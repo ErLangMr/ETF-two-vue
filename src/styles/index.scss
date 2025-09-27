@@ -1,0 +1,84 @@
+@use 'variables' as *;
+@use 'mixins' as *;
+
+// 全局样式重置
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+:root {
+  --theme-purple: #{$theme-purple};
+  --font-size-base: #{$font-size-base};
+  --font-size-small: #{$font-size-small};
+  --font-size-medium: #{$font-size-medium};
+  --font-size-large: #{$font-size-large};
+  --font-size-extra-large: #{$font-size-extra-large};
+  --font-size-title: #{$font-size-title};
+  @include mobile {
+    --font-size-base: #{$font-size-base-mobile};
+    --font-size-small: #{$font-size-small-mobile};
+    --font-size-medium: #{$font-size-medium-mobile};
+    --font-size-large: #{$font-size-large-mobile};
+    --font-size-extra-large: #{$font-size-extra-large-mobile};
+    --font-size-title: #{$font-size-title-mobile};
+  }
+}
+
+html, body {
+  height: 100%;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  font-size: var(--font-size-base);
+  line-height: 1.5;
+  color: $text-primary;
+  background-color: $background-color-base;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+// 通用样式类
+.flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.text-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.clearfix {
+  &::after {
+    content: '';
+    display: table;
+    clear: both;
+  }
+}
+
+// 响应式容器
+.container {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 $spacing-base;
+
+  @include mobile {
+    padding: 0 $spacing-small;
+  }
+}
+.linkStyle{
+  color: var(--theme-purple)!important;
+  cursor: pointer;
+  &:hover {
+    text-decoration: underline!important;
+  }
+}
+
+.el-table {
+  font-size: var(--font-size-base)!important;
+  @include mobile {
+    font-size: var(--font-size-small)!important;
+  }
+}
