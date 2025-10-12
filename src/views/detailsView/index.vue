@@ -38,8 +38,7 @@
               :is="item.component"
               :tabActiveName="activeName"
               :detailsData="detailsData"
-              :code="route.query?.code as string"
-              />
+              :code="route.query?.code" />
             </div>
           </el-tab-pane>
         </el-tabs>
@@ -62,7 +61,7 @@
             :is="tabList.find(tab => tab.value === mobildSelect)?.component || StockProfilePrice"
             :tabActiveName="componentName"
             :detailsData="detailsData"
-            :code="route.query?.code as string"
+            :code="route.query?.code"
           />
         </div>
       </div>
@@ -75,6 +74,7 @@ import { ref, markRaw, shallowRef, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useDevice } from "@/utils/device";
 import StockProfilePrice from "./components/StockProfilePrice.vue";
+import BaseData from "./components/BaseData.vue";
 import DividendAndValuation from "./components/DividendAndValuation.vue";
 import ExpenseAndFee from "./components/ExpenseAndFee.vue";
 import Holdings from "./components/Holdings.vue";
@@ -134,45 +134,50 @@ watch(activeName, (newVal) => {
 
 const tabList = ref([
   {
-    label: "概况和价格",
+    label: "ETF快照",
     value: 'StockProfilePrice',
     component: markRaw(StockProfilePrice),
   },
-  // {
-  //   label: "股息和估值",
-  //   value: 'DividendAndValuation',
-  //   component: markRaw(DividendAndValuation),
-  // },
-  // {
-  //   label: "费用率和费用",
-  //   value: 'ExpenseAndFee',
-  //   component: markRaw(ExpenseAndFee),
-  // },
-  // {
-  //   label: "控股",
-  //   value: 'Holdings',
-  //   component: markRaw(Holdings),
-  // },
-  // {
-  //   label: "持股分析图表",
-  //   value: 'HoldingAnalysisChart',
-  //   component: markRaw(HoldingAnalysisChart),
-  // },
-  // {
-  //   label: "价格和数量图表",
-  //   value: 'PriceAndVolumeChart',
-  //   component: markRaw(PriceAndVolumeChart),
-  // },
+  {
+    label: "基础资料",
+    value: 'BaseData',
+    component: markRaw(BaseData),
+  },
+  {
+    label: "股息和估值",
+    value: 'DividendAndValuation',
+    component: markRaw(DividendAndValuation),
+  },
+  {
+    label: "费用率和费用",
+    value: 'ExpenseAndFee',
+    component: markRaw(ExpenseAndFee),
+  },
+  {
+    label: "控股",
+    value: 'Holdings',
+    component: markRaw(Holdings),
+  },
+  {
+    label: "持股分析图表",
+    value: 'HoldingAnalysisChart',
+    component: markRaw(HoldingAnalysisChart),
+  },
+  {
+    label: "价格和数量图表",
+    value: 'PriceAndVolumeChart',
+    component: markRaw(PriceAndVolumeChart),
+  },
   {
     label: "资金流动图表",
     value: 'FundFlowChart',
     component: markRaw(FundFlowChart),
   },
-  // {
-  //   label: "价格与流量影响力图表",
-  //   value: 'PriceAndFlowInfluenceChart',
-  //   component: markRaw(PriceAndFlowInfluenceChart),
-  // },
+  {
+    label: "价格与流量影响力图表",
+    value: 'PriceAndFlowInfluenceChart',
+    component: markRaw(PriceAndFlowInfluenceChart) ,
+  },
   // {
   //   label: "ESG",
   //   component: "ESG",

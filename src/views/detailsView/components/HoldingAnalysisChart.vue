@@ -3,16 +3,16 @@
     <h2 class="h3">Geographic Exposure</h2>
     <p style="margin-bottom: 40px;">The following charts reflect the geographic spread of IVV's underlying holdings.</p>
     <div class="chart-item">
-      <CustomCharts :sectorData="sectorData" :active="componentName === '持股分析图表'" :title="title" />
+      <CustomCharts :sectorData="sectorData" :active="componentName === 'HoldingAnalysisChart'" :title="title" />
     </div>
     <div class="chart-item">
-      <CustomCharts :sectorData="sectorData" :active="componentName === '持股分析图表'" :title="title" />
+      <CustomCharts :sectorData="sectorData" :active="componentName === 'HoldingAnalysisChart'" :title="title" />
     </div>
     <div class="chart-item">
-      <CustomCharts :sectorData="sectorData" :active="componentName === '持股分析图表'" :title="title" />
+      <CustomCharts :sectorData="sectorData" :active="componentName === 'HoldingAnalysisChart'" :title="title" />
     </div>
     <div class="chart-item">
-      <CustomCharts :sectorData="sectorData" :active="componentName === '持股分析图表'" :title="title" />
+      <CustomCharts :sectorData="sectorData" :active="componentName === 'HoldingAnalysisChart'" :title="title" />
     </div>
   </div>
 </template>
@@ -25,9 +25,9 @@ const props = defineProps<{
 }>()
 const componentName = ref('')
 watch(() => props.tabActiveName, (newVal) => {
-  if (newVal === '持股分析图表') {
+  if (newVal === 'HoldingAnalysisChart') {
     nextTick(() => {
-      componentName.value = '持股分析图表'
+      componentName.value = 'HoldingAnalysisChart'
     })
   }
 }, { immediate: true });
