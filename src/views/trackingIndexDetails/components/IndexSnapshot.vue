@@ -7,7 +7,7 @@
           <div class="section-title">基本信息</div>
           <div class="info-list">
             <div class="info-row">
-              <span>成立日期</span
+              <span>基日</span
               ><span
                 class="linkStyle"
                 @click.stop="clickVitals(props.detailsData?.fundInfoByVitals)"
@@ -15,7 +15,7 @@
               >
             </div>
             <div class="info-row">
-              <span>基金公司</span
+              <span>基点</span
               ><span
                 class="linkStyle"
                 @click.stop="clickVitals(props.detailsData?.fundInfoByVitals)"
@@ -23,21 +23,21 @@
               >
             </div>
             <div class="info-row">
-              <span>追踪指数</span>
+              <span>发布日期</span>
               <span>{{ formatValue(props.detailsData?.fundInfoByVitals?.fee, 'percent') }}</span>
             </div>
             <div class="info-row">
-              <span>管理费率</span>
+              <span>发布机构</span>
               <span>{{ props.detailsData?.fundInfoByVitals?.setupDate }}</span>
             </div>
             <div class="info-row">
-              <span>托管费率</span>
+              <span>加权方式</span>
               <span>{{
                 props.detailsData?.fundInfoByVitals?.trackIndexName
               }}</span>
             </div>
             <div class="info-row">
-              <span>联接基金</span>
+              <span>收益处理方式</span>
               <span>{{
                 props.detailsData?.fundInfoByVitals?.trackIndexName
               }}</span>
@@ -75,36 +75,17 @@
               </span>
             </div>
             <div class="info-row">
-              <span>最新份额净值</span
+              <span>总市值（万亿元）</span
               ><span>
                 {{ props.detailsData?.fundInfoByThemes?.compMarketCap }}
               </span>
             </div>
             <div class="info-row">
-              <span>最新流通规模</span
+              <span>自由流通市值（万亿元）</span
               ><span>
                 {{ props.detailsData?.fundInfoByThemes?.investStrategy }}
               </span>
             </div>
-            <div class="info-row">
-              <span>最新资产净值规模</span
-              ><span>
-                {{ props.detailsData?.fundInfoByThemes?.investStrategy }}
-              </span>
-            </div>
-            <div class="info-row">
-              <span>折溢价率</span
-              ><span>
-                {{ props.detailsData?.fundInfoByThemes?.investStrategy }}
-              </span>
-            </div>
-            <!-- <div class="info-row">
-              <span>Region (General)</span
-              ><span class="link" @click="router.push('/etfs-list')">North America</span>
-            </div>
-            <div class="info-row">
-              <span>Region (Specific)</span><span class="link" @click="router.push('/etfs-list')">U.S.</span>
-            </div> -->
           </div>
         </div>
       </div>

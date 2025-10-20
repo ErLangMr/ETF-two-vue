@@ -29,11 +29,27 @@ const router = createRouter({
       }
     },
     {
+      path: '/trackingIndex',
+      name: 'trackingIndex',
+      component: () => import('../views/trackingIndexView/index.vue'),
+      meta: {
+        title: 'ETF 跟踪指数'
+      }
+    },
+    {
+      path: '/trackingIndexDetails',
+      name: 'trackingIndexDetails',
+      component: () => import('../views/trackingIndexDetails/index.vue'),
+      meta: {
+        title: '指数详情'
+      }
+    },
+    {
       path: '/tool',
       name: 'tool',
       component: () => import('../views/toolView/index.vue'),
       meta: {
-        title: 'ETF 跟踪指数'
+        title: 'ETF 特色榜单'
       }
     },
     {
@@ -89,7 +105,7 @@ const router = createRouter({
       name: 'details',
       component: () => import('../views/detailsView/index.vue'),
       meta: {
-        title: '详情'
+        title: 'ETF详情'
       }
     },
   ],

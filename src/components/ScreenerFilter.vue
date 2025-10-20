@@ -58,11 +58,6 @@ interface RangeFilterItem extends BaseFilterItem {
 // 筛选项联合类型
 export type FilterItem = NormalFilterItem | RangeFilterItem;
 
-// 类型守卫函数
-function isRangeFilterItem(item: FilterItem): item is RangeFilterItem {
-  return item.type === "slider" || item.type === "checkIssuer";
-}
-
 // 组件属性接口定义
 // const props = defineProps<{ filterData: FilterItem[] }>()
 // 定义组件事件

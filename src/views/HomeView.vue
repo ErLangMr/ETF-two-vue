@@ -32,13 +32,37 @@ const cards = [
     title: "ETF 跟踪指数",
     desc: "想要拥有特定指数的投资组合吗?关注ETF追踪指数。",
     icon: Location,
-    path: "/tool",
+    path: "/trackingIndex",
   },
   {
     title: "ETF 发行人",
     desc: "快速轻松地查找由50多家不同发行人发行的ETF。",
     icon: OfficeBuilding,
     path: "/issuers",
+  },
+  {
+    title: "ETF 比较工具",
+    desc: "根据资产类别、发行人、市值、费用率等筛选 ETF。",
+    icon: Setting,
+    path: "/screener",
+  },
+  {
+    title: "ETF 股票定位器",
+    desc: '将ETF根据资产类型、投资区域、发行人等进行分类，并根据资产规模、收益、费率等进行排序。',
+    icon: Edit,
+    path: "/etfs",
+  },
+  {
+    title: "ETF 组合模拟器",
+    desc: "快速轻松地查找由50多家不同发行人发行的ETF。",
+    icon: OfficeBuilding,
+    path: "/issuers",
+  },
+  {
+    title: "ETF 特色榜单",
+    desc: "想要拥有特定指数的投资组合吗?关注ETF追踪指数。",
+    icon: Location,
+    path: "/tool",
   },
 ];
 const router = useRouter();

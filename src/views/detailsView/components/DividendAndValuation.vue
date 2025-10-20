@@ -2,20 +2,73 @@
   <div class="dividend-and-valuation">
     <QuickFacts :facts="facts" title="BKLC Valuation"></QuickFacts>
     <div style="height: 40px"></div>
-    <EtfCompareTable :title="title" :columns="columns" :data="data">
-      <div class="description">
-        <p>
-          This section compares the dividend yield of this ETF to its peers.
-        </p>
+    <div style="display: flex; gap: 62px">
+      <div class="block">
+        <div class="section-title">基本面</div>
+        <div class="info-list">
+          <div class="info-row">
+            <span>份额净值</span
+            ><span class="linkStyle">{{
+              "val"
+            }}</span>
+          </div>
+          <div class="info-row">
+            <span>份额盈利</span
+            ><span class="linkStyle">{{
+              "val"
+            }}</span>
+          </div>
+          <div class="info-row">
+            <span>份额销售收入</span>
+            <span>{{ formatValue(29.9999, "percent") }}</span>
+          </div>
+          <div class="info-row">
+            <span>份额自由现金流</span>
+            <span>{{ "val" }}</span>
+          </div>
+          <div class="info-row">
+            <span>份额分红</span>
+            <span>{{ "val" }}</span>
+          </div>
+        </div>
       </div>
-    </EtfCompareTable>
+      <div class="block">
+        <div class="section-title">估值</div>
+        <div class="info-list">
+          <div class="info-row">
+            <span>ETF P/B</span
+            ><span class="linkStyle">{{
+              "val"
+            }}</span>
+          </div>
+          <div class="info-row">
+            <span>ETF P/E</span
+            ><span class="linkStyle">{{
+              "val"
+            }}</span>
+          </div>
+          <div class="info-row">
+            <span>ETF P/S</span>
+            <span>{{ formatValue(29.9999, "percent") }}</span>
+          </div>
+          <div class="info-row">
+            <span>ETF P/CF</span>
+            <span>{{ "val" }}</span>
+          </div>
+          <div class="info-row">
+            <span>D/P</span>
+            <span>{{ "val" }}</span>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref } from "vue";
 import QuickFacts from "@/components/QuickFacts.vue";
-import EtfCompareTable from "@/components/EtfCompareTable.vue";
+import { formatValue } from "@/utils/formatValue";
 const facts = ref([
   { title: "IVV", label: "P/E Ratio", value: "0.77%" },
   {
@@ -24,28 +77,6 @@ const facts = ref([
     value: "100.00%",
   },
   { title: "FactSet Segment Average", label: "P/E Ratio", value: "0.00%" },
-]);
-const title = ref("BKLC Valuation");
-const columns = ref([
-  { key: "name", label: "" },
-  { key: "title", label: "Title" },
-  { key: "label", label: "Label" },
-  { key: "value", label: "Value" },
-]);
-const data = ref([
-  { name: "IVV", title: "P/E Ratio", label: "P/E Ratio", value: "0.77%" },
-  {
-    name: "ETF Database Category Average",
-    title: "P/E Ratio",
-    label: "P/E Ratio",
-    value: "100.00%",
-  },
-  {
-    name: "FactSet Segment Average",
-    title: "P/E Ratio",
-    label: "P/E Ratio",
-    value: "0.00%",
-  },
 ]);
 </script>
 

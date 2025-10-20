@@ -1,5 +1,4 @@
 <script setup lang="ts">
-// PC 端特有的逻辑和状态
 import { ref, onMounted, nextTick, computed, watch } from "vue";
 import ScreenerFilter from "@/components/ScreenerFilter.vue";
 import type { FilterItem } from "@/components/ScreenerFilter.vue";

@@ -12,6 +12,7 @@
       <span>的日净流入</span>
     </div>
     <div v-loading="loading" id="fund-flow-chart"></div>
+    <div v-loading="chartTwoLoading" id="fund-flow-chart-2"></div>
   </div>
 </template>
 
@@ -23,6 +24,7 @@ import { getFundFlowDataApi } from "@/api/details";
 import { getMonthAgoDate, getYearAgoDate } from "@/utils/formatValue";
 
 let myChart: echarts.ECharts | null = null;
+let myTwoChart: echarts.ECharts | null = null;
 const props = defineProps<{
   tabActiveName: string;
   code: string;
@@ -32,6 +34,7 @@ const xAxisData = ref([]);
 const seriesData = ref([]);
 const activeBtn = ref('1month');
 const loading = ref(false);
+const chartTwoLoading = ref(false);
 watch(() => props.tabActiveName, (newVal) => {
   if (newVal === 'FundFlowChart') {
     if(myChart) {
@@ -114,17 +117,27 @@ const handleChange = (type: string) => {
   })
 }
 
-function resizeChart() {
-  if (myChart) {
-    myChart.resize();
-  }
+const chartTwoData = {
+  dates: [
+    "14. Apr", "15. Apr", "16. Apr", "17. Apr", "18. Apr", "19. Apr", "20. Apr",
+    "21. Apr", "22. Apr", "23. Apr", "24. Apr", "25. Apr", "26. Apr", "27. Apr",
+    "28. Apr", "29. Apr", "30. Apr", "1. May", "2. May", "3. May", "4. May",
+    "5. May", "6. May", "7. May", "8. May", "9. May", "10. May", "11. May",
+    "12. May", "13. May"
+  ],
+  priceInfluence: [10, 4, 3, 0, 0, -12, -12, 0, 14, 12, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 6],
+  fundFlow: [-2, -9, 0, 0, 0, 0, 0, -8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -2, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+  aumChange: 27.15
 }
 
 const initChart = async () => {
-  await nextTick()
+  disposeCharts();
   const chartDom = document.getElementById("fund-flow-chart");
+  const chartDomTwo = document.getElementById("fund-flow-chart-2");
   myChart = echarts.init(chartDom);
-  const option = {
+  myTwoChart = echarts.init(chartDomTwo);
+  if(myChart){
+    myChart.setOption({
     // title: {
     //   text: "1 Month Fund Flows",
     //   left: "left",
@@ -205,17 +218,80 @@ const initChart = async () => {
         return params[0].axisValue + ": " + params[0].value + " B";
       },
     },
-  };
-  myChart.setOption(option);
+  });
+  }
+  if(myTwoChart){
+    myTwoChart.setOption({
+     tooltip: {
+        trigger: 'axis',
+        axisPointer: { type: 'shadow' }
+      },
+      legend: {
+        data: [
+          { name: 'Price Influence', icon: 'circle', textStyle: { color: '#2D1C5A' } },
+          { name: 'Fund Flow', icon: 'circle', textStyle: { color: '#1CA9A6' } }
+        ],
+        bottom: 0
+      },
+      grid: { left: 40, right: 40, bottom: 60, top: 40 },
+      xAxis: {
+        type: 'category',
+        data: chartTwoData.dates,
+        // axisTick: { alignWithLabel: true },
+        // axisLabel: { interval: 2 } // 只显示部分日期，防止重叠
+      },
+      yAxis: {
+        type: 'value',
+        position: 'right',
+        axisLabel: {
+          formatter: function (value: number) {
+            return value + ' B';
+          }
+        }
+      },
+      series: [
+        {
+          name: 'Price Influence',
+          type: 'bar',
+          stack: 'one',
+          data: chartTwoData.priceInfluence,
+          itemStyle: { color: '#2D1C5A' },
+          // barWidth: isMobile() ? 8 : 16
+        },
+        {
+          name: 'Fund Flow',
+          type: 'bar',
+          stack: 'one',
+          data: chartTwoData.fundFlow,
+          itemStyle: { color: '#1CA9A6' },
+          // barWidth: isMobile() ? 8 : 16
+        }
+      ]
+    })
+  }
   window.addEventListener("resize", resizeChart);
 };
-
-onUnmounted(() => {
-  window.removeEventListener("resize", resizeChart);
+function resizeChart() {
+  if (myChart) {
+    myChart.resize();
+  }
+  if (myTwoChart) {
+    myTwoChart.resize();
+  }
+}
+function disposeCharts() {
   if (myChart) {
     myChart.dispose();
     myChart = null;
   }
+  if (myTwoChart) {
+    myTwoChart.dispose();
+    myTwoChart = null;
+  }
+}
+onUnmounted(() => {
+  window.removeEventListener("resize", resizeChart);
+  disposeCharts();
 });
 </script>
 
@@ -223,9 +299,9 @@ onUnmounted(() => {
 .fund-flow-chart {
   width: 100%;
   height: 100%;
-  #fund-flow-chart {
+  #fund-flow-chart, #fund-flow-chart-2 {
     width: 100%;
-    height: 320px;
+    height: 400px;
   }
   .fund-flow-chart-btn {
     display: flex;

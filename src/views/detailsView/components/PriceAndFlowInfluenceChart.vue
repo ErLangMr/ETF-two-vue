@@ -17,7 +17,7 @@ const props = defineProps<{
 }>();
 const { isMobile } = useDevice();
 watch(() => props.tabActiveName, (newVal) => {
-  if (newVal === '价格与流量影响力图表') {
+  if (newVal === 'PriceAndFlowInfluenceChart') {
     nextTick(() => {
       initChart()
     })

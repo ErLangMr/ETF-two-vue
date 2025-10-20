@@ -37,8 +37,12 @@ const router = useRouter()
           <nav class="nav desktop-nav" v-if="!isMobile()">
             <RouterLink to="/screener" class="nav-item">ETF筛选器</RouterLink>
             <RouterLink to="/etfs" class="nav-item">ETF类型</RouterLink>
-            <RouterLink to="/tool" class="nav-item">ETF跟踪指数</RouterLink>
+            <RouterLink to="/trackingIndex" class="nav-item">ETF跟踪指数</RouterLink>
             <RouterLink to="/issuers" class="nav-item">ETF发行人</RouterLink>
+            <RouterLink to="/issuers" class="nav-item">ETF比较工具</RouterLink>
+            <RouterLink to="/issuers" class="nav-item">ETF股票定位器</RouterLink>
+            <RouterLink to="/issuers" class="nav-item">ETF组合模拟器</RouterLink>
+            <RouterLink to="/issuers" class="nav-item">特色榜单</RouterLink>
           </nav>
         </div>
         <div class="right-section">

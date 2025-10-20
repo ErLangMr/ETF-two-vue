@@ -1,5 +1,5 @@
 <template>
-  <div class="details-view">
+  <div class="trackingIndexDetails">
     <div class="details-header">
       <span class="details-symbol">{{ detailsTitle.code }}</span>
       <span class="details-title">{{ detailsTitle.shortName }}</span>
@@ -65,7 +65,7 @@
           <component
             :is="
               tabList.find((tab) => tab.value === mobildSelect)?.component ||
-              StockProfilePrice
+              IndexSnapshot
             "
             :tabActiveName="componentName"
             :detailsData="detailsData"
@@ -81,24 +81,7 @@
 import { ref, markRaw, shallowRef, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useDevice } from "@/utils/device";
-import StockProfilePrice from "./components/StockProfilePrice.vue";
-import BaseData from "./components/BaseData.vue";
-import EfficiencyAndCost from "./components/EfficiencyAndCost.vue";
-import DividendAndValuation from "./components/DividendAndValuation.vue";
-import RiskMeasurement from "./components/RiskMeasurement.vue";
-import AttributionAnalysis from "./components/AttributionAnalysis.vue";
-import PositionDetail from "./components/PositionDetail.vue";
-import PortfolioCharacteristic from "./components/PortfolioCharacteristic.vue";
-import PositionAnalysis from "./components/PositionAnalysis.vue";
-import PositionHoldingBehavior from "./components/PositionHoldingBehavior.vue";
-import HolderBehaviorAnalysis from "./components/HolderBehaviorAnalysis.vue";
-import ExpenseAndFee from "./components/ExpenseAndFee.vue";
-import Holdings from "./components/Holdings.vue";
-import HoldingAnalysisChart from "./components/HoldingAnalysisChart.vue";
-import PriceAndVolumeChart from "./components/PriceAndVolumeChart.vue";
-import FundFlowChart from "./components/FundFlowChart.vue";
-import PriceAndFlowInfluenceChart from "./components/PriceAndFlowInfluenceChart.vue";
-import Performance from "./components/Performance.vue";
+import IndexSnapshot from "./components/IndexSnapshot.vue";
 import { Top } from "@element-plus/icons-vue";
 import { formatValue } from "@/utils/formatValue";
 import { getOneDetailsDataApi } from "@/api/details";
@@ -106,9 +89,9 @@ import { getOneDetailsDataApi } from "@/api/details";
 const router = useRouter();
 const route = useRoute();
 const { isMobile } = useDevice();
-const activeName = ref("StockProfilePrice");
-const mobildSelect = ref("StockProfilePrice");
-const componentName = ref("StockProfilePrice");
+const activeName = ref("IndexSnapshot");
+const mobildSelect = ref("IndexSnapshot");
+const componentName = ref("IndexSnapshot");
 
 const categoryList = ref([
   { label: "股票", value: "EQUITY" },
@@ -134,7 +117,7 @@ const detailsTitle = ref({
 watch(
   activeName,
   (newVal) => {
-    if (newVal === "StockProfilePrice") {
+    if (newVal === "IndexSnapshot") {
       getOneDetailsDataApi(route.query.code as string).then((res) => {
         detailsTitle.value = {
           code: res.code,
@@ -153,100 +136,15 @@ watch(
 
 const tabList = ref([
   {
-    label: "ETF快照",
-    value: "StockProfilePrice",
-    component: markRaw(StockProfilePrice),
-  },
-  {
-    label: "基础资料",
-    value: "BaseData",
-    component: markRaw(BaseData),
-  },
-  {
-    label: "效率和成本",
-    value: "EfficiencyAndCost",
-    component: markRaw(EfficiencyAndCost),
-  },
-  {
-    label: "分红和估值",
-    value: "DividendAndValuation",
-    component: markRaw(DividendAndValuation),
-  },
-  {
-    label: "业绩表现",
-    value: "Performance",
-    component: markRaw(Performance),
-  },
-  {
-    label: "风险度量",
-    value: "RiskMeasurement",
-    component: markRaw(RiskMeasurement),
-  },
-  {
-    label: "归因分析",
-    value: "AttributionAnalysis",
-    component: markRaw(AttributionAnalysis),
-  },
-   {
-    label: "资金流动图表",
-    value: "FundFlowChart",
-    component: markRaw(FundFlowChart),
-  },
-  {
-    label: "持仓明细",
-    value: "PositionDetail",
-    component: markRaw(PositionDetail),
-  },
-  {
-    label: "投资组合特征",
-    value: "PortfolioCharacteristic",
-    component: markRaw(PortfolioCharacteristic),
-  },
-  {
-    label: "持仓分析",
-    value: "PositionAnalysis",
-    component: markRaw(PositionAnalysis),
-  },
-  {
-    label: "持仓行为分析",
-    value: "PositionHoldingBehavior",
-    component: markRaw(PositionHoldingBehavior),
-  },
-  {
-    label: "持有人行为分析",
-    value: "HolderBehaviorAnalysis",
-    component: markRaw(HolderBehaviorAnalysis),
-  },
-  // {
-  //   label: "费用率和费用",
-  //   value: "ExpenseAndFee",
-  //   component: markRaw(ExpenseAndFee),
-  // },
-  // {
-  //   label: "控股",
-  //   value: "Holdings",
-  //   component: markRaw(Holdings),
-  // },
-  // {
-  //   label: "持股分析图表",
-  //   value: "HoldingAnalysisChart",
-  //   component: markRaw(HoldingAnalysisChart),
-  // },
-  // {
-  //   label: "价格和数量图表",
-  //   value: "PriceAndVolumeChart",
-  //   component: markRaw(PriceAndVolumeChart),
-  // },
-  // {
-  //   label: "价格与流量影响力图表",
-  //   value: "PriceAndFlowInfluenceChart",
-  //   component: markRaw(PriceAndFlowInfluenceChart),
-  // },
+    label: "指数快照",
+    value: "IndexSnapshot",
+    component: markRaw(IndexSnapshot),
+  }
 ]);
 </script>
 
 <style lang="scss" scoped>
-.details-view {
+.trackingIndexDetails{
   width: 100%;
   height: 100%;
   padding: 20px;
@@ -385,7 +283,7 @@ const tabList = ref([
     padding: 0 20px;
   }
   @media (max-width: 768px) {
-    .details-view {
+    .trackingIndexDetails {
       padding: 0;
     }
     .tab-content {

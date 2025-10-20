@@ -1,12 +1,12 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
 import { QuestionFilled } from '@element-plus/icons-vue'
-import { computed, ref, type PropType } from 'vue'
+import { computed, ref, watch, type PropType } from 'vue'
 import { useDevice } from '@/utils/device'
 import { formatValue } from '@/utils/formatValue'
 const { isMobile } = useDevice()
 
-defineProps({
+const props = defineProps({
   tableData: {
     type: Array as PropType<any[]>,
     required: true
@@ -18,6 +18,16 @@ defineProps({
   description: {
     type: String,
     required: false
+  },
+  isTracking: {
+    type: Boolean,
+    required: false
+  },
+})
+watch(() => props.isTracking, (newVal) => {
+  console.log('isTracking changed:', newVal)
+  if (newVal) {
+
   }
 })
 const router = useRouter()
@@ -35,6 +45,97 @@ const filterTabs = ref([
   // { label: "分析", value: "analysis" },
   // { label: "实时评级", value: "realtimeRatings" },
 ]);
+
+const trankingTabs = [
+  { label: "概览", value: "overview" },
+  { label: "收益", value: "returns" },
+  { label: "资金流动", value: "fundFlows" },
+  { label: "分红", value: "dividends" },
+  { label: "风险指标", value: "risk" },
+  { label: "持仓特征", value: "holdings" },
+  { label: "估值", value: "valuation" },
+  { label: "相关ETF", value: "relatedETF" },
+]
+
+const trankingColumnList = ref<Record<string, TableColumn[]>>(
+  {
+    overview: [
+      { prop: "code", label: "指数代码" },
+      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
+      { prop: "fullName", label: "指数全称", type: "link", url: "/trackingIndexDetails" },
+      { prop: "category", label: "资产类型" },
+      { prop: "fabu", label: "发布日期" },
+      { prop: "jiri", label: "基日" },
+      { prop: "jigou", label: "发布机构" },
+      { prop: "jiaquan", label: "加权方式" },
+    ],
+    returns: [
+      { prop: "code", label: "指数代码" },
+      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
+      { prop: "return1M", label: "近1月" },
+      { prop: "return3M", label: "3月" },
+      { prop: "returnYTD", label: "今年以来" },
+      { prop: "return1Y", label: "1年" },
+      { prop: "return3Y", label: "3年" },
+      { prop: "return5Y", label: "5年涨跌" },
+    ],
+    fundFlows: [
+      { prop: "code", label: "指数代码" },
+      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
+      { prop: "flow1M", label: "近1月" },
+      { prop: "flow3M", label: "3月" },
+      { prop: "flowYTD", label: "今年以来" },
+      { prop: "flow1Y", label: "1年" },
+      { prop: "flow3Y", label: "3年" },
+      { prop: "flow5Y", label: "5年资金净流入" },
+    ],
+    dividends: [
+      { prop: "code", label: "指数代码" },
+      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
+      { prop: "annualDividend", label: "年度分红" },
+      { prop: "dividendYield", label: "股息率" },
+    ],
+    risk: [
+      { prop: "code", label: "指数代码" },
+      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
+      { prop: "volatility1M", label: "近1月" },
+      { prop: "volatility3M", label: "3月" },
+      { prop: "volatilityYTD", label: "今年以来" },
+      { prop: "volatility1Y", label: "1年" },
+      { prop: "volatility3Y", label: "3年" },
+      { prop: "volatility5Y", label: "5年波动率" },
+    ],
+    holdings: [
+      { prop: "code", label: "指数代码" },
+      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
+      { prop: "sampleSize", label: "样本数量" },
+      { prop: "indexFloatMarketCap", label: "指数自由流通市值" },
+      { prop: "avgFloatMarketCap", label: "样本平均自由流通市值" },
+      { prop: "medianFloatMarketCap", label: "样本自由流通市值中位数" },
+      { prop: "top5Weight", label: "前五大权重之和" },
+      { prop: "top10Weight", label: "前十大权重之和" },
+    ],
+    valuation: [
+      { prop: "code", label: "指数代码" },
+      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
+      { prop: "pe", label: "PE" },
+      { prop: "pePercentile3Y", label: "PE分位值(3年)" },
+      { prop: "pePercentile5Y", label: "PE分位值(5年)" },
+      { prop: "pePercentile10Y", label: "PE分位值(10年)" },
+      { prop: "pb", label: "PB" },
+      { prop: "pbPercentile3Y", label: "PB分位值(3年)" },
+      { prop: "pbPercentile5Y", label: "PB分位值(5年)" },
+      { prop: "pbPercentile10Y", label: "PB分位值(10年)" },
+    ],
+    relatedETF: [
+      { prop: "code", label: "指数代码" },
+      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
+      { prop: "relatedETFCount", label: "相关ETF只数" },
+      { prop: "relatedETFScale", label: "相关ETF规模" },
+      { prop: "relatedETFDetail", label: "相关ETF明细" },
+    ],
+  }
+)
 
 interface TableColumn {
   prop: string;
@@ -153,6 +254,9 @@ const categoryList = ref([
   { label: "跨境", value: "CROSS_BOUNDARY" },
 ])
 const tableColumns = computed(() => {
+  if (props.isTracking) {
+    return trankingColumnList.value[activeTab.value as keyof typeof trankingColumnList.value] || []
+  }
   return tableColumnList.value[activeTab.value as keyof typeof tableColumnList.value] || []
 })
 const activeTab = ref("overview");
@@ -177,7 +281,7 @@ const toggleExpand = (symbol: string) => {
     <div v-if="hasTableFilter" class="filter-tabs-wrapper">
       <div class="filter-tabs">
         <div
-          v-for="tab in filterTabs"
+          v-for="tab in (isTracking ? trankingTabs : filterTabs)"
           :key="tab.value"
           :class="['filter-tab', { active: activeTab === tab.value } ]"
           @click="handleTabClick(tab.value)"

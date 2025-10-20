@@ -13,69 +13,64 @@ const route = useRoute()
 const router = useRouter()
 const breadcrumbs = ref<BreadcrumbItem[]>([])
 
-// 从 sessionStorage 获取访问历史
-const getVisitHistory = (): BreadcrumbItem[] => {
-  const history = sessionStorage.getItem('visitHistory')
-  return history ? JSON.parse(history) : []
+// 面包屑存储键名
+const BREADCRUMB_KEY = 'app_breadcrumb_trail'
+
+// 从 sessionStorage 获取面包屑路径
+const getBreadcrumbTrail = (): BreadcrumbItem[] => {
+  const trail = sessionStorage.getItem(BREADCRUMB_KEY)
+  return trail ? JSON.parse(trail) : []
 }
 
-// 保存访问历史到 sessionStorage
-const saveVisitHistory = (items: BreadcrumbItem[]) => {
-  sessionStorage.setItem('visitHistory', JSON.stringify(items))
+// 保存面包屑路径到 sessionStorage
+const saveBreadcrumbTrail = (items: BreadcrumbItem[]) => {
+  sessionStorage.setItem(BREADCRUMB_KEY, JSON.stringify(items))
 }
 
 // 生成面包屑数据
 const generateBreadcrumbs = () => {
-  const history = getVisitHistory()
   const currentPath = route.path
+  const currentTitle = route.meta.title as string || route.name as string || '未命名'
+  const currentQuery = { ...route.query }
 
-  // 如果是首页，清空历史
+  // 如果是首页，清空面包屑
   if (currentPath === '/') {
     breadcrumbs.value = [{
       path: '/',
       title: '首页'
     }]
-    saveVisitHistory([])
+    saveBreadcrumbTrail([])
     return
   }
 
-  // 获取当前页面信息
-  const currentTitle = route.meta.title as string || route.name as string || '未命名'
-  const currentItem = {
-    path: currentPath,
-    title: currentTitle,
-    query: route.query?.code ? { code: route.query.code } : route.query?.issuer ? { issuer: route.query.issuer } : route.query?.index ? { index: route.query.index } : {}
-  }
+  // 获取历史面包屑路径
+  let trail = getBreadcrumbTrail()
 
-  // 检查是否已经在历史记录中
-  const existingIndex = history.findIndex(item => item.path === currentPath)
+  // 查找当前页面是否已在路径中
+  const existingIndex = trail.findIndex(item => item.path === currentPath)
 
   if (existingIndex !== -1) {
-    // 如果已存在，截取到该位置
-    breadcrumbs.value = [
-      { path: '/', title: '首页' },
-      ...history.slice(0, existingIndex + 1)
-    ]
+    // 如果已存在，截断到该位置（表示返回到某个页面）
+    trail = trail.slice(0, existingIndex + 1)
+    // 更新该页面的 query 参数
+    trail[existingIndex].query = currentQuery
   } else {
-    // 如果是新页面，添加到历史记录
-    breadcrumbs.value = [
-      { path: '/', title: '首页' },
-      ...history,
-      currentItem
-    ]
+    // 如果是新页面，添加到路径末尾
+    trail.push({
+      path: currentPath,
+      title: currentTitle,
+      query: currentQuery
+    })
   }
 
-  // 限制面包屑数量，最多显示4个
-  if (breadcrumbs.value.length > 4) {
-    breadcrumbs.value = [
-      breadcrumbs.value[0], // 保留首页
-      { path: '...', title: '...' }, // 添加省略号
-      ...breadcrumbs.value.slice(-2) // 保留最后3个
-    ]
-  }
+  // 保存更新后的路径
+  saveBreadcrumbTrail(trail)
 
-  // 保存当前历史记录（排除首页和省略号）
-  saveVisitHistory(breadcrumbs.value.filter(item => item.path !== '/' && item.path !== '...'))
+  // 构建完整面包屑（首页 + 路径）
+  breadcrumbs.value = [
+    { path: '/', title: '首页' },
+    ...trail
+  ]
 }
 
 // 监听路由变化
@@ -93,9 +88,10 @@ onMounted(() => {
 
 // 点击面包屑项
 const handleClick = (item: BreadcrumbItem) => {
-  if (item.path === '...') return // 点击省略号不跳转
   if (item.path === route.path) return // 如果点击当前路径，不进行跳转
-  router.push({path: item.path, query: item.query})
+
+  // 点击面包屑时，会触发路由变化，generateBreadcrumbs 会自动截断路径
+  router.push({ path: item.path, query: item.query })
 }
 
 // 判断是否为首页
@@ -107,15 +103,12 @@ const isHome = (path: string) => path === '/'
     <el-breadcrumb separator="/">
       <el-breadcrumb-item
         v-for="(item, index) in breadcrumbs"
-        :key="item.path"
+        :key="item.path + index"
         @click="handleClick(item)"
       >
         <template v-if="isHome(item.path)">
           <el-icon class="breadcrumb-icon"><HomeFilled /></el-icon>
           首页
-        </template>
-        <template v-else-if="item.path === '...'">
-          <span class="breadcrumb-ellipsis">...</span>
         </template>
         <template v-else>
           {{ item.title }}
@@ -186,10 +179,5 @@ const isHome = (path: string) => path === '/'
   &:hover {
     color: var(--el-color-primary);
   }
-}
-
-.breadcrumb-ellipsis {
-  color: var(--el-text-color-secondary);
-  cursor: default;
 }
 </style>
