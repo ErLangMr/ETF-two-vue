@@ -334,6 +334,10 @@ const tabList = ref([
         color: var(--theme-purple);
       }
     }
+    :deep(.row) {
+      display: flex;
+      gap: 62px;
+    }
     :deep(.block) {
       flex: 1;
       min-width: 0;

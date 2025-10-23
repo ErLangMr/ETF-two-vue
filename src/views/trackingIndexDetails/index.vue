@@ -82,6 +82,9 @@ import { ref, markRaw, shallowRef, watch } from "vue";
 import { useRouter, useRoute } from "vue-router";
 import { useDevice } from "@/utils/device";
 import IndexSnapshot from "./components/IndexSnapshot.vue";
+import IndexFeature from "./components/IndexFeature.vue";
+import Trade from "./components/Trade.vue";
+import DividendAndValuation from "./components/DividendAndValuation.vue";
 import { Top } from "@element-plus/icons-vue";
 import { formatValue } from "@/utils/formatValue";
 import { getOneDetailsDataApi } from "@/api/details";
@@ -139,12 +142,27 @@ const tabList = ref([
     label: "指数快照",
     value: "IndexSnapshot",
     component: markRaw(IndexSnapshot),
-  }
+  },
+  {
+    label: "指数特征",
+    value: "IndexFeature",
+    component: markRaw(IndexFeature),
+  },
+  {
+    label: "交易",
+    value: "Trade",
+    component: markRaw(Trade),
+  },
+  {
+    label: "分红和估值",
+    value: "DividendAndValuation",
+    component: markRaw(DividendAndValuation),
+  },
 ]);
 </script>
 
 <style lang="scss" scoped>
-.trackingIndexDetails{
+.trackingIndexDetails {
   width: 100%;
   height: 100%;
   padding: 20px;
@@ -231,6 +249,10 @@ const tabList = ref([
       :deep(.el-tabs__item:hover) {
         color: var(--theme-purple);
       }
+    }
+    :deep(.row) {
+      display: flex;
+      gap: 62px;
     }
     :deep(.block) {
       flex: 1;
