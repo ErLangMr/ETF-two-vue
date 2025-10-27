@@ -6,8 +6,10 @@ import ScreenerTable from "@/components/ScreenerTable.vue";
 import { useDevice } from "@/utils/device";
 import { Operation } from "@element-plus/icons-vue";
 import { getFilterTableApi } from "@/api/filterTable";
+import { useRouter } from "vue-router";
+import { ElMessage } from "element-plus";
 
-
+const router = useRouter()
 const { isMobile } = useDevice();
 const mobileFilterRef = ref();
 // 单选的值（一级分类）
@@ -134,6 +136,56 @@ function closeMobileFilter() {
 onMounted(() => {
   getFilterTableData()
 });
+
+const tableSelestValue = ref<string[]>([])
+function handleTableSelect(val: string[]) {
+  console.log(val, "handleTableSelect")
+  tableSelestValue.value = val
+}
+function handleCompare() {
+  if(tableSelestValue.value.length === 0) {
+    ElMessage({
+      message: '请先选择需要对比的ETF',
+      type: 'warning',
+    })
+    return
+  }else if(tableSelestValue.value.length === 1){
+    ElMessage({
+      message: '请至少选择两个需要对比的ETF',
+      type: 'warning',
+    })
+    return
+  }
+  router.push({
+    name: "ComparisonTool",
+    query: {
+      ETFCodes: tableSelestValue.value.join(",")
+    }
+  })
+}
+function handleDeepCompare() {
+  if(tableSelestValue.value.length === 0) {
+    ElMessage({
+      message: '请先选择需要对比的ETF',
+      type: 'warning',
+    })
+    return
+  }else if(tableSelestValue.value.length === 1 || tableSelestValue.value.length > 2){
+    ElMessage({
+      message: '请选择两个需要深度对比的ETF',
+      type: 'warning',
+    })
+    return
+  }
+  nextTick(() => {
+    router.push({
+      name: "DeepCompare",
+      query: {
+        codes: tableSelestValue.value.join(",")
+      }
+    })
+  })
+}
 </script>
 
 <template>
@@ -151,6 +203,10 @@ onMounted(() => {
     >
       <Operation />筛选
     </button>
+
+    <el-button class="theme-button" style="position: absolute; right: 150px;top: -20px;" @click="handleCompare">ETF对比</el-button>
+
+    <el-button class="theme-button" style="position: absolute; right: 20px;top: -20px;" @click="handleDeepCompare">ETF深度对比</el-button>
     <!-- PC端筛选器 -->
     <div class="filter-left pc-filter" v-show="!isMobile()">
       <ScreenerFilter
@@ -183,6 +239,7 @@ onMounted(() => {
       class="table-area"
       :tableData="etfList"
       :hasTableFilter="true"
+      @tableSelect="handleTableSelect"
     >
       <template #table-pagination>
         <el-pagination
@@ -211,6 +268,7 @@ onMounted(() => {
   min-height: 100vh;
   padding: 20px;
   background: #ffffff;
+  position: relative;
 }
 .filter-left {
   width: 320px;

@@ -19,17 +19,17 @@ const props = defineProps({
     type: String,
     required: false
   },
-  isTracking: {
-    type: Boolean,
+  filterTabsProp: {
+    type: Array as PropType<any[]>,
     required: false
   },
-})
-watch(() => props.isTracking, (newVal) => {
-  console.log('isTracking changed:', newVal)
-  if (newVal) {
-
+  tableColumnListProp: {
+    type: Object as PropType<Record<string, any[]>>,
+    required: false
   }
 })
+const emit = defineEmits(['tableSelect'])
+
 const router = useRouter()
 const filterTabs = ref([
   { label: "概览", value: "overview" },
@@ -45,97 +45,6 @@ const filterTabs = ref([
   // { label: "分析", value: "analysis" },
   // { label: "实时评级", value: "realtimeRatings" },
 ]);
-
-const trankingTabs = [
-  { label: "概览", value: "overview" },
-  { label: "收益", value: "returns" },
-  { label: "资金流动", value: "fundFlows" },
-  { label: "分红", value: "dividends" },
-  { label: "风险指标", value: "risk" },
-  { label: "持仓特征", value: "holdings" },
-  { label: "估值", value: "valuation" },
-  { label: "相关ETF", value: "relatedETF" },
-]
-
-const trankingColumnList = ref<Record<string, TableColumn[]>>(
-  {
-    overview: [
-      { prop: "code", label: "指数代码" },
-      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
-      { prop: "fullName", label: "指数全称", type: "link", url: "/trackingIndexDetails" },
-      { prop: "category", label: "资产类型" },
-      { prop: "fabu", label: "发布日期" },
-      { prop: "jiri", label: "基日" },
-      { prop: "jigou", label: "发布机构" },
-      { prop: "jiaquan", label: "加权方式" },
-    ],
-    returns: [
-      { prop: "code", label: "指数代码" },
-      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
-      { prop: "return1M", label: "近1月" },
-      { prop: "return3M", label: "3月" },
-      { prop: "returnYTD", label: "今年以来" },
-      { prop: "return1Y", label: "1年" },
-      { prop: "return3Y", label: "3年" },
-      { prop: "return5Y", label: "5年涨跌" },
-    ],
-    fundFlows: [
-      { prop: "code", label: "指数代码" },
-      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
-      { prop: "flow1M", label: "近1月" },
-      { prop: "flow3M", label: "3月" },
-      { prop: "flowYTD", label: "今年以来" },
-      { prop: "flow1Y", label: "1年" },
-      { prop: "flow3Y", label: "3年" },
-      { prop: "flow5Y", label: "5年资金净流入" },
-    ],
-    dividends: [
-      { prop: "code", label: "指数代码" },
-      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
-      { prop: "annualDividend", label: "年度分红" },
-      { prop: "dividendYield", label: "股息率" },
-    ],
-    risk: [
-      { prop: "code", label: "指数代码" },
-      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
-      { prop: "volatility1M", label: "近1月" },
-      { prop: "volatility3M", label: "3月" },
-      { prop: "volatilityYTD", label: "今年以来" },
-      { prop: "volatility1Y", label: "1年" },
-      { prop: "volatility3Y", label: "3年" },
-      { prop: "volatility5Y", label: "5年波动率" },
-    ],
-    holdings: [
-      { prop: "code", label: "指数代码" },
-      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
-      { prop: "sampleSize", label: "样本数量" },
-      { prop: "indexFloatMarketCap", label: "指数自由流通市值" },
-      { prop: "avgFloatMarketCap", label: "样本平均自由流通市值" },
-      { prop: "medianFloatMarketCap", label: "样本自由流通市值中位数" },
-      { prop: "top5Weight", label: "前五大权重之和" },
-      { prop: "top10Weight", label: "前十大权重之和" },
-    ],
-    valuation: [
-      { prop: "code", label: "指数代码" },
-      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
-      { prop: "pe", label: "PE" },
-      { prop: "pePercentile3Y", label: "PE分位值(3年)" },
-      { prop: "pePercentile5Y", label: "PE分位值(5年)" },
-      { prop: "pePercentile10Y", label: "PE分位值(10年)" },
-      { prop: "pb", label: "PB" },
-      { prop: "pbPercentile3Y", label: "PB分位值(3年)" },
-      { prop: "pbPercentile5Y", label: "PB分位值(5年)" },
-      { prop: "pbPercentile10Y", label: "PB分位值(10年)" },
-    ],
-    relatedETF: [
-      { prop: "code", label: "指数代码" },
-      { prop: "shortName", label: "指数简称", type: "link", url: "/trackingIndexDetails" },
-      { prop: "relatedETFCount", label: "相关ETF只数" },
-      { prop: "relatedETFScale", label: "相关ETF规模" },
-      { prop: "relatedETFDetail", label: "相关ETF明细" },
-    ],
-  }
-)
 
 interface TableColumn {
   prop: string;
@@ -254,8 +163,8 @@ const categoryList = ref([
   { label: "跨境", value: "CROSS_BOUNDARY" },
 ])
 const tableColumns = computed(() => {
-  if (props.isTracking) {
-    return trankingColumnList.value[activeTab.value as keyof typeof trankingColumnList.value] || []
+  if (props.tableColumnListProp) {
+    return props.tableColumnListProp[activeTab.value as keyof typeof props.tableColumnListProp] || []
   }
   return tableColumnList.value[activeTab.value as keyof typeof tableColumnList.value] || []
 })
@@ -274,6 +183,26 @@ const toggleExpand = (symbol: string) => {
   expanded.value = expanded.value === symbol ? null : symbol;
 };
 
+const selectedCodes = ref<string[]>([])
+const tableRef = ref()
+const MAX_SELECTION = 5
+
+// 控制每行的可选状态
+const handleSelectable = (row: any) => {
+  // 如果当前行已被选中，允许取消选择
+  const isSelected = selectedCodes.value.includes(row.code)
+  if (isSelected) {
+    return true
+  }
+  // 如果未达到最大选择数，允许选择
+  return selectedCodes.value.length < MAX_SELECTION
+}
+
+const handleSelectionChange = (val: any[]) => {
+  selectedCodes.value = val.map(item => item.code)
+  console.log(val, selectedCodes.value)
+  emit("tableSelect", selectedCodes.value)
+}
 
 </script>
 <template>
@@ -281,7 +210,7 @@ const toggleExpand = (symbol: string) => {
     <div v-if="hasTableFilter" class="filter-tabs-wrapper">
       <div class="filter-tabs">
         <div
-          v-for="tab in (isTracking ? trankingTabs : filterTabs)"
+          v-for="tab in (filterTabsProp ? filterTabsProp : filterTabs)"
           :key="tab.value"
           :class="['filter-tab', { active: activeTab === tab.value } ]"
           @click="handleTabClick(tab.value)"
@@ -296,8 +225,24 @@ const toggleExpand = (symbol: string) => {
     <div v-if="description" class="description">
       {{ description }}
     </div>
+    <div v-if="!filterTabsProp" class="selection-tip">
+      <span>已选择 <strong>{{ selectedCodes.length }}</strong> / {{ MAX_SELECTION }} 个ETF</span>
+      <span v-if="selectedCodes.length >= MAX_SELECTION" class="max-tip">（已达到最大选择数量）</span>
+    </div>
     <div class="table-scroll" v-if="!isMobile()">
-      <el-table :data="tableData" border>
+      <el-table
+        ref="tableRef"
+        :data="tableData"
+        @selection-change="handleSelectionChange"
+        border
+      >
+        <el-table-column
+          v-if="!filterTabsProp"
+          type="selection"
+          width="50"
+          :selectable="handleSelectable"
+          :reserve-selection="false"
+        />
         <el-table-column
           v-for="column in tableColumns"
           :key="column.prop"
@@ -411,6 +356,23 @@ const toggleExpand = (symbol: string) => {
   line-height: 1.7;
   padding: 0 16px;
 }
+.selection-tip {
+  padding: 8px 16px;
+  margin-bottom: 12px;
+  font-size: 0.9rem;
+  color: #606266;
+  background: #f4f4f5;
+  border-left: 3px solid var(--theme-purple);
+  strong {
+    color: var(--theme-purple);
+    font-size: 1rem;
+  }
+  .max-tip {
+    color: #f56c6c;
+    margin-left: 8px;
+    font-weight: 500;
+  }
+}
 .filter-tabs-wrapper {
   width: 100%;
   padding: 16px;
@@ -443,6 +405,10 @@ const toggleExpand = (symbol: string) => {
 }
 :deep(.el-table) {
   max-width: 100%;
+  // 隐藏表头的全选复选框
+  .el-table__header-wrapper .el-table-column--selection .cell {
+    display: none;
+  }
 }
 .link-cell {
   color: $theme-purple;

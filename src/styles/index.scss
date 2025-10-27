@@ -82,3 +82,19 @@ html, body {
     font-size: var(--font-size-small)!important;
   }
 }
+.page-header{
+  width: 100%;
+  padding: 20px;
+  padding-bottom: 0;
+  background: #fff;
+  .page-desc{
+    font-size: 1.08rem;
+    margin-bottom: 1.1rem;
+    line-height: 1.7;
+  }
+}
+.theme-button{
+  background: var(--theme-purple) !important;
+  border-color: var(--theme-purple) !important;
+  color: #fff !important;
+}

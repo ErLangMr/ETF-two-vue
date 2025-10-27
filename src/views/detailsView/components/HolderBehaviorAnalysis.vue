@@ -94,13 +94,13 @@ function getChartData(){
   disposeCharts();
   leixingChart = echarts.init(document.getElementById("leixing") as HTMLDivElement);
   fenggeChart = echarts.init(document.getElementById("fengge") as HTMLDivElement);
-  initChart(leixingChart);
-  initChart(fenggeChart);
+  initChart(leixingChart, '不同类型持有人的行为');
+  initChart(fenggeChart, '不同风格持有人的行为');
 }
-function initChart(chart: echarts.ECharts) {
+function initChart(chart: echarts.ECharts, title: string) {
   chart.setOption({
     title: {
-        text: "行业配置",
+        text: title,
       },
       tooltip: {
         trigger: "axis",

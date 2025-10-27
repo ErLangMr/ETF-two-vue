@@ -108,6 +108,22 @@ const router = createRouter({
         title: 'ETF详情'
       }
     },
+    {
+      path: '/comparisonTool',
+      name: 'ComparisonTool',
+      component: () => import('../views/comparisonToolView/index.vue'),
+      meta: {
+        title: 'ETF比较工具'
+      }
+    },
+    {
+      path: '/deepCompare',
+      name: 'DeepCompare',
+      component: () => import('../views/comparisonToolView/deepCompare.vue'),
+      meta: {
+        title: 'ETF深度分析'
+      }
+    },
   ],
 })
 

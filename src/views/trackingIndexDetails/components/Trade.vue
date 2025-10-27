@@ -5,29 +5,29 @@
       :header-cell-style="{ background: '#d7d9dc', color: '#333' }"
       style="width: 100%"
     >
-      <el-table-column prop="tradingDate" label="交易日期" width="120" />
+      <el-table-column prop="tradingDate" label="交易日期" />
       <!-- <el-table-column prop="openPrice" label="开盘点位" width="100" />
       <el-table-column prop="highPrice" label="最高点位" width="100" />
       <el-table-column prop="lowPrice" label="最低点位" width="100" /> -->
-      <el-table-column prop="closePrice" label="收盘价" width="100" />
-      <el-table-column prop="change" label="涨跌" width="80">
+      <el-table-column prop="closePrice" label="收盘价" />
+      <el-table-column prop="change" label="涨跌">
         <template #default="{ row }">
           <span :style="{ color: row.change >= 0 ? 'red' : 'green' }">
             {{ row.change }}
           </span>
         </template>
       </el-table-column>
-      <el-table-column prop="changePercent" label="涨跌幅(%)" width="100">
+      <el-table-column prop="changePercent" label="涨跌幅(%)">
         <template #default="{ row }">
           <span :style="{ color: row.change >= 0 ? 'red' : 'green' }">
             {{ row.changePercent }}
           </span>
         </template>
       </el-table-column>
-      <el-table-column prop="openDateChange" label="开始日累计涨跌" width="130" />
-      <el-table-column prop="openDateChangePercent" label="开始日累计涨跌幅" width="150" />
-      <el-table-column prop="volume" label="成交量(万股)" width="140" />
-      <el-table-column prop="turnover" label="成交额(万元)" width="150" />
+      <el-table-column prop="openDateChange" label="开始日累计涨跌" />
+      <el-table-column prop="openDateChangePercent" label="开始日累计涨跌幅" />
+      <el-table-column prop="volume" label="成交量(万股)" />
+      <el-table-column prop="turnover" label="成交额(万元)" />
     </el-table>
   </div>
 </template>

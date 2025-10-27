@@ -44,7 +44,7 @@ const cards = [
     title: "ETF 比较工具",
     desc: "根据资产类别、发行人、市值、费用率等筛选 ETF。",
     icon: Setting,
-    path: "/screener",
+    path: "/comparisonTool",
   },
   {
     title: "ETF 股票定位器",
