@@ -124,6 +124,22 @@ const router = createRouter({
         title: 'ETF深度分析'
       }
     },
+    {
+      path: '/stockLocator',
+      name: 'StockLocator',
+      component: () => import('../views/stockLocator/index.vue'),
+      meta: {
+        title: '股票定位器'
+      }
+    },
+    {
+      path: '/portfolioSimulator',
+      name: 'PortfolioSimulator',
+      component: () => import('../views/portfolioSimulator/index.vue'),
+      meta: {
+        title: '组合模拟器'
+      }
+    },
   ],
 })
 
