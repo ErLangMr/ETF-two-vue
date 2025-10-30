@@ -38,7 +38,7 @@ import fundFlows from "./components/fundFlows.vue";
 import holdingsCharacteristics from "./components/holdingsCharacteristics.vue";
 import holdingBehaviorAndHolderBehavior from "./components/holdingBehaviorAndHolderBehavior.vue";
 import { useRouter, useRoute } from "vue-router";
-import { ElMessage } from "element-plus";
+import { ElMessage, ElMessageBox } from "element-plus";
 const router = useRouter();
 const route = useRoute();
 const ETFCodes = route.query.ETFCodes;
@@ -140,10 +140,26 @@ const tableData = ref<TableData>({
   columns: [],
 });
 if (!ETFCodes) {
-  ElMessage({
-    message: "请先选择需要对比的ETF",
-    type: "warning",
-  });
+  // ElMessage({
+  //   message: "请先选择需要对比的ETF",
+  //   type: "warning",
+  // });
+  ElMessageBox.confirm(
+    '没有选择需要对比的ETF，是否跳转到筛选器页面？',
+    '警告',
+    {
+      confirmButtonText: '确定',
+      cancelButtonText: '取消',
+      type: 'warning',
+    }
+  )
+    .then(() => {
+      router.push({
+        name: "screener",
+      })
+    })
+    .catch(() => {
+    })
 } else {
   const ETFCodesArr = (ETFCodes as string).split(",");
   const arr = [

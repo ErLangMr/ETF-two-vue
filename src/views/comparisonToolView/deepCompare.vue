@@ -107,9 +107,65 @@
         <div id="chart"></div>
       </div>
     </div>
+    <div style="width: 100%; padding: 20px;">
+      <div class="mainBox">
+        <header class="section-title" style="margin-bottom: 10px;">重合持有的股票明细</header>
+        <el-table
+          :data="tableData"
+          :header-cell-style="{
+            background: '#f5f5fa',
+            color: '#333',
+            fontWeight: 'bold',
+            fontSize: '1rem',
+          }"
+        >
+          <el-table-column
+            v-for="col in tableColumn"
+            :key="col.prop"
+            :prop="col.prop"
+            :label="col.label"
+          />
+        </el-table>
+      </div>
+    </div>
     <div class="contentBox">
       <div class="mainBox">
-        <header></header>
+        <header class="section-title">两只ETF持仓权重之差</header>
+        <div class="weight-diff-container">
+          <div
+            v-for="item in weightDiffData"
+            :key="item.stockCode"
+            class="weight-diff-item"
+          >
+            <div class="stock-name">{{ item.stockName }}</div>
+            <div class="progress-wrapper">
+              <div
+                class="progress-bar"
+                :style="{ width: (item.weightDiff / maxWeightDiff * 100) + '%' }"
+              ></div>
+            </div>
+            <div class="weight-value">{{ item.weightDiff }}%</div>
+          </div>
+        </div>
+      </div>
+      <div class="mainBox">
+        <header class="section-title">两只ETF持仓权重之差</header>
+        <div class="weight-diff-container">
+          <div
+            v-for="item in weightDiffData"
+            :key="item.stockCode"
+            class="weight-diff-item"
+          >
+            <div class="stock-name">{{ item.stockName }}</div>
+            <div class="progress-wrapper">
+              <div
+                class="progress-bar"
+                :style="{ width: (item.weightDiff / maxWeightDiff * 100) + '%' }"
+              ></div>
+            </div>
+            <div class="weight-value">{{ item.weightDiff }}%</div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -120,26 +176,42 @@ import { ref, onMounted, computed, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 import * as echarts from "echarts";
 
-const props = defineProps({
-  tableData: {
-    type: Object,
-    default: () => ({}),
-  },
-});
 const route = useRoute();
 onMounted(() => {
   const ETFCodes = route.query.codes;
   if (ETFCodes) {
     window.addEventListener("resize", () => {
-      myChart.resize();
+      if (myChart) {
+        myChart.resize();
+      }
     });
     etfCodes.value = (ETFCodes as string).split(",");
+    etfCodes.value.forEach((code) => {
+      tableColumn.value.push({ prop: code, label: code + "权重" });
+    });
+    tableColumn.value.push({ prop: "overlap", label: "重叠" });
     fetchOverlapData();
-    initChart()
+    initChart();
   }
 });
+
+const tableData = ref([]);
+const tableColumn = ref([{ prop: "stockCode", label: "" }]);
 const etfCodes = ref<string[]>([]);
 const etfColors = ref<string[]>(["#1e5a78", "#7ba3d1"]);
+
+interface WeightDiffData {
+  stockCode: string;
+  stockName: string;
+  weightDiff: number;
+}
+
+const weightDiffData = ref<WeightDiffData[]>([]);
+
+const maxWeightDiff = computed(() => {
+  if (weightDiffData.value.length === 0) return 10;
+  return Math.max(...weightDiffData.value.map(item => item.weightDiff));
+});
 
 interface OverlapData {
   weightPercentage: number;
@@ -224,24 +296,36 @@ const fetchOverlapData = async () => {
       alsoInEtf1: 87,
     },
   };
+
+  // TODO: 调用API获取权重差异数据
+  // 模拟数据
+  weightDiffData.value = [
+    { stockCode: "NVDA", stockName: "NVIDIA CORP", weightDiff: 8.8 },
+    { stockCode: "AAPL", stockName: "APPLE INC", weightDiff: 6.6 },
+    { stockCode: "MSFT", stockName: "MICROSOFT CORP", weightDiff: 6.1 },
+    { stockCode: "AVGO", stockName: "BROADCOM INC.", weightDiff: 1.8 },
+    { stockCode: "ORCL", stockName: "ORACLE CORP", weightDiff: 1.5 },
+    { stockCode: "AMD", stockName: "ADVANCED MICRO DEVICES", weightDiff: 1.3 },
+    { stockCode: "PLTR", stockName: "PALANTIR TECHNOLOGIES INC. CLASS A", weightDiff: 1.3 },
+    { stockCode: "IBM", stockName: "INTL BUSINESS MACHINES CORP", weightDiff: 0.9 },
+    { stockCode: "CSCO", stockName: "CISCO SYSTEMS INC", weightDiff: 0.9 },
+    { stockCode: "MU", stockName: "MICRON TECHNOLOGY INC", weightDiff: 0.8 },
+  ];
 };
 let myChart: echarts.ECharts;
+
 function initChart() {
-  if(myChart){
+  if (myChart) {
     myChart.dispose();
   }
   myChart = echarts.init(document.getElementById("chart"));
   myChart.setOption({
-    // title: {
-    //     text: ,
-    //   },
     tooltip: {
       trigger: "axis",
       axisPointer: {
         type: "shadow",
       },
     },
-    // legend: {},
     grid: {
       left: "3%",
       right: "15%",
@@ -266,17 +350,14 @@ function initChart() {
         type: "bar",
         barGap: 0,
         data: [-18203, -23489, -29034, 104970, -131744, -130230],
-        // itemStyle: {
-        //   color: (params: any) => {
-        //     return params.value >= 0 ? "#14b143" : "#ef232a";
-        //   },
-        // },
       },
     ],
   });
 }
 onUnmounted(() => {
-  myChart.dispose();
+  if (myChart) {
+    myChart.dispose();
+  }
 });
 </script>
 
@@ -403,6 +484,49 @@ onUnmounted(() => {
         height: calc(100% - 40px);
       }
     }
+  }
+
+  .weight-diff-container {
+    padding: 20px;
+    overflow-y: auto;
+  }
+
+  .weight-diff-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+    gap: 15px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+
+  .stock-name {
+    width: 80%;
+    flex-shrink: 0;
+    text-align: left;
+  }
+
+  .progress-wrapper {
+    flex: 1;
+    background: rgba(255, 255, 255, 0.1);
+    height: 16px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-bar {
+    height: 100%;
+    background: #5b8fb9;
+    border-radius: 0 2px 2px 0;
+    transition: width 0.6s ease;
+  }
+
+  .weight-value {
+    width: 50px;
+    flex-shrink: 0;
+    text-align: right;
   }
 }
 </style>
