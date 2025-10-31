@@ -9,7 +9,7 @@ const getBaseUrl = () => {
     case 'development':
       return '/api' // 开发环境使用代理
     case 'production':
-      return 'http://47.76.221.169:8899' // 生产环境
+      return '/test/api' // 生产环境
     default:
       return '/'
   }
