@@ -8,6 +8,9 @@ import { Operation } from "@element-plus/icons-vue";
 import { getFilterTableApi } from "@/api/filterTable";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
+import { usePortfolioSimulatorStore } from "@/store/portfolioSimulator";
+
+const portfolioSimulatorStore = usePortfolioSimulatorStore();
 
 const router = useRouter()
 const { isMobile } = useDevice();
@@ -138,9 +141,28 @@ onMounted(() => {
 });
 
 const tableSelestValue = ref<string[]>([])
-function handleTableSelect(val: string[]) {
-  console.log(val, "handleTableSelect")
+const selectEtfList = ref([]);
+function handleTableSelect(val: string[], row: any) {
+  console.log(val, row, "handleTableSelect")
   tableSelestValue.value = val
+  selectEtfList.value = row
+}
+function handleAnalysis() {
+  if(tableSelestValue.value.length === 0) {
+    ElMessage({
+      message: '请先选择需要分析的ETF',
+      type: 'warning',
+    })
+    return
+  }else if(tableSelestValue.value.length === 1){
+    ElMessage({
+      message: '请至少选择两个需要对比的ETF',
+      type: 'warning',
+    })
+    return
+  }
+  portfolioSimulatorStore.selectETFList = selectEtfList.value
+  router.push({name: "PortfolioSimulator"})
 }
 function handleCompare() {
   if(tableSelestValue.value.length === 0) {
@@ -204,8 +226,8 @@ function handleDeepCompare() {
       <Operation />筛选
     </button>
 
+    <el-button class="theme-button" style="position: absolute; right: 250px;top: -20px;" @click="handleAnalysis">组合分析</el-button>
     <el-button class="theme-button" style="position: absolute; right: 150px;top: -20px;" @click="handleCompare">ETF对比</el-button>
-
     <el-button class="theme-button" style="position: absolute; right: 20px;top: -20px;" @click="handleDeepCompare">ETF深度对比</el-button>
     <!-- PC端筛选器 -->
     <div class="filter-left pc-filter" v-show="!isMobile()">

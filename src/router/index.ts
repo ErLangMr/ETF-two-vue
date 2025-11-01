@@ -133,6 +133,14 @@ const router = createRouter({
       }
     },
     {
+      path: '/stockLocatorDetails',
+      name: 'StockLocatorDetails',
+      component: () => import('../views/stockLocator/stockLocatorDetails.vue'),
+      meta: {
+        title: '股票定位器详情'
+      }
+    },
+    {
       path: '/portfolioSimulator',
       name: 'PortfolioSimulator',
       component: () => import('../views/portfolioSimulator/index.vue'),

@@ -267,7 +267,7 @@ const handleSelectable = (row: any) => {
 const handleSelectionChange = (val: any[]) => {
   selectedCodes.value = val.map(item => item.code)
   console.log(val, selectedCodes.value)
-  emit("tableSelect", selectedCodes.value)
+  emit("tableSelect", selectedCodes.value, val)
 }
 
 </script>
