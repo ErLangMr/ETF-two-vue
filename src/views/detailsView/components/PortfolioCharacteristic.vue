@@ -1,12 +1,12 @@
 <template>
   <div class="portfolio-characteristic">
-    <div ref="chartRef" id="portfolio-characteristic-chart" class="chart-container"></div>
+    <div id="portfolio-characteristic-chart"></div>
   </div>
 </template>
 
 <script setup lang="ts">
 import * as echarts from 'echarts'
-import { ref, onMounted, onActivated, onDeactivated, watch } from 'vue'
+import { ref, onMounted, onActivated, onDeactivated, watch, nextTick, onUnmounted } from 'vue'
 
 const props = defineProps<{
   tabActiveName: string
@@ -14,12 +14,12 @@ const props = defineProps<{
 
 watch(() => props.tabActiveName, (newVal) => {
   if (newVal === 'PortfolioCharacteristic') {
-    initChart()
+    nextTick(() => {
+      initChart()
+    })
   }
 })
-const chartRef = ref<HTMLElement | null>(null)
 let myChart: echarts.ECharts | null = null
-let isInitialized = false
 
 // 生成模拟数据
 const generateMockData = () => {
@@ -54,6 +54,10 @@ const generateMockData = () => {
 }
 
 const initChart = () => {
+  if (myChart) {
+    myChart.dispose()
+    myChart = null
+  }
   const { dates, data1, data2, data3, data4, data5 } = generateMockData()
   myChart = echarts.init(document.getElementById("portfolio-characteristic-chart"))
 
@@ -280,38 +284,29 @@ const initChart = () => {
   }
 
   myChart.setOption(option)
-  isInitialized = true
-
-  // 调整图表尺寸
-  setTimeout(() => {
-    myChart?.resize()
-  }, 100)
 }
 
 onMounted(() => {
-  // 如果组件已经激活，直接初始化
-  initChart()
+  window.addEventListener('resize', resizeChart)
 })
 
-onActivated(() => {
-  // 在动态组件激活时初始化或调整尺寸
-  if (isInitialized && myChart) {
-    setTimeout(() => {
-      myChart?.resize()
-    }, 100)
-  } else {
-    initChart()
+function resizeChart() {
+  if (myChart) {
+    myChart.resize();
   }
-})
+}
 
-onDeactivated(() => {
-  // 组件失活时销毁图表实例释放资源
+onUnmounted(() => {
+  window.removeEventListener("resize", resizeChart);
   if (myChart) {
     myChart.dispose()
     myChart = null
-    isInitialized = false
   }
-})
+});
+onMounted(() => {
+  window.addEventListener("resize", resizeChart);
+});
+
 </script>
 
 <style lang="scss" scoped>
@@ -319,9 +314,9 @@ onDeactivated(() => {
   width: 100%;
   height: 100%;
 
-  .chart-container {
-    width: 100%;
-    height: 800px;
-  }
+  #portfolio-characteristic-chart {
+      width: 100%;
+      height: 800px;
+    }
 }
 </style>

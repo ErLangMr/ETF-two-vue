@@ -85,6 +85,11 @@ import IndexSnapshot from "./components/IndexSnapshot.vue";
 import IndexFeature from "./components/IndexFeature.vue";
 import Trade from "./components/Trade.vue";
 import DividendAndValuation from "./components/DividendAndValuation.vue";
+import PerformanceAndRisk from "./components/PerformanceAndRisk.vue";
+import FundsFlow from "./components/FundsFlow.vue";
+import ConstituentStockDetails from "./components/ConstituentStockDetails.vue";
+import PositionAnalysis from "./components/PositionAnalysis.vue";
+
 import { Top } from "@element-plus/icons-vue";
 import { formatValue } from "@/utils/formatValue";
 import { getOneDetailsDataApi } from "@/api/details";
@@ -157,6 +162,26 @@ const tabList = ref([
     label: "分红和估值",
     value: "DividendAndValuation",
     component: markRaw(DividendAndValuation),
+  },
+  {
+    label: "收益和风险度量",
+    value: "PerformanceAndRisk",
+    component: markRaw(PerformanceAndRisk),
+  },
+  {
+    label: "资金流动",
+    value: "FundsFlow",
+    component: markRaw(FundsFlow),
+  },
+  {
+    label: "成分股明细",
+    value: "ConstituentStockDetails",
+    component: markRaw(ConstituentStockDetails),
+  },
+  {
+    label: "持仓分析",
+    value: "PositionAnalysis",
+    component: markRaw(PositionAnalysis),
   },
 ]);
 </script>

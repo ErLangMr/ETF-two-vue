@@ -1,10 +1,11 @@
 <template>
   <div class="attribution-analysis">
     <div>
+      <h3>组合归因分析</h3>
       <el-table :data="tableData" style="width: 100%">
-        <el-table-column prop="date" label="行业名称" width="150" />
+        <el-table-column prop="date" label="行业名称" />
         <el-table-column label="行业配置（%）" align="center">
-          <el-table-column prop="jijin" label="基金" width="120" />
+          <el-table-column prop="jijin" label="基金" />
           <el-table-column prop="bijiaojizhun" label="比较基准" width="120" />
           <el-table-column prop="zhengfu" label="+/-" width="120" />
         </el-table-column>
@@ -19,45 +20,6 @@
           <el-table-column prop="zhengfu" label="+/-" width="120" />
         </el-table-column>
       </el-table>
-    </div>
-    <div style="display: flex; justify-content: space-between">
-      <div
-        id="attributionAnalysis"
-        style="width: 50%; height: 400px; margin: 20px 0"
-      ></div>
-      <div style="width: 50%">
-        <el-table
-          :data="goodTableData"
-          :header-cell-style="{
-            background: '#d7d9dc',
-            color: '#333',
-            height: '30px',
-            padding: 0,
-            fontSize: '14px',
-          }"
-          :cell-style="{ height: '30px', padding: 0, fontSize: '14px' }"
-          style="margin: 20px 0"
-        >
-          <el-table-column prop="name" label="表现优异行业" />
-          <el-table-column prop="shizhi" label="市值（万元）" />
-          <el-table-column prop="shouyi" label="资产配置收益(%)" />
-        </el-table>
-        <el-table
-          :data="badTableData"
-          :header-cell-style="{
-            background: '#d7d9dc',
-            color: '#333',
-            height: '30px',
-            padding: 0,
-            fontSize: '14px',
-          }"
-          :cell-style="{ height: '30px', padding: 0, fontSize: '14px' }"
-        >
-          <el-table-column prop="name" label="表现优异行业" />
-          <el-table-column prop="shizhi" label="市值（万元）" />
-          <el-table-column prop="shouyi" label="资产配置收益(%)" />
-        </el-table>
-      </div>
     </div>
     <div class="divisorBox">
       <header>
@@ -77,7 +39,7 @@
         </el-select>
       </header>
       <div class="divisorChartBox">
-        <div class="oneChartBox">
+        <!-- <div class="oneChartBox">
           <div id="oneFirstChart" style="height: 100%; width: 40%"></div>
           <div
             style="
@@ -90,15 +52,15 @@
             <div id="oneSecondChart" style="height: 100%; width: 50%"></div>
             <div id="oneThirdChart" style="height: 100%; width: 50%"></div>
           </div>
-        </div>
+        </div> -->
         <div class="towChartBox">
           <div id="twoFirstChart" style="height: 100%; width: 50%"></div>
           <div id="twoSecondChart" style="height: 100%; width: 50%"></div>
         </div>
-        <div class="threeChartBox">
+        <!-- <div class="threeChartBox">
           <div id="threeFirstChart" style="height: 100%; width: 50%"></div>
           <div id="threeSecondChart" style="height: 100%; width: 50%"></div>
-        </div>
+        </div> -->
       </div>
     </div>
   </div>
@@ -108,12 +70,13 @@
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import * as echarts from "echarts";
 
-const props = defineProps<{
-  tabActiveName: string;
-}>();
 
 onMounted(() => {
   window.addEventListener("resize", resizeChart);
+  nextTick(() => {
+        disposeCharts()
+        getDivisorData();
+      });
 });
 const tableData = [
   {
@@ -178,131 +141,7 @@ const chartData = [
   ],
 ];
 
-watch(
-  () => props.tabActiveName,
-  (newVal) => {
-    if (newVal === "AttributionAnalysis") {
-      nextTick(() => {
-        disposeCharts()
-        initCharts();
-        getDivisorData();
-      });
-    }
-  }
-);
 let myChart: echarts.ECharts | null = null;
-function initCharts() {
-  myChart = echarts.init(document.getElementById("attributionAnalysis"));
-  myChart.setOption({
-    // backgroundColor: new echarts.graphic.RadialGradient(0.3, 0.3, 0.8, [
-    //   {
-    //     offset: 0,
-    //     color: "#f7f8fa",
-    //   },
-    //   {
-    //     offset: 1,
-    //     color: "#cdd0d5",
-    //   },
-    // ]),
-    title: {
-      text: "资产配置收益",
-      left: "3%",
-      top: "3%",
-    },
-    legend: {
-      right: "3%",
-      top: "3%",
-      data: ["表现优异行业", "表现不佳行业"],
-    },
-    grid: {
-      left: "8%",
-      top: "15%",
-    },
-    xAxis: {
-      splitLine: {
-        lineStyle: {
-          type: "dashed",
-        },
-      },
-    },
-    yAxis: {
-      splitLine: {
-        lineStyle: {
-          type: "dashed",
-        },
-      },
-      scale: true,
-    },
-    series: [
-      {
-        name: "表现优异行业",
-        data: chartData[0],
-        type: "scatter",
-        symbolSize: function (data: any) {
-          return Math.sqrt(data[2]) / 5e2;
-        },
-        emphasis: {
-          focus: "series",
-          label: {
-            show: true,
-            formatter: function (param: any) {
-              return param.data[3];
-            },
-            position: "top",
-          },
-        },
-        itemStyle: {
-          shadowBlur: 10,
-          shadowColor: "rgba(120, 36, 50, 0.5)",
-          shadowOffsetY: 5,
-          color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [
-            {
-              offset: 0,
-              color: "rgb(251, 118, 123)",
-            },
-            {
-              offset: 1,
-              color: "rgb(204, 46, 72)",
-            },
-          ]),
-        },
-      },
-      {
-        name: "表现不佳行业",
-        data: chartData[1],
-        type: "scatter",
-        symbolSize: function (data: any) {
-          return Math.sqrt(data[2]) / 5e2;
-        },
-        emphasis: {
-          focus: "series",
-          label: {
-            show: true,
-            formatter: function (param: any) {
-              return param.data[3];
-            },
-            position: "top",
-          },
-        },
-        itemStyle: {
-          shadowBlur: 10,
-          shadowColor: "rgba(25, 100, 150, 0.5)",
-          shadowOffsetY: 5,
-          color: new echarts.graphic.RadialGradient(0.4, 0.3, 1, [
-            {
-              offset: 0,
-              color: "rgb(129, 227, 238)",
-            },
-            {
-              offset: 1,
-              color: "rgb(25, 183, 207)",
-            },
-          ]),
-        },
-      },
-    ],
-  });
-}
 const divisorVal = ref("选项1");
 const divisorOptions = [
   {
@@ -333,27 +172,27 @@ let twoSecondChart: echarts.ECharts | null = null;
 let threeFirstChart: echarts.ECharts | null = null;
 let threeSecondChart: echarts.ECharts | null = null;
 function getDivisorData() {
-  oneFirstChart = echarts.init(document.getElementById("oneFirstChart"));
-  oneSecondChart = echarts.init(document.getElementById("oneSecondChart"));
-  oneThirdChart = echarts.init(document.getElementById("oneThirdChart"));
+  // oneFirstChart = echarts.init(document.getElementById("oneFirstChart"));
+  // oneSecondChart = echarts.init(document.getElementById("oneSecondChart"));
+  // oneThirdChart = echarts.init(document.getElementById("oneThirdChart"));
   twoFirstChart = echarts.init(document.getElementById("twoFirstChart"));
   twoSecondChart = echarts.init(document.getElementById("twoSecondChart"));
-  threeFirstChart = echarts.init(document.getElementById("threeFirstChart"));
-  threeSecondChart = echarts.init(document.getElementById("threeSecondChart"));
+  // threeFirstChart = echarts.init(document.getElementById("threeFirstChart"));
+  // threeSecondChart = echarts.init(document.getElementById("threeSecondChart"));
   // 临时数据
   const arr = [
-    oneFirstChart,
+    // oneFirstChart,
     twoFirstChart,
     twoSecondChart,
-    threeFirstChart,
-    threeSecondChart,
+    // threeFirstChart,
+    // threeSecondChart,
   ];
   for (let i of arr) {
     initDivisorBarChart(i);
   }
   // 初始化热力图
-  initHeatmapChart(oneSecondChart);
-  initRadarChart(oneThirdChart);
+  // initHeatmapChart(oneSecondChart);
+  // initRadarChart(oneThirdChart);
 }
 function initDivisorBarChart(chart: echarts.ECharts) {
   chart.setOption({

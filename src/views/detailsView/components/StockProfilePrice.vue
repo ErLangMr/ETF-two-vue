@@ -24,7 +24,9 @@
             </div>
             <div class="info-row">
               <span>追踪指数</span>
-              <span>{{ formatValue(props.detailsData?.fundInfoByVitals?.fee, 'percent') }}</span>
+              <span>{{
+                formatValue(props.detailsData?.fundInfoByVitals?.fee, "percent")
+              }}</span>
             </div>
             <div class="info-row">
               <span>管理费率</span>
@@ -65,7 +67,13 @@
             <div class="info-row">
               <span>最新交易日</span
               ><span>
-                {{ categoryList.find(item => item.value === props.detailsData?.fundInfoByThemes?.category)?.label }}
+                {{
+                  categoryList.find(
+                    (item) =>
+                      item.value ===
+                      props.detailsData?.fundInfoByThemes?.category
+                  )?.label
+                }}
               </span>
             </div>
             <div class="info-row">
@@ -113,12 +121,24 @@
         <div id="detailOneEcart"></div>
       </div>
       <div>
-        <el-table :data="tableData" :header-cell-style="{ background: '#d7d9dc', color: '#333' }" style="width: 100%">
+        <el-table
+          :data="tableData"
+          :header-cell-style="{ background: '#d7d9dc', color: '#333' }"
+          style="width: 100%"
+        >
           <el-table-column prop="type" label="" width="180" />
           <el-table-column prop="shortName" label="简称" width="180" />
           <el-table-column prop="fee" label="费用率(%)" />
-          <el-table-column prop="totalMarketValue" label="基金规模(百万元)" unit="million" />
-          <el-table-column prop="avgDailyVolumeForYear" label="日均成交额(百万元)" unit="million" />
+          <el-table-column
+            prop="totalMarketValue"
+            label="基金规模(百万元)"
+            unit="million"
+          />
+          <el-table-column
+            prop="avgDailyVolumeForYear"
+            label="日均成交额(百万元)"
+            unit="million"
+          />
           <el-table-column prop="ytdReturns" label="年初至今回报(%)" />
         </el-table>
       </div>
@@ -147,15 +167,15 @@ const categoryList = ref([
   { label: "商品", value: "GOODS" },
   { label: "货币", value: "CURRENCY" },
   { label: "跨境", value: "CROSS_BOUNDARY" },
-])
+]);
 
 function clickVitals(data: any) {
   router.push({
-    path: '/proshares',
+    path: "/proshares",
     query: {
       issuer: JSON.stringify(data),
     },
-  })
+  });
 }
 
 watch(
@@ -163,17 +183,17 @@ watch(
   (newVal) => {
     if (newVal) {
       if (newVal.fundInfoByIndexData) {
-        tableData.value = []
+        tableData.value = [];
         Object.keys(newVal.fundInfoByIndexData).forEach((key) => {
-          let typeName = ''
-          if(key === "bestReturn") {
-            typeName = '年初至今回报最高'
-          } else if(key === "highestVolume") {
-            typeName = '流动性最高'
-          } else if(key === "largestSize") {
-            typeName = '规模最大'
-          }else if(key === "lowestFee") {
-            typeName = '费用最低'
+          let typeName = "";
+          if (key === "bestReturn") {
+            typeName = "年初至今回报最高";
+          } else if (key === "highestVolume") {
+            typeName = "流动性最高";
+          } else if (key === "largestSize") {
+            typeName = "规模最大";
+          } else if (key === "lowestFee") {
+            typeName = "费用最低";
           }
           tableData.value.push({
             type: typeName,
@@ -201,8 +221,12 @@ const columns = [
     // },
   },
   { key: "fee", label: "费用率(%)" },
-  { key: "totalMarketValue", label: "基金规模(百万元)",unit: 'million' },
-  { key: "avgDailyVolumeForYear", label: "日均成交额(百万元)",unit: 'million' },
+  { key: "totalMarketValue", label: "基金规模(百万元)", unit: "million" },
+  {
+    key: "avgDailyVolumeForYear",
+    label: "日均成交额(百万元)",
+    unit: "million",
+  },
   { key: "ytdReturns", label: "年初至今回报(%)" },
 ];
 
@@ -213,77 +237,82 @@ function initChart() {
     myChart.dispose();
     myChart = null;
   }
-  myChart = echarts.init(document.getElementById("detailOneEcart") as HTMLElement);
+  myChart = echarts.init(
+    document.getElementById("detailOneEcart") as HTMLElement
+  );
   myChart.setOption({
     title: {
-    text: '业绩表现'
-  },
-  tooltip: {
-    trigger: 'axis'
-  },
+      text: "业绩表现",
+    },
+    tooltip: {
+      trigger: "axis",
+    },
 
-  legend: {
-    orient: 'horizontal',
-    left: 'center',
-    bottom: '1%'
-  },
-  grid: {
-    top: '10%',
-    left: '3%',
-    right: '4%',
-    bottom: '10%',
-    containLabel: true
-  },
-  xAxis: {
-    type: 'category',
-    boundaryGap: false,
-    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
-  },
-  yAxis: {
-    type: 'value'
-  },
-  series: [
-    {
-      name: 'Email',
-      type: 'line',
-      showSymbol: false,
-      // smooth: true,
-      data: [120, 132, 101, 134, 90, 230, 210]
+    legend: {
+      orient: "horizontal",
+      left: "center",
+      bottom: "1%",
     },
-    {
-      name: 'Union Ads',
-      type: 'line',
-      showSymbol: false,
-      // smooth: true,
-      data: [220, 182, 191, 234, 290, 330, 310]
+    grid: {
+      top: "10%",
+      left: "3%",
+      right: "4%",
+      bottom: "10%",
+      containLabel: true,
     },
-    {
-      name: 'Video Ads',
-      type: 'line',
-      showSymbol: false,
-      // smooth: true,
-      data: [150, 232, 201, 154, 190, 330, 410]
+    xAxis: {
+      type: "category",
+      boundaryGap: false,
+      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
     },
-    {
-      name: 'Direct',
-      type: 'line',
-      showSymbol: false,
-      // smooth: true,
-      data: [320, 332, 301, 334, 390, 330, 320]
+    yAxis: {
+      type: "value",
     },
-    {
-      name: 'Search Engine',
-      type: 'line',
-      showSymbol: false,
-      // smooth: true,
-      data: [820, 932, 901, 934, 1290, 1330, 1320]
-    }
-  ]
-  })
+    series: [
+      {
+        name: "Email",
+        type: "line",
+        showSymbol: false,
+        // smooth: true,
+        data: [120, 132, 101, 134, 90, 230, 210],
+      },
+      {
+        name: "Union Ads",
+        type: "line",
+        showSymbol: false,
+        // smooth: true,
+        data: [220, 182, 191, 234, 290, 330, 310],
+      },
+      {
+        name: "Video Ads",
+        type: "line",
+        showSymbol: false,
+        // smooth: true,
+        data: [150, 232, 201, 154, 190, 330, 410],
+      },
+      {
+        name: "Direct",
+        type: "line",
+        showSymbol: false,
+        // smooth: true,
+        data: [320, 332, 301, 334, 390, 330, 320],
+      },
+      {
+        name: "Search Engine",
+        type: "line",
+        showSymbol: false,
+        // smooth: true,
+        data: [820, 932, 901, 934, 1290, 1330, 1320],
+      },
+    ],
+  });
 }
-watch(() => props.detailsData, () => {
-  initChart()
-})
+watch(
+  () => props.detailsData,
+  () => {
+    initChart();
+  }
+);
 function resizeChart() {
   if (myChart) {
     myChart.resize();
@@ -300,7 +329,7 @@ onUnmounted(() => {
 </script>
 
 <style scoped lang="scss">
-@use '@/styles/variables.scss' as *;
+@use "@/styles/variables.scss" as *;
 .stock-profile-price {
   background: #fff;
   color: #222;

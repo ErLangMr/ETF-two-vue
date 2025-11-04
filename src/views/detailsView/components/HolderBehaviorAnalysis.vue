@@ -83,8 +83,6 @@ watch(
       nextTick(() => {
         getChartData();
       });
-    }else{
-      disposeCharts();
     }
   }
 );

@@ -60,6 +60,52 @@
         </div>
       </div>
     </div>
+    <div class="divider"></div>
+    <div style="padding: 20px">
+      <QuickFacts :facts="facts" title="成本"></QuickFacts>
+      <div style="height: 30px;"></div>
+      <Performance />
+      <div style="height: 30px;"></div>
+      <div>
+        <div class="block">
+          <div class="section-title">组合风险</div>
+          <div class="info-list">
+            <div class="info-row">
+              <span>过去5日波动率</span
+              ><span class="linkStyle">{{ "val" }}</span>
+            </div>
+            <div class="info-row">
+              <span>过去20日波动率</span
+              ><span class="linkStyle">{{ "val" }}</span>
+            </div>
+            <div class="info-row">
+              <span>过去50日波动率</span>
+              <span>{{ formatValue(29.9999, "percent") }}</span>
+            </div>
+            <div class="info-row">
+              <span>过去200日波动率</span>
+              <span>{{ "val" }}</span>
+            </div>
+            <div class="info-row">
+              <span>Beta</span>
+              <span>{{ "val" }}</span>
+            </div>
+            <div class="info-row">
+              <span>标准差</span>
+              <span>{{ "val" }}</span>
+            </div>
+            <div class="info-row">
+              <span>夏普比率</span>
+              <span>{{ "val" }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="height: 30px;"></div>
+      <AnalystOpinions />
+      <div style="height: 30px;"></div>
+      <ComboPositionFeature />
+    </div>
   </div>
 </template>
 
@@ -68,8 +114,12 @@ import { ref, computed, onMounted } from "vue";
 import { usePortfolioSimulatorStore } from "@/store/portfolioSimulator";
 import { ElMessageBox } from "element-plus";
 import { useRouter } from "vue-router";
+import { formatValue } from "@/utils/formatValue";
+import QuickFacts from "@/components/QuickFacts.vue";
+import Performance from "@/views/detailsView/components/Performance.vue";
+import AnalystOpinions from "./details/AttributionAnalysis.vue";
+import ComboPositionFeature from "./details/comboPositionFeature.vue";
 const router = useRouter();
-
 
 interface ETFItem {
   code: string;
@@ -98,7 +148,7 @@ const etfList = ref<ETFItem[]>([
 
 const portfolioSimulatorStore = usePortfolioSimulatorStore();
 onMounted(() => {
-  console.log(portfolioSimulatorStore.selectETFList, 'selectETFList')
+  console.log(portfolioSimulatorStore.selectETFList, "selectETFList");
   // if (portfolioSimulatorStore.selectETFList.length === 0){
   //   ElMessageBox.confirm(
   //   '没有选择需要组合的ETF，是否跳转到筛选器页面？',
@@ -129,6 +179,15 @@ const removeETF = (index: number) => {
   if (etfList.value.length <= 2) return;
   etfList.value.splice(index, 1);
 };
+const facts = ref([
+  { label: "加权平均管理费率", value: "0.77%" },
+  {
+    label: "加权平均托管费率",
+    value: "100.00%",
+  },
+  { label: "加权平均总成本", value: "0.00%" },
+]);
+
 </script>
 
 <style lang="scss" scoped>
@@ -311,6 +370,58 @@ const removeETF = (index: number) => {
         &.ratio-error {
           color: #f56c6c;
         }
+      }
+    }
+  }
+  .divider {
+    width: 100%;
+    height: 4px;
+    background: var(--theme-purple);
+    margin: 20px 0;
+  }
+  :deep(.block) {
+    flex: 1;
+    min-width: 0;
+    max-width: 70%;
+    .section-title {
+      font-weight: 600;
+      font-size: var(--font-size-base);
+      margin-bottom: 10px;
+      color: #222;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .analyst-title-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .info-list {
+      border-radius: 0;
+      border: none;
+      background: none;
+      padding: 0;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 7px 0;
+      border-bottom: 1px solid #ececec;
+      font-size: var(--font-size-base);
+    }
+    .info-row:last-child {
+      border-bottom: none;
+    }
+    .info-row span:first-child {
+      color: #333;
+    }
+    .info-row .link {
+      color: var(--theme-purple);
+      cursor: pointer;
+      &:hover {
+        text-decoration: underline;
       }
     }
   }

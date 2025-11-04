@@ -180,7 +180,7 @@ const initChart = async () => {
       trigger: "item",
       formatter: (params: any) => `${params.seriesName}`,
     },
-    grid: { left: 120, right: 0, top: 0, bottom: 0 },
+    grid: { left: props.title ? 120 : 10, right: 0, top: 0, bottom: 0 },
     xAxis: { show: false, min: 0, max: 100 },
     yAxis: { show: false, min: 0, max: 1 },
     legend: {
@@ -223,6 +223,9 @@ onMounted(() => {
     }
   };
   window.addEventListener("resize", resizeHandler);
+  if(!props.active){
+    initChart()
+  }
 });
 
 onBeforeUnmount(() => {
