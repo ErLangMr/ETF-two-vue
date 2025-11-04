@@ -89,6 +89,7 @@ import PerformanceAndRisk from "./components/PerformanceAndRisk.vue";
 import FundsFlow from "./components/FundsFlow.vue";
 import ConstituentStockDetails from "./components/ConstituentStockDetails.vue";
 import PositionAnalysis from "./components/PositionAnalysis.vue";
+import EtfProductList from "./components/EtfProductList.vue";
 
 import { Top } from "@element-plus/icons-vue";
 import { formatValue } from "@/utils/formatValue";
@@ -183,6 +184,11 @@ const tabList = ref([
     value: "PositionAnalysis",
     component: markRaw(PositionAnalysis),
   },
+  {
+    label: "相关ETF产品列表",
+    value: "EtfProductList",
+    component: markRaw(EtfProductList),
+  },
 ]);
 </script>
 
@@ -233,7 +239,7 @@ const tabList = ref([
         height: 800px;
       }
       :deep(.el-tabs__item) {
-        width: 175px;
+        width: 190px;
         height: 50px;
         white-space: wrap;
         font-size: var(--font-size-medium);

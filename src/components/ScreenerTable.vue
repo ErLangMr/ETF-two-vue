@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import { useRouter, useRoute } from 'vue-router'
-import { QuestionFilled } from '@element-plus/icons-vue'
 import { computed, ref, watch, type PropType } from 'vue'
 import { useDevice } from '@/utils/device'
 import { formatValue } from '@/utils/formatValue'
