@@ -2,15 +2,13 @@
   <div class="fund-flow-chart">
     <h2 class="h3">{{ code }}资金流动图表</h2>
     <p>查看包含 ETF 基金流量数据的图表。</p>
-    <div class="fund-flow-chart-btn">
-      <span>过去</span>
-      <span class="span" :class="activeBtn === '1month' ? 'activeBtn' : ''" @click="handleChange('1month')"> 1 个月</span>
-      <span class="span" :class="activeBtn === '3month' ? 'activeBtn' : ''" @click="handleChange('3month')">3 个月</span>
-      <span class="span" :class="activeBtn === '6month' ? 'activeBtn' : ''" @click="handleChange('6month')">6 个月</span>
-      <span class="span" :class="activeBtn === '1year' ? 'activeBtn' : ''" @click="handleChange('1year')">1 年</span>
-      <span class="span" :class="activeBtn === '3year' ? 'activeBtn' : ''" @click="handleChange('3year')">3 年</span>
-      <span>的日净流入</span>
-    </div>
+    <PeriodSelector
+      v-model="activeBtn"
+      :options="periodOptions"
+      prefix="过去"
+      suffix="的日净流入"
+      @change="handleChange"
+    />
     <div v-loading="loading" id="fund-flow-chart"></div>
     <div v-loading="chartTwoLoading" id="fund-flow-chart-2"></div>
   </div>
@@ -22,6 +20,7 @@ import * as echarts from "echarts";
 import { useDevice } from "@/utils/device";
 import { getFundFlowDataApi } from "@/api/details";
 import { getMonthAgoDate, getYearAgoDate } from "@/utils/formatValue";
+import PeriodSelector from "@/components/PeriodSelector.vue";
 
 let myChart: echarts.ECharts | null = null;
 let myTwoChart: echarts.ECharts | null = null;
@@ -35,6 +34,19 @@ const seriesData = ref([]);
 const activeBtn = ref('1month');
 const loading = ref(false);
 const chartTwoLoading = ref(false);
+
+const periodOptions: [PeriodOption, PeriodOption, PeriodOption, PeriodOption, PeriodOption] = [
+  { label: '1 个月', value: '1month' },
+  { label: '3 个月', value: '3month' },
+  { label: '6 个月', value: '6month' },
+  { label: '1 年', value: '1year' },
+  { label: '3 年', value: '3year' }
+];
+
+interface PeriodOption {
+  label: string
+  value: string
+}
 watch(() => props.tabActiveName, (newVal) => {
   if (newVal === 'FundFlowChart') {
     if(myChart) {
@@ -303,32 +315,10 @@ onUnmounted(() => {
     width: 100%;
     height: 400px;
   }
-  .fund-flow-chart-btn {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 10px 0;
-    .span {
-      cursor: pointer;
-      background: rgb(236, 234, 234);
-      padding: 5px 10px;
-      border-radius: 5px;
-      &.activeBtn {
-        background: #c9c6c6;
-      }
-    }
-  }
 }
 @media (max-width: 768px) {
   #fund-flow-chart {
     height: 220px;
-  }
-  .fund-flow-chart-btn{
-    display: flex;
-    flex-wrap: wrap;
-    .span{
-      width: 60px;
-    }
   }
 }
 </style>

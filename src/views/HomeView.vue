@@ -487,12 +487,12 @@ h3{
   background: #fff;
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  box-shadow: 0px 0px 10px 4px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
 }
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 3px 6px 3px 8px rgba(0, 0, 0, 0.05);
 }
 .icon-bg {
   width: 60px;
