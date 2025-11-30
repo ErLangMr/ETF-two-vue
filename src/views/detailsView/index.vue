@@ -1,10 +1,10 @@
 <template>
   <div class="details-view">
     <div class="details-header">
-      <span class="details-symbol">{{ detailsTitle.code }}</span>
-      <span class="details-title">{{ detailsTitle.shortName }}</span>
+      <span class="details-symbol">{{ route.query?.code }}</span>
+      <span class="details-title">{{ route.query?.name }}</span>
     </div>
-    <div class="details-info">
+    <!-- <div class="details-info">
       <div>
         <span class="details-info-label">收盘价:</span>
         {{ detailsTitle.close }}
@@ -25,7 +25,7 @@
         <span class="details-info-label">最近更新日期:</span>
         <span>{{ detailsTitle.lastUpdated }}</span>
       </div>
-    </div>
+    </div> -->
     <div class="details-content">
       <van-divider :style="{ borderColor: '#dedede' }" />
       <template v-if="!isMobile()">
@@ -40,7 +40,6 @@
               <component
                 :is="item.component"
                 :tabActiveName="activeName"
-                :detailsData="detailsData"
                 :code="route.query?.code"
               />
             </div>
@@ -68,7 +67,6 @@
               StockProfilePrice
             "
             :tabActiveName="componentName"
-            :detailsData="detailsData"
             :code="route.query?.code"
           />
         </div>
@@ -122,34 +120,6 @@ function handleChange(val: string) {
   const selectedTab = tabList.value.find((tab) => tab.value === val);
   componentName.value = selectedTab?.value as string;
 }
-const detailsData = ref({});
-const detailsTitle = ref({
-  code: "",
-  shortName: "",
-  close: "",
-  change: "",
-  category: "",
-  lastUpdated: "",
-});
-watch(
-  activeName,
-  (newVal) => {
-    if (newVal === "StockProfilePrice") {
-      getOneDetailsDataApi(route.query.code as string).then((res) => {
-        detailsTitle.value = {
-          code: res.code,
-          shortName: res.shortName,
-          close: res.close,
-          change: res.change,
-          category: res.category,
-          lastUpdated: res.lastUpdated,
-        };
-        detailsData.value = res;
-      });
-    }
-  },
-  { immediate: true }
-);
 
 const tabList = ref([
   {

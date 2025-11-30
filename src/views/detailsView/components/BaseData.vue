@@ -1,39 +1,59 @@
 <template>
   <div class="base-data-container">
+    <div style="text-align: right">
+      <el-date-picker
+        v-model="baseDataDate"
+        value-format="YYYY-MM-DD"
+        type="date"
+        style="margin-bottom: 10px"
+        @change="baseDataDateChange"
+      />
+    </div>
     <div class="block">
       <div class="section-title">基础资料</div>
       <div class="info-list">
         <div class="info-row">
-          <span>资产类别</span
-          ><span class="linkStyle" @click.stop="clickVitals('val')">{{
-            "val"
-          }}</span>
+          <span>GICS 一级标签</span>
+          <span>{{ industryData.gics1 }}</span>
         </div>
         <div class="info-row">
-          <span>投资区域</span
-          ><span class="linkStyle" @click.stop="clickVitals('val')">{{
-            "val"
-          }}</span>
+          <span>GICS 三级标签</span><span>{{ industryData.gics3 }}</span>
         </div>
         <div class="info-row">
-          <span>经济部门</span>
-          <span>{{ formatValue(29.9999, "percent") }}</span>
+          <span>ICB 一级标签</span>
+          <span>{{ industryData.icb1 }}</span>
         </div>
         <div class="info-row">
-          <span>细分行业</span>
-          <span>{{ "val" }}</span>
+          <span>ICB 三级标签</span>
+          <span>{{ industryData.icb3 }}</span>
+        </div>
+        <div class="info-row">
+          <span>标签日期</span>
+          <span>{{ industryData.labelDate }}</span>
         </div>
         <div class="info-row">
           <span>市值标签</span>
-          <span>{{ "val" }}</span>
+          <span>{{ industryData.marketCapLabel }}</span>
         </div>
         <div class="info-row">
           <span>风格标签</span>
-          <span>{{ "val" }}</span>
+          <span>{{ industryData.styleLabel }}</span>
         </div>
       </div>
     </div>
-    <div id="baseDataOne" style="margin-top: 20px"></div>
+    <div style="text-align: right; margin-top: 20px">
+      <el-button
+        @click="dayOrMonthClick('day')"
+        :type="dayOrMonth === 'day' ? 'primary' : ''"
+        >日度</el-button
+      >
+      <el-button
+        @click="dayOrMonthClick('month')"
+        :type="dayOrMonth === 'month' ? 'primary' : ''"
+        >月度</el-button
+      >
+    </div>
+    <div id="baseDataOne"></div>
     <div id="baseDataTwo" style="margin-top: 10px"></div>
   </div>
 </template>
@@ -42,12 +62,14 @@
 import { nextTick, onMounted, onUnmounted, ref, watch } from "vue";
 import * as echarts from "echarts";
 import { formatValue } from "@/utils/formatValue";
+import {
+  getBaseInfoChartApi,
+  getBaseInfoIndustryApi,
+} from "@/api/filterDetails";
 
-function clickVitals(data: any) {
-  console.log(data);
-}
 const props = defineProps<{
   tabActiveName: string;
+  code: string;
 }>();
 
 watch(
@@ -55,17 +77,94 @@ watch(
   (newVal) => {
     if (newVal === "BaseData") {
       nextTick(() => {
-        initChart();
+        getBaseInfoIndustry();
+        getBaseInfoChart();
       });
     }
   },
   { immediate: true }
 );
+const baseDataDate = ref("");
+const industryData = ref<Record<string, any>>({});
 
+function getBaseInfoIndustry() {
+  getBaseInfoIndustryApi({
+    code: props.code,
+    date: baseDataDate.value || null,
+  }).then((res) => {
+    industryData.value = res;
+  });
+}
+
+const dayOrMonth = ref("month");
+function dayOrMonthClick(type: string) {
+  dayOrMonth.value = type;
+}
+
+// 监听日度/月度切换,更新图表
+watch(dayOrMonth, () => {
+  initChart();
+});
+
+const chartData = {
+  day: {
+    xData: [] as string[],
+    assetNetValue: [] as string[],
+    share: [] as string[],
+  },
+  month: {
+    xData: [] as string[],
+    assetNetValue: [] as string[],
+    share: [] as string[],
+  },
+};
+function getBaseInfoChart() {
+  getBaseInfoChartApi({
+    code: props.code,
+    date: baseDataDate.value || null,
+  }).then((res) => {
+    // 清空之前的数据
+    chartData.day.xData = [];
+    chartData.day.assetNetValue = [];
+    chartData.day.share = [];
+    chartData.month.xData = [];
+    chartData.month.assetNetValue = [];
+    chartData.month.share = [];
+
+    // 填充日度数据
+    res.daily?.forEach((item: any) => {
+      chartData.day.xData.push(item.date);
+      chartData.day.assetNetValue.push(item.aum);
+      chartData.day.share.push(item.shares);
+    });
+
+    // 填充月度数据
+    res.monthly?.forEach((item: any) => {
+      chartData.month.xData.push(item.date);
+      chartData.month.assetNetValue.push(item.aum);
+      chartData.month.share.push(item.shares);
+    });
+
+    initChart();
+  });
+}
+
+function baseDataDateChange() {
+  getBaseInfoIndustry();
+  getBaseInfoChart();
+}
 let oneChart: echarts.ECharts | null = null;
 let twoChart: echarts.ECharts | null = null;
-function initChart() {
-  disposeCharts()
+function initChart(): void {
+  disposeCharts();
+
+  // 根据当前选择的日度/月度获取对应的数据
+  const currentData =
+    dayOrMonth.value === "day" ? chartData.day : chartData.month;
+  const xData = currentData.xData;
+  const assetNetValueData = currentData.assetNetValue;
+  const shareData = currentData.share;
+
   const oneElement = document.getElementById("baseDataOne");
   const twoElement = document.getElementById("baseDataTwo");
 
@@ -73,26 +172,44 @@ function initChart() {
     oneChart = echarts.init(oneElement);
     oneChart.setOption({
       title: {
-        text: "资产净值规模（亿元）",
+        text: "资产净值规模（百万元）",
       },
       grid: {
         top: "15%",
         left: "3%",
         right: "4%",
-        bottom: "3%",
+        bottom: 60,
         containLabel: true,
+      },
+      dataZoom: [
+        {
+          type: "inside",
+          start: 0,
+          end: 40,
+        },
+        {
+          start: 0,
+          end: 40,
+        },
+      ],
+      tooltip: {
+        trigger: "axis",
+        axisPointer: { type: "line" },
+        formatter: function (params: any) {
+          return params[0].axisValue + ": " + params[0].value + "百万元";
+        },
       },
       xAxis: {
         type: "category",
         boundaryGap: false,
-        data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        data: xData,
       },
       yAxis: {
         type: "value",
       },
       series: [
         {
-          data: [820, 932, 901, 934, 1290, 1330, 1320],
+          data: assetNetValueData,
           type: "line",
           showSymbol: false,
           lineStyle: {
@@ -110,7 +227,7 @@ function initChart() {
     twoChart = echarts.init(twoElement);
     twoChart.setOption({
       title: {
-        text: "ETF份额（万份）",
+        text: "ETF份额（百万份）",
         // textStyle: {
         //   fontSize: 14,
         // },
@@ -118,24 +235,24 @@ function initChart() {
       grid: {
         left: "3%",
         right: "3%",
-        bottom: 20,
+        bottom: 80,
         top: 40,
         containLabel: true,
       },
+      dataZoom: [
+        {
+          type: "inside",
+          start: 0,
+          end: 10,
+        },
+        {
+          start: 0,
+          end: 10,
+        },
+      ],
       xAxis: {
         type: "category",
-        data: [
-      'ten',
-      'nine',
-      'eight',
-      'seven',
-      'six',
-      'five',
-      'four',
-      'three',
-      'two',
-      'one'
-    ],
+        data: xData,
         axisTick: { show: false },
         axisLine: { show: false },
         axisLabel: {
@@ -170,7 +287,7 @@ function initChart() {
       series: [
         {
           type: "bar",
-          data: [0.5, 0.5, -0.5, 0.5, -0.5, 0.5, -0.5, 0.5, -0.5, 0.5],
+          data: shareData,
           itemStyle: {
             color: function (params: any) {
               return params.value >= 0 ? "#2ca02c" : "#d62728";
@@ -180,7 +297,7 @@ function initChart() {
         },
       ],
       graphic:
-        [1,2,3].length === 0
+        [1, 2, 3].length === 0
           ? [
               {
                 type: "text",
@@ -198,7 +315,7 @@ function initChart() {
         trigger: "axis",
         axisPointer: { type: "shadow" },
         formatter: function (params: any) {
-          return params[0].axisValue + ": " + params[0].value + " B";
+          return params[0].axisValue + ": " + params[0].value + "百万份";
         },
       },
     });
@@ -230,7 +347,7 @@ onMounted(() => {
 
 onUnmounted(() => {
   window.removeEventListener("resize", resizeChart);
-  disposeCharts()
+  disposeCharts();
 });
 </script>
 
@@ -241,7 +358,7 @@ onUnmounted(() => {
   height: 100%;
   #baseDataOne,
   #baseDataTwo {
-    height: 400px;
+    height: 600px;
     width: 100%;
   }
   .block {

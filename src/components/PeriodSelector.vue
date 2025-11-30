@@ -21,7 +21,7 @@ interface PeriodOption {
 }
 
 interface Props {
-  options: [PeriodOption, PeriodOption, PeriodOption, PeriodOption, PeriodOption]
+  options: PeriodOption[]
   modelValue?: string
   prefix?: string
   suffix?: string

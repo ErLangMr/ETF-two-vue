@@ -201,7 +201,7 @@ const activeIndex = computed(() => route.path);
 }
 .header-content {
   width: 85%;
-  max-width: 1600px;
+  max-width: 1750px;
   margin: 0 auto;
   padding: 0 $spacing-base;
   height: $header-height;
@@ -290,7 +290,7 @@ const activeIndex = computed(() => route.path);
 .main {
   flex: 1;
   width: 85%;
-  max-width: 1600px;
+  max-width: 1750px;
   margin: 0 auto;
   margin-top: $header-height;
   background: $background-color-white;

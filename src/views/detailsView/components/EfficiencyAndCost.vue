@@ -1,89 +1,77 @@
 <template>
   <div class="efficiency-and-cost-container">
+    <div style="display: flex; justify-content: end;align-items: center;">
+      <PeriodSelector
+        v-model="activeBtn"
+        :options="periodOptions"
+        prefix="过去"
+        suffix=""
+        @change="handleChange"
+      />
+      <el-date-picker
+        v-model="dateFilter"
+        type="date"
+        value-format="YYYY-MM-DD"
+        style="margin-left: 20px"
+        @change="dateFilterChange"
+      />
+    </div>
     <div style="display: flex; gap: 62px">
       <div class="block">
-        <div class="section-title">效率</div>
+        <div class="section-title">效率和成本</div>
         <div class="info-list">
           <div class="info-row">
-            <span>过去一个月平均日交易量</span
-            ><span class="linkStyle" @click.stop="clickVitals('val')">{{
-              "val"
-            }}</span>
+            <span>交易金额（百万元）</span><span>{{ formatValue(infoData.amount) }}</span>
           </div>
           <div class="info-row">
-            <span>过去三个月平均日交易量</span
-            ><span class="linkStyle" @click.stop="clickVitals('val')">{{
-              "val"
-            }}</span>
+            <span>折溢价率</span><span>{{ formatValue(infoData.cover) }}</span>
           </div>
           <div class="info-row">
-            <span>过去一个月平均日交易额</span>
-            <span>{{ formatValue(29.9999, "percent") }}</span>
+            <span>托管费率</span>
+            <span>{{ formatValue(infoData.custodianFee) }}</span>
           </div>
           <div class="info-row">
-            <span>过去三个月平均日交易额</span>
-            <span>{{ "val" }}</span>
+            <span>跟踪偏离度</span>
+            <span>{{ formatValue(infoData.dev) }}</span>
           </div>
           <div class="info-row">
-            <span>过去1个月日跟踪偏离度</span>
-            <span>{{ "val" }}</span>
+            <span>查询维度（月）</span>
+            <span>{{ formatValue(infoData.dimension) }}</span>
           </div>
           <div class="info-row">
-            <span>过去3个月日跟踪偏离度</span>
-            <span>{{ "val" }}</span>
-          </div>
-          <div class="info-row">
-            <span>过去1个月日均折溢价率</span>
-            <span>{{ "val" }}</span>
-          </div>
-          <div class="info-row">
-            <span>过去3个月日均折溢价率</span>
-            <span>{{ "val" }}</span>
+            <span>管理费率</span>
+            <span>{{ formatValue(infoData.managementFee) }}</span>
           </div>
         </div>
       </div>
       <div class="block">
-        <div class="section-title">成本</div>
+        <div class="section-title"></div>
         <div class="info-list">
           <div class="info-row">
-            <span>日常运作费率</span
-            ><span class="linkStyle" @click.stop="clickVitals('val')">{{
-              "val"
-            }}</span>
+            <span>申购费率</span><span>{{ formatValue(infoData.subscriptionFee) }}</span>
           </div>
           <div class="info-row">
-            <span>管理费率</span
-            ><span class="linkStyle" @click.stop="clickVitals('val')">{{
-              "val"
-            }}</span>
+            <span>总费率</span><span>{{ formatValue(infoData.totalFee) }}</span>
           </div>
           <div class="info-row">
-            <span>托管费率</span>
-            <span>{{ formatValue(29.9999, "percent") }}</span>
+            <span>跟踪误差</span>
+            <span>{{ formatValue(infoData.trackingError) }}</span>
           </div>
           <div class="info-row">
-            <span>销售服务费率</span>
-            <span>{{ "val" }}</span>
+            <span>换手率</span>
+            <span>{{ formatValue(infoData.turnover) }}</span>
           </div>
           <div class="info-row">
-            <span>交易费率</span>
-            <span>{{ "val" }}</span>
-          </div>
-          <div class="info-row">
-            <span>申购费率</span>
-            <span>{{ "val" }}</span>
+            <span>交易量（百万份）</span>
+            <span>{{ formatValue(infoData.volume) }}</span>
           </div>
           <div class="info-row">
             <span>赎回费率</span>
-            <span>{{ "val" }}</span>
+            <span>{{ formatValue(infoData.redemptionFee) }}</span>
           </div>
           <div class="info-row">
-            <span>交易佣金</span>
-            <span>{{ "val" }}</span>
-          </div>
-          <div class="info-row">
-            <span>总费率（持有1年）</span>
-            <span>{{ "val" }}</span>
+            <span>销售服务费率</span>
+            <span>{{ formatValue(infoData.salesServiceFee) }}</span>
           </div>
         </div>
       </div>
@@ -95,10 +83,16 @@
 <script setup lang="ts">
 import { formatValue } from "@/utils/formatValue";
 import * as echarts from "echarts";
-import { nextTick, onUnmounted, watch } from "vue";
+import { nextTick, onUnmounted, ref, watch } from "vue";
+import {
+  getEfficiencyAndCostInfoApi,
+  getEfficiencyAndCostLineApi,
+} from "@/api/filterDetails";
+import PeriodSelector from "@/components/PeriodSelector.vue";
 
 const props = defineProps<{
   tabActiveName: string;
+  code: string;
 }>();
 
 watch(
@@ -106,19 +100,90 @@ watch(
   (val) => {
     if (val === "EfficiencyAndCost") {
       nextTick(() => {
-        initChart();
+        getData();
+        getLineData();
       });
     }
-  },{ immediate: true }
+  },
+  { immediate: true }
 );
 
+function dateFilterChange() {
+  getData();
+  getLineData();
+}
+
+const dateFilter = ref('');
+interface PeriodOption {
+  label: string;
+  value: string;
+}
+const activeBtn = ref("1");
+const periodOptions: PeriodOption[] = [
+  { label: "1 个月", value: "1" },
+  { label: "3 个月", value: "3" },
+  { label: "6 个月", value: "6" },
+  { label: "1 年", value: "12" },
+  { label: "3 年", value: "36" },
+  { label: "5 年", value: "60" },
+];
+const infoData = ref<Record<string, any>>({});
+function getData() {
+  getEfficiencyAndCostInfoApi({
+    code: props.code,
+    dimension: activeBtn.value || null,
+    date: dateFilter.value || null,
+  }).then((res) => {
+    infoData.value = res;
+  });
+}
+
+function getLineData() {
+  // 显示 loading
+  if (myChart) {
+    myChart.showLoading({
+      text: '加载中...',
+      // color: '#4a90e2',
+      // textColor: '#333',
+      // maskColor: 'rgba(255, 255, 255, 0.8)',
+      // zlevel: 0
+    });
+  }
+
+  getEfficiencyAndCostLineApi({
+    code: props.code,
+    date: dateFilter.value || null,
+  }).then((res) => {
+    // 隐藏 loading
+    if (myChart) {
+      myChart.hideLoading();
+    }
+    initChart(res.months, res.trackingErrors);
+  }).catch(() => {
+    // 出错时隐藏 loading 并显示无数据
+    if (myChart) {
+      myChart.hideLoading();
+    }
+    initChart([], []);
+  });
+}
+
+const handleChange = (type: string) => {
+  console.log(type);
+  activeBtn.value = type;
+  getData();
+};
+
 let myChart: echarts.ECharts | null = null;
-function initChart() {
+function initChart(XData: string[], YData: number[]) {
   if (myChart) {
     myChart.dispose();
     myChart = null;
   }
   myChart = echarts.init(document.getElementById("efficiency-and-cost-chart"));
+
+  const hasData = XData && XData.length > 0 && YData && YData.length > 0;
+
   myChart.setOption({
     title: {
       text: "月度跟踪误差",
@@ -130,17 +195,20 @@ function initChart() {
       bottom: "3%",
       containLabel: true,
     },
+    tooltip: {
+      trigger: "axis",
+    },
     xAxis: {
       type: "category",
       boundaryGap: false,
-      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      data: XData || [],
     },
     yAxis: {
       type: "value",
     },
-    series: [
+    series: hasData ? [
       {
-        data: [820, 932, 901, 934, 1290, 1330, 1320],
+        data: YData,
         type: "line",
         showSymbol: false,
         lineStyle: {
@@ -150,7 +218,17 @@ function initChart() {
           color: "rgba(74, 144, 226, 0.5)",
         },
       },
-    ],
+    ] : [],
+    graphic: hasData ? [] : {
+      type: 'text',
+      left: 'center',
+      top: 'middle',
+      style: {
+        text: '暂无数据',
+        fontSize: 16,
+        fill: '#999'
+      }
+    }
   });
 }
 

@@ -8,41 +8,27 @@
           <div class="info-list">
             <div class="info-row">
               <span>成立日期</span
-              ><span
-                class="linkStyle"
-                @click.stop="clickVitals(props.detailsData?.fundInfoByVitals)"
-                >{{ props.detailsData?.fundInfoByVitals?.fundMgrs }}</span
-              >
+              ><span>{{ formatDate(detailsData?.inceptionDate) }}</span>
             </div>
             <div class="info-row">
               <span>基金公司</span
-              ><span
-                class="linkStyle"
-                @click.stop="clickVitals(props.detailsData?.fundInfoByVitals)"
-                >{{ props.detailsData?.fundInfoByVitals?.shortName }}</span
-              >
+              ><span>{{ formatValue(detailsData?.issuer) }}</span>
             </div>
             <div class="info-row">
-              <span>追踪指数</span>
-              <span>{{
-                formatValue(props.detailsData?.fundInfoByVitals?.fee, "percent")
-              }}</span>
+              <span>指数名称</span>
+              <span>{{ formatValue(detailsData?.indexName) }}</span>
             </div>
             <div class="info-row">
-              <span>管理费率</span>
-              <span>{{ props.detailsData?.fundInfoByVitals?.setupDate }}</span>
+              <span>管理费率(%)</span>
+              <span>{{ formatValue(detailsData?.managementFee) }}</span>
             </div>
             <div class="info-row">
-              <span>托管费率</span>
-              <span>{{
-                props.detailsData?.fundInfoByVitals?.trackIndexName
-              }}</span>
+              <span>托管费率(%)</span>
+              <span>{{ formatValue(detailsData?.custodianFee) }}</span>
             </div>
             <div class="info-row">
               <span>联接基金</span>
-              <span>{{
-                props.detailsData?.fundInfoByVitals?.trackIndexName
-              }}</span>
+              <span>{{ formatValue(detailsData?.etfLj) }}</span>
             </div>
           </div>
         </div>
@@ -67,43 +53,37 @@
             <div class="info-row">
               <span>最新交易日</span
               ><span>
-                {{
-                  categoryList.find(
-                    (item) =>
-                      item.value ===
-                      props.detailsData?.fundInfoByThemes?.category
-                  )?.label
-                }}
+                {{ formatDate(detailsData?.latestDate) }}
               </span>
             </div>
             <div class="info-row">
-              <span>最新收盘价</span
+              <span>最新收盘价(元)</span
               ><span>
-                {{ props.detailsData?.fundInfoByThemes?.styleAttribute }}
+                {{ formatValue(detailsData?.close) }}
               </span>
             </div>
             <div class="info-row">
               <span>最新份额净值</span
               ><span>
-                {{ props.detailsData?.fundInfoByThemes?.compMarketCap }}
+                {{ formatValue(detailsData?.nav) }}
               </span>
             </div>
             <div class="info-row">
               <span>最新流通规模</span
               ><span>
-                {{ props.detailsData?.fundInfoByThemes?.investStrategy }}
+                {{ formatValue(detailsData?.mktCap) }}
               </span>
             </div>
             <div class="info-row">
               <span>最新资产净值规模</span
               ><span>
-                {{ props.detailsData?.fundInfoByThemes?.investStrategy }}
+                {{ formatValue(detailsData?.aum) }}
               </span>
             </div>
             <div class="info-row">
-              <span>折溢价率</span
+              <span>价格收益率(%)</span
               ><span>
-                {{ props.detailsData?.fundInfoByThemes?.investStrategy }}
+                {{ formatValue(detailsData?.retPrice) }}
               </span>
             </div>
             <!-- <div class="info-row">
@@ -120,26 +100,28 @@
       <div class="">
         <div id="detailOneEcart"></div>
       </div>
-      <div>
+      <div style="text-align: right;">
+        <el-date-picker
+          v-model="tableDate"
+          value-format="YYYY-MM-DD"
+          @change="handleDateChange"
+          type="date"
+          style="margin-bottom: 10px;"
+        />
         <el-table
           :data="tableData"
           :header-cell-style="{ background: '#d7d9dc', color: '#333' }"
-          style="width: 100%"
+          :style="{ width: '100%' }"
         >
-          <el-table-column prop="type" label="" width="180" />
-          <el-table-column prop="shortName" label="简称" width="180" />
-          <el-table-column prop="fee" label="费用率(%)" />
           <el-table-column
-            prop="totalMarketValue"
-            label="基金规模(百万元)"
-            unit="million"
-          />
-          <el-table-column
-            prop="avgDailyVolumeForYear"
-            label="日均成交额(百万元)"
-            unit="million"
-          />
-          <el-table-column prop="ytdReturns" label="年初至今回报(%)" />
+            v-for="column in columns"
+            :prop="column.key"
+            :label="column.label"
+          >
+            <template #default="scope">
+              {{ formatValue(scope.row[column.key]) }}
+            </template>
+          </el-table-column>
         </el-table>
       </div>
     </div>
@@ -149,15 +131,23 @@
 <script setup lang="ts">
 import { useRouter } from "vue-router";
 import * as echarts from "echarts";
-import { formatValue } from "@/utils/formatValue";
-import { onUnmounted, ref, watch } from "vue";
+import { formatValue, formatDate } from "@/utils/formatValue";
+import { nextTick, onUnmounted, ref, watch } from "vue";
+import {
+  getSnapshotInfoApi,
+  getSnapshotLineApi,
+  getSnapshotReturnsApi,
+} from "@/api/filterDetails";
 
 const router = useRouter();
 const props = defineProps({
-  detailsData: {
-    type: Object,
+  tabActiveName: {
+    type: String,
     required: true,
-    default: () => ({}),
+  },
+  code: {
+    type: String,
+    required: true,
   },
 });
 
@@ -169,70 +159,149 @@ const categoryList = ref([
   { label: "跨境", value: "CROSS_BOUNDARY" },
 ]);
 
-function clickVitals(data: any) {
-  router.push({
-    path: "/proshares",
-    query: {
-      issuer: JSON.stringify(data),
-    },
-  });
-}
+const tableDate = ref('');
+const handleDateChange = (date: string) => {
+  getSnapshotReturns();
+};
+
 
 watch(
-  () => props.detailsData,
+  () => props.tabActiveName,
   (newVal) => {
-    if (newVal) {
-      if (newVal.fundInfoByIndexData) {
-        tableData.value = [];
-        Object.keys(newVal.fundInfoByIndexData).forEach((key) => {
-          let typeName = "";
-          if (key === "bestReturn") {
-            typeName = "年初至今回报最高";
-          } else if (key === "highestVolume") {
-            typeName = "流动性最高";
-          } else if (key === "largestSize") {
-            typeName = "规模最大";
-          } else if (key === "lowestFee") {
-            typeName = "费用最低";
-          }
-          tableData.value.push({
-            type: typeName,
-            shortName: newVal.fundInfoByIndexData[key].shortName,
-            fee: newVal.fundInfoByIndexData[key].fee,
-            totalMarketValue: newVal.fundInfoByIndexData[key].totalMarketValue,
-            avgDailyVolumeForYear:
-              newVal.fundInfoByIndexData[key].avgDailyVolumeForYear,
-            ytdReturns: newVal.fundInfoByIndexData[key].ytdReturns,
-          });
+    if (newVal === "StockProfilePrice") {
+      getSnapshotInfoApi({
+        code: props.code,
+      }).then((res) => {
+        detailsData.value = res as Record<string, any>;
+      });
+      getSnapshotLineApi({
+        code: props.code,
+      }).then((res) => {
+        const lineData = res.points;
+        const XData: string[] = [];
+        // 上市至今基准总回报(%)
+        const ltdBenchData = {
+          name: "上市至今基准总回报(%)",
+          type: "line",
+          showSymbol: false,
+          // smooth: true,
+          data: [] as number[],
+        };
+        // 上市至今市场总回报(%)
+        const ltdMarketData = {
+          name: "上市至今市场总回报(%)",
+          type: "line",
+          showSymbol: false,
+          // smooth: true,
+          data: [] as number[],
+        };
+        // 上市至今净值总回报(%)
+        const ltdNavData = {
+          name: "上市至今净值总回报(%)",
+          type: "line",
+          showSymbol: false,
+          // smooth: true,
+          data: [] as number[],
+        };
+        // 上市至今价格总回报(%)
+        const ltdPriceData = {
+          name: "上市至今价格总回报(%)",
+          type: "line",
+          showSymbol: false,
+          // smooth: true,
+          data: [] as number[],
+        };
+        lineData.forEach((item: Record<string, any>) => {
+          XData.push(item.date);
+          ltdBenchData.data.push(item.ltdBench);
+          ltdMarketData.data.push(item.ltdMarket);
+          ltdNavData.data.push(item.ltdNav);
+          ltdPriceData.data.push(item.ltdPrice);
         });
-      }
+        console.log(ltdBenchData, "ltdBenchData");
+        initChart(XData, [
+          ltdBenchData,
+          ltdMarketData,
+          ltdNavData,
+          ltdPriceData,
+        ]);
+      });
+      getSnapshotReturns();
     }
-  }
+  },
+  { immediate: true }
 );
-
+function getSnapshotReturns() {
+  getSnapshotReturnsApi({
+        code: props.code,
+        date: tableDate.value || null,
+      }).then((res) => {
+        tableData.value = [
+          {
+            type: "基于净值的收益(%)",
+            ytd: res.ytdNav,
+            mt1: res.ret1,
+            mt3: res.ret3,
+            mt6: res.ret6,
+            mt12: res.ret12,
+            mt36: res.ret36,
+            mt60: res.ret60,
+            ltd: res.ltdNav,
+            ytdReturns: res.ytdReturns,
+          },
+          {
+            type: "基于价格的收益(%)",
+            ytd: res.ytdPrice,
+            mt1: res.pf1,
+            mt3: res.pf3,
+            mt6: res.pf6,
+            mt12: res.pf12,
+            mt36: res.pf36,
+            mt60: res.pf60,
+            ltd: res.ltdPrice,
+          },
+          {
+            type: "基准指数收益(%)",
+            ytd: res.ytdBench,
+            mt1: res.bench1,
+            mt3: res.bench3,
+            mt6: res.bench6,
+            mt12: res.bench12,
+            mt36: res.bench36,
+            mt60: res.bench60,
+            ltd: res.ltdBench,
+          },
+          {
+            type: "全市场收益(%)",
+            ytd: res.ytdMkt,
+            mt1: res.mkt1,
+            mt3: res.mkt3,
+            mt6: res.mkt6,
+            mt12: res.mkt12,
+            mt36: res.mkt36,
+            mt60: res.mkt60,
+            ltd: res.ltdMkt,
+          },
+        ];
+      });
+}
+const detailsData = ref<Record<string, any>>({});
 const columns = [
-  { key: "type", label: "类型" },
-  {
-    key: "shortName",
-    label: "简称",
-    // isLink: true,
-    // onClick: (symbol: string) => {
-    //   router.push(`/details?symbol=${symbol}`);
-    // },
-  },
-  { key: "fee", label: "费用率(%)" },
-  { key: "totalMarketValue", label: "基金规模(百万元)", unit: "million" },
-  {
-    key: "avgDailyVolumeForYear",
-    label: "日均成交额(百万元)",
-    unit: "million",
-  },
-  { key: "ytdReturns", label: "年初至今回报(%)" },
+  { key: "type", label: "" },
+  { key: "ytd", label: "今年以来" },
+  { key: "mt1", label: "近一个月" },
+  { key: "mt3", label: "近三个月" },
+  { key: "mt6", label: "近六个月" },
+  { key: "mt12", label: "近一年" },
+  { key: "mt36", label: "近三年" },
+  { key: "mt60", label: "近五年" },
+  { key: "ltd", label: "上市至今总回报" },
+  { key: "ytdReturns", label: "年化回报" },
 ];
 
 const tableData = ref<Record<string, any>[]>([]);
 let myChart: echarts.ECharts | null = null;
-function initChart() {
+function initChart(xData: string[], seriesData: any[]) {
   if (myChart) {
     myChart.dispose();
     myChart = null;
@@ -263,56 +332,15 @@ function initChart() {
     xAxis: {
       type: "category",
       boundaryGap: false,
-      data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+      data: xData,
     },
     yAxis: {
       type: "value",
     },
-    series: [
-      {
-        name: "Email",
-        type: "line",
-        showSymbol: false,
-        // smooth: true,
-        data: [120, 132, 101, 134, 90, 230, 210],
-      },
-      {
-        name: "Union Ads",
-        type: "line",
-        showSymbol: false,
-        // smooth: true,
-        data: [220, 182, 191, 234, 290, 330, 310],
-      },
-      {
-        name: "Video Ads",
-        type: "line",
-        showSymbol: false,
-        // smooth: true,
-        data: [150, 232, 201, 154, 190, 330, 410],
-      },
-      {
-        name: "Direct",
-        type: "line",
-        showSymbol: false,
-        // smooth: true,
-        data: [320, 332, 301, 334, 390, 330, 320],
-      },
-      {
-        name: "Search Engine",
-        type: "line",
-        showSymbol: false,
-        // smooth: true,
-        data: [820, 932, 901, 934, 1290, 1330, 1320],
-      },
-    ],
+    series: seriesData,
   });
 }
-watch(
-  () => props.detailsData,
-  () => {
-    initChart();
-  }
-);
+
 function resizeChart() {
   if (myChart) {
     myChart.resize();

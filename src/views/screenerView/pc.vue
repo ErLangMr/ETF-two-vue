@@ -1,20 +1,24 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick, computed, watch } from "vue";
 import ScreenerFilter from "@/components/ScreenerFilter.vue";
+import ScreenerFilterV2 from "@/components/ScreenerFilterV2.vue";
 import type { FilterItem } from "@/components/ScreenerFilter.vue";
 import ScreenerTable from "@/components/ScreenerTable.vue";
 import { useDevice } from "@/utils/device";
 import { Operation } from "@element-plus/icons-vue";
-import { getFilterTableApi } from "@/api/filterTable";
+import { getFilterTableApi, getEtfFilterDataApi, getEtfOverviewPageApi, getEtfNetValuePageApi, getEtfFundFlowPageApi, getEtfFeePageApi, getEtfTradingEfficiencyPageApi, getEtfDividendPageApi, getEtfRiskPageApi, getEtfHoldingFeaturePageApi } from "@/api/filterTable";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { usePortfolioSimulatorStore } from "@/store/portfolioSimulator";
+// import responseData from "@/components/response_1763022495540.json";
 
 const portfolioSimulatorStore = usePortfolioSimulatorStore();
 
 const router = useRouter()
 const { isMobile } = useDevice();
 const mobileFilterRef = ref();
+// 控制使用哪个版本的筛选器 (true: 新版, false: 旧版)
+const useNewFilter = ref(true);
 // 单选的值（一级分类）
 const selectedChild = ref("");
 // 多选的值（二级分类）
@@ -24,6 +28,19 @@ const sliderItems = ref<{ [key: string]: number }>({});
 // 滑块的值（滑块的值）
 let sliderValue:Record<string, any>[] = []
 let paramsObj: Record<string, any> = {}
+
+onMounted(() => {
+  getFilterData()
+  getEtfTableData()
+});
+
+// 获取筛选数据
+const responseData = ref<any>([]);
+function getFilterData() {
+  getEtfFilterDataApi().then((res: any) => {
+    responseData.value = res
+  });
+}
 
 // 添加防抖函数
 const debounce = (fn: Function, delay: number) => {
@@ -39,17 +56,24 @@ const debounce = (fn: Function, delay: number) => {
 // 创建防抖后的请求函数
 const debouncedGetFilterTableData = debounce((params?: Record<string, any>) => {
   page.value = 1
-  getFilterTableData(params);
+  getEtfTableData(params);
 }, 300);
 
 watch(selectedChild, (newVal) => {
   console.log(newVal, 11111);
   if(newVal) {
+    // 单选时，如果 selectedItems 为空或者是刚刚被清空，才调用接口
+    // 避免与 selectedItems 的 watch 重复调用
     if (!selectedItems.value.length) {
       paramsObj.category = newVal
       paramsObj.codes = null
       page.value = 1
-      getFilterTableData(paramsObj)
+      // 使用 nextTick 确保 selectedItems 的 watch 先执行
+      nextTick(() => {
+        if (!selectedItems.value.length) {
+          getEtfTableData(paramsObj)
+        }
+      })
     }
   }
 });
@@ -57,12 +81,13 @@ watch(selectedChild, (newVal) => {
 watch(
   selectedItems,
   (newVal) => {
+    console.log('selectedItems changed:', newVal);
     // 如果是重置操作，直接清空参数并请求
     if (newVal.length === 0 && !selectedChild.value) {
       paramsObj.codes = null;
       paramsObj.category = null;
       page.value = 1;
-      getFilterTableData(paramsObj);
+      getEtfTableData(paramsObj);
       return;
     }
 
@@ -71,13 +96,9 @@ watch(
       paramsObj.codes = newVal;
       paramsObj.category = null;
       page.value = 1;
-      getFilterTableData(paramsObj);
-    } else if (selectedChild.value) {
-      paramsObj.codes = null;
-      paramsObj.category = selectedChild.value;
-      page.value = 1;
-      debouncedGetFilterTableData(paramsObj);
+      getEtfTableData(paramsObj);
     }
+    // 删除 else if 分支，避免重复调用
   },
   { deep: true }
 );
@@ -98,21 +119,21 @@ watch(sliderItems, (newVal) => {
     })
     Object.assign(paramsObj, obj)
     page.value = 1
-    getFilterTableData(paramsObj)
+    getEtfTableData(paramsObj)
   }else{
     sliderValue = []
     paramsObj = {}
     page.value = 1
-    getFilterTableData()
+    getEtfTableData()
   }
 }, { deep: true });
 
 const page = ref(1)
-const pageSize = ref(20)
+const pageSize = ref(10)
 const total = ref(0)
 function handlePageChange(val: number) {
   page.value = val
-  getFilterTableData(paramsObj)
+  getEtfTableData(paramsObj)
 }
 function getFilterTableData(params?: Record<string, any>) {
   const obj = {
@@ -126,6 +147,93 @@ function getFilterTableData(params?: Record<string, any>) {
   });
 }
 
+// 顶部筛选Tab变化，获取表格数据
+const tableFilterTab = ref("overview");
+function handleTableFilterTab(tab: string) {
+  tableFilterTab.value = tab;
+  getEtfTableData(paramsObj)
+}
+
+function getEtfTableData(params?: Record<string, any>) {
+  const obj = {
+    page: page.value,
+    size: pageSize.value,
+    ...params
+  }
+  if( tableFilterTab.value === 'overview'){
+    getEtfOverviewPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTab.value === 'returns'){
+    getEtfNetValuePageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTab.value === 'fundFlows'){
+    getEtfFundFlowPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  }else if( tableFilterTab.value === 'expenses'){
+    getEtfFeePageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTab.value === 'efficiency'){
+    getEtfTradingEfficiencyPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTab.value === 'dividends'){
+    getEtfDividendPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTab.value === 'risk'){
+    getEtfRiskPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTab.value === 'holdings'){
+    getEtfHoldingFeaturePageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+  }
+}
+
 const etfList = ref<any[]>([]);
 
 const showMobileFilter = ref(false);
@@ -136,10 +244,7 @@ function closeMobileFilter() {
   showMobileFilter.value = false;
 }
 
-onMounted(() => {
-  getFilterTableData()
-});
-
+// 分析、对比、深度对比
 const tableSelestValue = ref<string[]>([])
 const selectEtfList = ref([]);
 function handleTableSelect(val: string[], row: any) {
@@ -231,7 +336,27 @@ function handleDeepCompare() {
     <el-button class="theme-button" style="position: absolute; right: 20px;top: -20px;" @click="handleDeepCompare">ETF深度对比</el-button>
     <!-- PC端筛选器 -->
     <div class="filter-left pc-filter" v-show="!isMobile()">
+      <!-- 切换按钮 -->
+      <!-- <el-button
+        @click="useNewFilter = !useNewFilter"
+        size="small"
+        style="margin-bottom: 10px; width: 100%;"
+      >
+        {{ useNewFilter ? '切换到旧版筛选器' : '切换到新版筛选器' }}
+      </el-button> -->
+
+      <!-- 旧版筛选器 -->
       <ScreenerFilter
+        v-if="!useNewFilter"
+        v-model:selected-child="selectedChild"
+        v-model:selected-items="selectedItems"
+        v-model:slider-items="sliderItems"
+      />
+
+      <!-- 新版筛选器 -->
+      <ScreenerFilterV2
+        v-else
+        :api-data="responseData"
         v-model:selected-child="selectedChild"
         v-model:selected-items="selectedItems"
         v-model:slider-items="sliderItems"
@@ -248,8 +373,27 @@ function handleDeepCompare() {
           <span class="close-btn" @click="closeMobileFilter">×</span>
         </div>
         <div class="mobile-filter-content">
+          <!-- 移动端也支持切换 -->
+          <!-- <el-button
+            @click="useNewFilter = !useNewFilter"
+            size="small"
+            style="margin: 10px 20px; width: calc(100% - 40px);"
+          >
+            {{ useNewFilter ? '切换到旧版筛选器' : '切换到新版筛选器' }}
+          </el-button> -->
+
           <ScreenerFilter
+            v-if="!useNewFilter"
             ref="mobileFilterRef"
+            v-model:selected-child="selectedChild"
+            v-model:selected-items="selectedItems"
+            v-model:slider-items="sliderItems"
+          />
+
+          <ScreenerFilterV2
+            v-else
+            ref="mobileFilterRef"
+            :api-data="responseData"
             v-model:selected-child="selectedChild"
             v-model:selected-items="selectedItems"
             v-model:slider-items="sliderItems"
@@ -262,6 +406,7 @@ function handleDeepCompare() {
       :tableData="etfList"
       :hasTableFilter="true"
       @tableSelect="handleTableSelect"
+      @tableFilterTab="handleTableFilterTab"
     >
       <template #table-pagination>
         <el-pagination
