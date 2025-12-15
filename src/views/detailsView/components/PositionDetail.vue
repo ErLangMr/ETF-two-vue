@@ -1,324 +1,244 @@
 <template>
   <div class="position-details">
-    <div>
-      <h3>持仓明细</h3>
-      <el-table
-      :data="tableData"
-      :header-cell-style="{ background: '#d7d9dc', color: '#333' }"
-      style="width: 100%">
-        <el-table-column prop="序号" label="序号" width="60" />
-        <el-table-column prop="股票代码" label="股票代码" width="120" />
-        <el-table-column prop="股票名称" label="股票名称" width="120" />
-        <el-table-column prop="持仓市值" label="持仓市值(元)" width="140" align="right" />
-        <el-table-column prop="持仓数量" label="持仓数量" width="120" align="right" />
-        <el-table-column prop="相对上期增减" label="相对上期增减" width="120" align="right" />
-        <el-table-column prop="占基金净值比" label="占基金净值比" width="120" align="right" />
-        <el-table-column prop="占流通股本比" label="占流通股本比" width="120" align="right" />
-        <el-table-column prop="占股票市值比" label="占股票市值比" width="120" align="right" />
-        <el-table-column prop="区间涨跌幅" label="区间涨跌幅" width="120" align="right" />
-        <el-table-column prop="所属行业" label="所属行业" width="120" />
-      </el-table>
+    <div style="text-align: right">
+      <el-date-picker
+        v-model="yearValue"
+        type="year"
+        placeholder="选择年份"
+        value-format="YYYY"
+      />
     </div>
-    <div style="margin-top: 30px;">
-      <h3>重仓明细</h3>
+    <div>
+      <header class="header">
+        <h3>重仓明细</h3>
+      </header>
+      <h4>一季报</h4>
       <el-table
-      :data="tableData"
-      :header-cell-style="{ background: '#d7d9dc', color: '#333' }"
-      style="width: 100%">
-        <el-table-column prop="序号" label="序号" width="60" />
-        <el-table-column prop="股票代码" label="股票代码" width="120" />
-        <el-table-column prop="股票名称" label="股票名称" width="120" />
-        <el-table-column prop="持仓市值" label="持仓市值(元)" width="140" align="right" />
-        <el-table-column prop="持仓数量" label="持仓数量" width="120" align="right" />
-        <el-table-column prop="相对上期增减" label="相对上期增减" width="120" align="right" />
-        <el-table-column prop="占基金净值比" label="占基金净值比" width="120" align="right" />
-        <el-table-column prop="占流通股本比" label="占流通股本比" width="120" align="right" />
-        <el-table-column prop="占股票市值比" label="占股票市值比" width="120" align="right" />
-        <el-table-column prop="区间涨跌幅" label="区间涨跌幅" width="120" align="right" />
-        <el-table-column prop="所属行业" label="所属行业" width="120" />
+        :data="tableData1"
+        :header-cell-style="{ background: '#d7d9dc', color: '#333' }"
+        :style="{ width: '100%' }"
+      >
+        <el-table-column
+          v-for="column in tableColumns"
+          :key="column.prop"
+          :prop="column.prop"
+          :label="column.label"
+        >
+          <template #default="scope">
+            <span v-if="column.prop === 'holdMv'">
+              {{ formatValue(scope.row[column.prop], "million") }}
+            </span>
+            <span v-if="column.prop === 'reportType'">
+              {{ formatReportType(scope.row[column.prop]) }}
+            </span>
+          </template>
+        </el-table-column>
+      </el-table>
+      <div style="display: flex; justify-content: flex-end;margin-top: 10px;">
+        <el-pagination
+          :current-page="currentPage1"
+          layout="total, prev, pager, next"
+          :total="total1"
+          @current-change="(val) => tab1handleCurrentChange(val, '1')"
+        />
+      </div>
+      <div style="margin-top: 30px">
+        <h4>三季报</h4>
+        <el-table
+          :data="tableData3"
+          :header-cell-style="{ background: '#d7d9dc', color: '#333' }"
+          :style="{ width: '100%' }"
+        >
+          <el-table-column
+            v-for="column in tableColumns"
+            :key="column.prop"
+            :prop="column.prop"
+            :label="column.label"
+          >
+            <template #default="scope">
+              <span v-if="column.prop === 'holdMv'">
+                {{ formatValue(scope.row[column.prop], "million") }}
+              </span>
+              <span v-if="column.prop === 'reportType'">
+                {{ formatReportType(scope.row[column.prop]) }}
+              </span>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </div>
+    <div style="margin-top: 30px">
+      <header class="header">
+        <h3>全部明细</h3>
+      </header>
+      <h4>半年报</h4>
+      <el-table
+        :data="tableData5"
+        :header-cell-style="{ background: '#d7d9dc', color: '#333' }"
+        :style="{ width: '100%' }"
+      >
+        <el-table-column
+          v-for="column in tableColumns"
+          :key="column.prop"
+          :prop="column.prop"
+          :label="column.label"
+        >
+          <template #default="scope">
+            <span v-if="column.prop === 'holdMv'">
+              {{ formatValue(scope.row[column.prop], "million") }}
+            </span>
+            <span v-if="column.prop === 'reportType'">
+              {{ formatReportType(scope.row[column.prop]) }}
+            </span>
+          </template>
+        </el-table-column>
+      </el-table>
+      <h4 style="margin-top: 20px">年报</h4>
+      <el-table
+        :data="tableData6"
+        :header-cell-style="{ background: '#d7d9dc', color: '#333' }"
+        :style="{ width: '100%' }"
+      >
+        <el-table-column
+          v-for="column in tableColumns"
+          :key="column.prop"
+          :prop="column.prop"
+          :label="column.label"
+        >
+          <template #default="scope">
+            <span v-if="column.prop === 'holdMv'">
+              {{ formatValue(scope.row[column.prop], "million") }}
+            </span>
+            <span v-if="column.prop === 'reportType'">
+              {{ formatReportType(scope.row[column.prop]) }}
+            </span>
+          </template>
+        </el-table-column>
       </el-table>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-// 定义表格数据项接口
-interface TableDataItem {
-  序号: number;
-  股票代码: string;
-  股票名称: string;
-  持仓市值: string;
-  持仓数量: string;
-  相对上期增减: string;
-  占基金净值比: string;
-  占流通股本比: string;
-  占股票市值比: string;
-  区间涨跌幅: string;
-  所属行业: string;
-}
+import { ref, watch, type Ref } from "vue";
+import { getAnnualHoldingsApi } from "@/api/filterDetails.ts";
+import { formatValue } from "@/utils/formatValue.ts";
 
-const tableData: TableDataItem[] = [
-  {
-    序号: 1,
-    股票代码: '600519.SH',
-    股票名称: '贵州茅台',
-    持仓市值: '74,986,464.00',
-    持仓数量: '53,200',
-    相对上期增减: '-36.21%',
-    占基金净值比: '4.26%',
-    占流通股本比: '0.0042%',
-    占股票市值比: '4.27%',
-    区间涨跌幅: '-5.70%',
-    所属行业: '日常消费'
+const props = defineProps({
+  code: {
+    type: String,
+    required: true,
   },
-  {
-    序号: 2,
-    股票代码: '300750.SZ',
-    股票名称: '宁德时代',
-    持仓市值: '55,669,493.96',
-    持仓数量: '220,718',
-    相对上期增减: '-37.91%',
-    占基金净值比: '3.16%',
-    占流通股本比: '0.0052%',
-    占股票市值比: '3.17%',
-    区间涨跌幅: '-2.82%',
-    所属行业: '工业'
+  tabActiveName: {
+    type: String,
+    required: true,
   },
-  {
-    序号: 3,
-    股票代码: '601318.SH',
-    股票名称: '中国平安',
-    持仓市值: '50,109,536.00',
-    持仓数量: '903,200',
-    相对上期增减: '-37.29%',
-    占基金净值比: '2.85%',
-    占流通股本比: '0.0084%',
-    占股票市值比: '2.85%',
-    区间涨跌幅: '8.42%',
-    所属行业: '金融'
-  },
-  {
-    序号: 4,
-    股票代码: '600036.SH',
-    股票名称: '招商银行',
-    持仓市值: '47,659,340.00',
-    持仓数量: '1,037,200',
-    相对上期增减: '-37.48%',
-    占基金净值比: '2.71%',
-    占流通股本比: '0.0050%',
-    占股票市值比: '2.72%',
-    区间涨跌幅: '16.92%',
-    所属行业: '金融'
-  },
-  {
-    序号: 5,
-    股票代码: '601166.SH',
-    股票名称: '兴业银行',
-    持仓市值: '32,647,992.00',
-    持仓数量: '1,398,800',
-    相对上期增减: '-28.33%',
-    占基金净值比: '1.86%',
-    占流通股本比: '0.0066%',
-    占股票市值比: '1.86%',
-    区间涨跌幅: '27.49%',
-    所属行业: '金融'
-  },
-  {
-    序号: 6,
-    股票代码: '600900.SH',
-    股票名称: '长江电力',
-    持仓市值: '30,821,164.00',
-    持仓数量: '1,022,600',
-    相对上期增减: '-37.65%',
-    占基金净值比: '1.75%',
-    占流通股本比: '0.0043%',
-    占股票市值比: '1.76%',
-    区间涨跌幅: '2.75%',
-    所属行业: '公用事业'
-  },
-  {
-    序号: 7,
-    股票代码: '000333.SZ',
-    股票名称: '美的集团',
-    持仓市值: '29,677,088.00',
-    持仓数量: '411,040',
-    相对上期增减: '-37.32%',
-    占基金净值比: '1.69%',
-    占流通股本比: '0.0060%',
-    占股票市值比: '1.69%',
-    区间涨跌幅: '0.62%',
-    所属行业: '可选消费'
-  },
-  {
-    序号: 8,
-    股票代码: '601899.SH',
-    股票名称: '紫金矿业',
-    持仓市值: '26,970,450.00',
-    持仓数量: '1,383,100',
-    相对上期增减: '-37.28%',
-    占基金净值比: '1.53%',
-    占流通股本比: '0.0067%',
-    占股票市值比: '1.54%',
-    区间涨跌幅: '30.85%',
-    所属行业: '材料'
-  },
-  {
-    序号: 9,
-    股票代码: '002594.SZ',
-    股票名称: '比亚迪',
-    持仓市值: '24,760,486.00',
-    持仓数量: '74,600',
-    相对上期增减: '-39.55%',
-    占基金净值比: '1.41%',
-    占流通股本比: '0.0064%',
-    占股票市值比: '1.41%',
-    区间涨跌幅: '17.42%',
-    所属行业: '可选消费'
-  },
-  {
-    序号: 10,
-    股票代码: '300059.SZ',
-    股票名称: '东方财富',
-    持仓市值: '24,658,893.00',
-    持仓数量: '1,066,100',
-    相对上期增减: '-36.73%',
-    占基金净值比: '1.40%',
-    占流通股本比: '0.0080%',
-    占股票市值比: '1.40%',
-    区间涨跌幅: '-10.15%',
-    所属行业: '金融'
-  },
-  {
-    序号: 11,
-    股票代码: '600030.SH',
-    股票名称: '中信证券',
-    持仓市值: '22,690,934.80',
-    持仓数量: '821,540',
-    相对上期增减: '-36.91%',
-    占基金净值比: '1.29%',
-    占流通股本比: '0.0067%',
-    占股票市值比: '1.29%',
-    区间涨跌幅: '-5.31%',
-    所属行业: '金融'
-  },
-  {
-    序号: 12,
-    股票代码: '601398.SH',
-    股票名称: '工商银行',
-    持仓市值: '22,316,118.00',
-    持仓数量: '2,940,200',
-    相对上期增减: '-37.41%',
-    占基金净值比: '1.27%',
-    占流通股本比: '0.0011%',
-    占股票市值比: '1.27%',
-    区间涨跌幅: '12.01%',
-    所属行业: '金融'
-  },
-  {
-    序号: 13,
-    股票代码: '000858.SZ',
-    股票名称: '五粮液',
-    持仓市值: '19,582,830.00',
-    持仓数量: '164,700',
-    相对上期增减: '-36.16%',
-    占基金净值比: '1.11%',
-    占流通股本比: '0.0042%',
-    占股票市值比: '1.12%',
-    区间涨跌幅: '-13.38%',
-    所属行业: '日常消费'
-  },
-  {
-    序号: 14,
-    股票代码: '600276.SH',
-    股票名称: '恒瑞医药',
-    持仓市值: '19,384,650.00',
-    持仓数量: '373,500',
-    相对上期增减: '-37.53%',
-    占基金净值比: '1.10%',
-    占流通股本比: '0.0059%',
-    占股票市值比: '1.10%',
-    区间涨跌幅: '13.48%',
-    所属行业: '医疗保健'
-  },
-  {
-    序号: 15,
-    股票代码: '601211.SH',
-    股票名称: '国泰海通',
-    持仓市值: '18,157,932.00',
-    持仓数量: '947,700',
-    相对上期增减: '56.75%',
-    占基金净值比: '1.03%',
-    占流通股本比: '0.0070%',
-    占股票市值比: '1.03%',
-    区间涨跌幅: '2.73%',
-    所属行业: '金融'
-  },
-  {
-    序号: 16,
-    股票代码: '601328.SH',
-    股票名称: '交通银行',
-    持仓市值: '17,917,152.00',
-    持仓数量: '2,239,644',
-    相对上期增减: '-28.68%',
-    占基金净值比: '1.02%',
-    占流通股本比: '0.0086%',
-    占股票市值比: '1.02%',
-    区间涨跌幅: '8.34%',
-    所属行业: '金融'
-  },
-  {
-    序号: 17,
-    股票代码: '000651.SZ',
-    股票名称: '格力电器',
-    持仓市值: '16,853,984.00',
-    持仓数量: '375,200',
-    相对上期增减: '-37.58%',
-    占基金净值比: '0.96%',
-    占流通股本比: '0.0068%',
-    占股票市值比: '0.96%',
-    区间涨跌幅: '0.99%',
-    所属行业: '可选消费'
-  },
-  {
-    序号: 18,
-    股票代码: '601288.SH',
-    股票名称: '农业银行',
-    持仓市值: '15,775,452.00',
-    持仓数量: '2,682,900',
-    相对上期增减: '-37.17%',
-    占基金净值比: '0.90%',
-    占流通股本比: '0.0008%',
-    占股票市值比: '0.90%',
-    区间涨跌幅: '12.68%',
-    所属行业: '金融'
-  },
-  {
-    序号: 19,
-    股票代码: '600887.SH',
-    股票名称: '伊利股份',
-    持仓市值: '14,854,464.00',
-    持仓数量: '532,800',
-    相对上期增减: '-37.20%',
-    占基金净值比: '0.84%',
-    占流通股本比: '0.0085%',
-    占股票市值比: '0.85%',
-    区间涨跌幅: '-3.73%',
-    所属行业: '日常消费'
-  },
-  {
-    序号: 20,
-    股票代码: '002475.SZ',
-    股票名称: '立讯精密',
-    持仓市值: '14,753,657.00',
-    持仓数量: '425,300',
-    相对上期增减: '-37.33%',
-    占基金净值比: '0.84%',
-    占流通股本比: '0.0059%',
-    占股票市值比: '0.84%',
-    区间涨跌幅: '-14.89%',
-    所属行业: '信息技术'
+});
+
+const yearValue = ref<string>((new Date().getFullYear() - 1).toString());
+
+watch(
+  () => props.tabActiveName,
+  (tabActiveName) => {
+    if (tabActiveName === "PositionDetail") {
+      getAnnualHoldings();
+    }
   }
+);
+const tableData1 = ref<Record<string, any>[]>([]);
+const tableData3 = ref<Record<string, any>[]>([]);
+const tableData5 = ref<Record<string, any>[]>([]);
+const tableData6 = ref<Record<string, any>[]>([]);
+
+const currentPage1 = ref<number>(1);
+const total1 = ref<number>(0);
+const currentPage3 = ref<number>(1);
+const total3 = ref<number>(0);
+const currentPage5 = ref<number>(1);
+const total5 = ref<number>(0);
+const currentPage6 = ref<number>(1);
+const total6 = ref<number>(0);
+
+const currentPageMap: Record<string, Ref<number>> = {
+  '1': currentPage1,
+  '3': currentPage3,
+  '5': currentPage5,
+  '6': currentPage6
+};
+
+const tableDataMap: Record<string, Ref<Record<string, any>[]>> = {
+  '1': tableData1,
+  '3': tableData3,
+  '5': tableData5,
+  '6': tableData6
+};
+
+const totalMap: Record<string, Ref<number>> = {
+  '1': total1,
+  '3': total3,
+  '5': total5,
+  '6': total6
+};
+const handleSizeChange1 = (val: number) => {
+  currentPage1.value = val;
+  // getAnnualHoldings();
+};
+const tab1handleCurrentChange = (val: number, type: string) => {
+  const currentPageRef = currentPageMap[type];
+  if (currentPageRef) {
+    currentPageRef.value = val;
+  }
+  const obj = {
+    etfCode: "159150.OF",
+    year: yearValue.value,
+    reportType: type,
+    pageSize: 10,
+    currentPage: val,
+  }
+};
+
+const tableColumns = [
+  { prop: "stkCode", label: "股票代码" },
+  { prop: "stkName", label: "股票名称" },
+  { prop: "reportType", label: "报告类型" },
+  { prop: "holdNum", label: "持股数量（股）" },
+  { prop: "holdMv", label: "持股市值（百万元）" },
+  { prop: "date", label: "报告日期" },
 ];
+function getAnnualHoldings() {
+  const typeArr = ["1", "3", "5", "6"];
+  typeArr.forEach((type) => {
+    getAnnualHoldingsApi({
+      etfCode: "159150.OF",
+      year: yearValue.value,
+      reportType: type,
+    }).then((res: any) => {
+      // const tableDataRef = tableDataMap[type];
+      // const totalRef = totalMap[type];
+      // if (tableDataRef && totalRef) {
+      //   tableDataRef.value = res.data;
+      //   totalRef.value = res.total;
+      // }
+    });
+  });
+}
+function formatReportType(type: string) {
+  const reportTypeMap: Record<string, string> = {
+    "1": "一季报",
+    "3": "三季报",
+    "5": "半年报",
+    "6": "年报",
+  };
+  return reportTypeMap[type] ?? "其他";
+}
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+.position-details {
+  .header {
+    margin-bottom: 20px;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+  }
+}
+</style>

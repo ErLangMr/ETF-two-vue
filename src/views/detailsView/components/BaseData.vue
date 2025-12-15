@@ -6,6 +6,7 @@
         value-format="YYYY-MM-DD"
         type="date"
         style="margin-bottom: 10px"
+        placeholder="选择日期"
         @change="baseDataDateChange"
       />
     </div>
@@ -14,30 +15,30 @@
       <div class="info-list">
         <div class="info-row">
           <span>GICS 一级标签</span>
-          <span>{{ industryData.gics1 }}</span>
+          <span>{{ formatValue(industryData.gics1) }}</span>
         </div>
         <div class="info-row">
-          <span>GICS 三级标签</span><span>{{ industryData.gics3 }}</span>
+          <span>GICS 三级标签</span><span>{{ formatValue(industryData.gics3) }}</span>
         </div>
         <div class="info-row">
           <span>ICB 一级标签</span>
-          <span>{{ industryData.icb1 }}</span>
+          <span>{{ formatValue(industryData.icb1) }}</span>
         </div>
         <div class="info-row">
           <span>ICB 三级标签</span>
-          <span>{{ industryData.icb3 }}</span>
+          <span>{{ formatValue(industryData.icb3) }}</span>
         </div>
         <div class="info-row">
           <span>标签日期</span>
-          <span>{{ industryData.labelDate }}</span>
+          <span>{{ formatValue(industryData.labelDate) }}</span>
         </div>
         <div class="info-row">
           <span>市值标签</span>
-          <span>{{ industryData.marketCapLabel }}</span>
+          <span>{{ formatValue(industryData.marketCapLabel) }}</span>
         </div>
         <div class="info-row">
           <span>风格标签</span>
-          <span>{{ industryData.styleLabel }}</span>
+          <span>{{ formatValue(industryData.styleLabel) }}</span>
         </div>
       </div>
     </div>

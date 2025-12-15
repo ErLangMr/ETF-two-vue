@@ -13,6 +13,7 @@
         type="date"
         value-format="YYYY-MM-DD"
         style="margin-left: 20px"
+        placeholder="选择日期"
         @change="dateFilterChange"
       />
     </div>

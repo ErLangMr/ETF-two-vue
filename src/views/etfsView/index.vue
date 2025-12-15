@@ -384,7 +384,7 @@ $desc-color: #444;
 .etf-directory-container {
   width: 100%;
   padding: 20px;
-  font-family: "Segoe UI", Arial, sans-serif;
+  font-family: "Segoe UI", Arial, sans-serif, 'Microsoft YaHei UI', '微软雅黑';
   box-sizing: border-box;
 
   .etf-title {

@@ -1,13 +1,22 @@
 <template>
   <div class="performance">
     <!-- <EtfCompareTable :columns="columns" :data="data" /> -->
+    <div style="text-align: right">
+      <el-date-picker
+        v-model="dateValue"
+        value-format="YYYY-MM-DD"
+        type="date"
+        placeholder="选择日期"
+        style="margin-bottom: 10px"
+        @change="baseDataDateChange"
+      />
+    </div>
     <div id="performancEshouYiChart" style="margin-top: 20px"></div>
     <el-table
       :data="tableData"
       :header-cell-style="{ background: '#d7d9dc', color: '#333' }"
-      style="width: 100%"
+      :style="{ width: '100%', 'margin': '20px 0' }"
     >
-      <el-table-column prop="name" label=""></el-table-column>
       <el-table-column
         :prop="column.prop"
         :label="column.label"
@@ -15,8 +24,9 @@
         :key="column.prop"
       >
         <template #default="{ row }">
-          <span :style="{ color: row[column.prop] >= 0 ? 'red' : 'green' }">
-            {{ row[column.prop] }}%
+          <span v-if="column.prop === 'type' || column.prop === 'label'">{{ row[column.prop] }}</span>
+          <span v-else :style="{ color: styleColor(row[column.prop]) }">
+            {{ formatValue(row[column.prop]) }}<span v-if="row[column.prop]">%</span>
           </span>
         </template>
       </el-table-column>
@@ -26,125 +36,194 @@
 </template>
 
 <script setup lang="ts">
-import EtfCompareTable from "@/components/EtfCompareTable.vue";
 import * as echarts from "echarts";
-import { getPerformanceDataApi } from "@/api/details";
 import {
-  ref,
-  onMounted,
-  watch,
-  onUnmounted,
-  nextTick,
-} from "vue";
+  getPerformanceListApi,
+  getPerformanceBarApi,
+  getPerformanceLineApi,
+} from "@/api/filterDetails";
+import { ref, onMounted, watch, onUnmounted, nextTick } from "vue";
+import { formatValue } from "@/utils/formatValue";
 
 const props = defineProps({
-  code:{
+  code: {
     type: String,
     required: false,
   },
-  tabActiveName:{
+  tabActiveName: {
     type: String,
     required: false,
   },
-})
+});
 
-const tableData = ref([
-  {
-    name: "XXXX",
-    oneMonth: "0.08",
-    threeMonth: "0.16",
-    sixMonth: "0.24",
-    ytdReturns: "0.32",
-    yearlyReturns: "0.40",
-    threeYearReturns: "0.48",
-    fiveYearReturns: "0.56",
-    establishedReturns: "0.64",
-  },
-  {
-    name: "XXXX",
-    oneMonth: "0.08",
-    threeMonth: "0.16",
-    sixMonth: "0.24",
-    ytdReturns: "0.32",
-    yearlyReturns: "0.40",
-    threeYearReturns: "0.48",
-    fiveYearReturns: "0.56",
-    establishedReturns: "0.64",
-  },
-]);
+const tableData = ref();
 const tableColumn = [
-  { prop: "oneMonth", label: "近一月" },
-  { prop: "threeMonth", label: "近三月" },
-  { prop: "sixMonth", label: "近六个月" },
-  { prop: "ytdReturns", label: "今年以来" },
-  { prop: "yearlyReturns", label: "近一年" },
-  { prop: "threeYearReturns", label: "近三年" },
-  { prop: "fiveYearReturns", label: "近五年" },
-  { prop: "establishedReturns", label: "成立以来" },
+  { prop: "label", label: "数据标签" },
+  { prop: "type", label: "数据类型" },
+  { prop: "data1", label: "近一月" },
+  { prop: "data3", label: "近三月" },
+  { prop: "data6", label: "近六个月" },
+  { prop: "ytdData", label: "今年以来" },
+  { prop: "data12", label: "近一年" },
+  { prop: "data36", label: "近三年" },
+  { prop: "data60", label: "近五年" },
+  { prop: "ltdData", label: "成立以来" },
 ];
+const dateValue = ref("");
+function baseDataDateChange() {
+  getPerformanceData();
+  getPerformanceBar();
+  getPerformanceLine();
+}
 
 watch(
   () => props.tabActiveName,
   (newVal) => {
     if (newVal === "Performance") {
       nextTick(() => {
-        initChart();
+        // initChart();
+        getPerformanceData();
+        getPerformanceBar();
+        getPerformanceLine();
       });
     }
   },
   { immediate: true }
 );
 
+function styleColor(value: any) {
+  if(value){
+    return value >= 0 ? 'red' : 'green';
+  }else{
+    return 'black';
+  }
+}
+
+function getPerformanceBar() {
+  if (oneChart) {
+    oneChart.showLoading();
+  }
+  getPerformanceBarApi({
+    etfCode: props.code,
+    date: dateValue.value || null,
+  }).then((res) => {
+    const xData: string[] = res.xaxis;
+    const seriesData: { name: string; type: string; data: any[] }[] = res.series.map((item: any) => {
+      return { name: item.name, type: "bar", data: item.data };
+    });
+    initBarChart(xData, seriesData);
+  }).finally(() => {
+    oneChart && oneChart.hideLoading();
+  });
+}
+function getPerformanceLine() {
+  if (twoChart) {
+    twoChart.showLoading();
+  }
+  getPerformanceLineApi({
+    etfCode: props.code,
+    date: dateValue.value || null,
+  }).then((res) => {
+    const xData = res.xaxis;
+    const seriesData = res.series.map((item: any) => {
+      return { name: item.name, type: "line",showSymbol: false, data: item.data };
+    });
+    initLineChart(xData, seriesData);
+  }).finally(() => {
+    twoChart && twoChart.hideLoading();
+  });
+}
+function getPerformanceData() {
+  getPerformanceListApi({
+    etfCode: props.code,
+    date: dateValue.value || null,
+  }).then((res) => {
+    console.log(res);
+    tableData.value = res.performanceDataList;
+  });
+}
+
 let oneChart: echarts.ECharts | null = null;
 let twoChart: echarts.ECharts | null = null;
 
-function initChart() {
-  disposeCharts();
-  const oneElement = document.getElementById("performancEshouYiChart");
-  const twoElement = document.getElementById("performancEchaoEChart");
+interface SeriesItem {
+  name: string;
+  type: string;
+  data: any[];
+  showSymbol?: boolean;
+}
 
-  // 确保 DOM 元素已经可见
-  if (oneElement) {
-    oneChart = echarts.init(oneElement);
-    oneChart.setOption({
-      title: {
-        text: "World Population",
+function initBarChart(xData: string[], seriesData: SeriesItem[]) {
+  // 只销毁当前图表实例
+  if (oneChart) {
+    oneChart.dispose();
+    oneChart = null;
+  }
+  const hasData = xData.length > 0 && seriesData.length > 0;
+  const oneElement = document.getElementById("performancEshouYiChart");
+  oneChart = echarts.init(oneElement);
+  oneChart.setOption({
+    title: {
+      text: "收益%",
+    },
+    tooltip: {
+      trigger: "axis",
+      axisPointer: {
+        type: "shadow",
       },
-      tooltip: {
-        trigger: "axis",
-        axisPointer: {
-          type: "shadow",
-        },
+    },
+    grid: {
+        top: "10%",
+        left: "3%",
+        right: "4%",
+        bottom: "15%",
+        containLabel: true,
       },
-      legend: {},
-      xAxis: {
-        type: "category",
-        data: ["Brazil", "Indonesia", "USA", "India", "China", "World"],
-      },
-      yAxis: {
-        type: "value",
-        boundaryGap: [0, 0.01],
-      },
-      series: [
+    dataZoom: [
         {
-          name: "2011",
-          type: "bar",
-          data: [18203, 23489, 29034, 104970, 131744, 630230],
+          type: "inside",
+          start: 0,
+          end: 10,
         },
         {
-          name: "2012",
-          type: "bar",
-          data: [19325, 23438, 31000, 121594, 134141, 681807],
+          start: 0,
+          end: 10,
         },
       ],
-    });
+    legend: {},
+    xAxis: {
+      type: "category",
+      data: xData,
+    },
+    yAxis: {
+      type: "value",
+      boundaryGap: [0, 0.01],
+    },
+    series: seriesData,
+    graphic: hasData ? [] : {
+      type: 'text',
+      left: 'center',
+      top: 'middle',
+      style: {
+        text: '暂无数据',
+        fontSize: 16,
+        fill: '#999'
+      }
+    }
+  });
+}
+function initLineChart(xData: string[], seriesData: SeriesItem[]) {
+  // 只销毁当前图表实例
+  if (twoChart) {
+    twoChart.dispose();
+    twoChart = null;
   }
-
-  if (twoElement) {
-    twoChart = echarts.init(twoElement);
+  const hasData = xData.length > 0 && seriesData.length > 0;
+  const twoElement = document.getElementById("performancEchaoEChart");
+  twoChart = echarts.init(twoElement);
     twoChart.setOption({
       title: {
-        text: "资产净值规模（亿元）",
+        text: "超额收益%",
       },
       tooltip: {
         trigger: "axis",
@@ -165,50 +244,23 @@ function initChart() {
       xAxis: {
         type: "category",
         boundaryGap: false,
-        data: ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"],
+        data: xData,
       },
       yAxis: {
         type: "value",
       },
-      series: [
-        {
-          name: "Email",
-          type: "line",
-          showSymbol: false,
-          // smooth: true,
-          data: [120, 132, 101, 134, 90, 230, 210],
-        },
-        {
-          name: "Union Ads",
-          type: "line",
-          showSymbol: false,
-          // smooth: true,
-          data: [220, 182, 191, 234, 290, 330, 310],
-        },
-        {
-          name: "Video Ads",
-          type: "line",
-          showSymbol: false,
-          // smooth: true,
-          data: [150, 232, 201, 154, 190, 330, 410],
-        },
-        {
-          name: "Direct",
-          type: "line",
-          showSymbol: false,
-          // smooth: true,
-          data: [320, 332, 301, 334, 390, 330, 320],
-        },
-        {
-          name: "Search Engine",
-          type: "line",
-          showSymbol: false,
-          // smooth: true,
-          data: [820, 932, 901, 934, 1290, 1330, 1320],
-        },
-      ],
+      series: seriesData,
+      graphic: hasData ? [] : {
+        type: 'text',
+        left: 'center',
+        top: 'middle',
+        style: {
+          text: '暂无数据',
+          fontSize: 16,
+          fill: '#999'
+        }
+      }
     });
-  }
 }
 
 function disposeCharts() {
@@ -237,11 +289,13 @@ onUnmounted(() => {
 });
 onMounted(() => {
   window.addEventListener("resize", resizeChart);
-  console.log(props)
-  if(!props.tabActiveName){
+  console.log(props);
+  if (!props.tabActiveName) {
     nextTick(() => {
-        initChart();
-      });
+      getPerformanceData();
+      getPerformanceBar();
+      getPerformanceLine();
+    });
   }
 });
 

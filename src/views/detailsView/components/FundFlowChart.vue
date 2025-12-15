@@ -1,24 +1,52 @@
 <template>
   <div class="fund-flow-chart">
-    <h2 class="h3">{{ code }}资金流动图表</h2>
-    <p>查看包含 ETF 基金流量数据的图表。</p>
-    <PeriodSelector
-      v-model="activeBtn"
-      :options="periodOptions"
-      prefix="过去"
-      suffix="的日净流入"
-      @change="handleChange"
-    />
+    <div
+      style="
+        display: flex;
+        align-items: center;
+        justify-content: end;
+        gap: 36px;
+      "
+    >
+      <PeriodSelector
+        v-model="activeBtn"
+        :options="periodOptions"
+        prefix="过去"
+        suffix="的资金流动"
+        @change="handleChange"
+      />
+      <div style="width: 333px">
+        <el-date-picker
+          v-model="dateRange"
+          type="daterange"
+          range-separator="To"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          value-format="YYYY-MM-DD"
+          @change="handleDateRangeChange"
+        />
+      </div>
+    </div>
     <div v-loading="loading" id="fund-flow-chart"></div>
-    <div v-loading="chartTwoLoading" id="fund-flow-chart-2"></div>
+    <div v-loading="chartTwoLoading" id="fund-flow-chart-2" style="margin-top: 40px;"></div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, onBeforeUnmount, onUnmounted, watch, nextTick } from "vue";
+import {
+  ref,
+  onMounted,
+  onBeforeUnmount,
+  onUnmounted,
+  watch,
+  nextTick,
+} from "vue";
 import * as echarts from "echarts";
 import { useDevice } from "@/utils/device";
-import { getFundFlowDataApi } from "@/api/details";
+import {
+  getFundFlowChartApi,
+  getScaleAndPriceChartApi,
+} from "@/api/filterDetails";
 import { getMonthAgoDate, getYearAgoDate } from "@/utils/formatValue";
 import PeriodSelector from "@/components/PeriodSelector.vue";
 
@@ -28,145 +56,102 @@ const props = defineProps<{
   tabActiveName: string;
   code: string;
 }>();
+const { isMobile } = useDevice();
 
-const xAxisData = ref([]);
-const seriesData = ref([]);
-const activeBtn = ref('1month');
+const activeBtn = ref("1m");
 const loading = ref(false);
 const chartTwoLoading = ref(false);
 
-const periodOptions: [PeriodOption, PeriodOption, PeriodOption, PeriodOption, PeriodOption] = [
-  { label: '1 个月', value: '1month' },
-  { label: '3 个月', value: '3month' },
-  { label: '6 个月', value: '6month' },
-  { label: '1 年', value: '1year' },
-  { label: '3 年', value: '3year' }
+const periodOptions: PeriodOption[] = [
+  { label: "1 个月", value: "1m" },
+  { label: "3 个月", value: "3m" },
+  { label: "6 个月", value: "6m" },
+  { label: "1 年", value: "1y" },
+  { label: "3 年", value: "3y" },
+  { label: "5 年", value: "5y" },
 ];
 
 interface PeriodOption {
-  label: string
-  value: string
+  label: string;
+  value: string;
 }
-watch(() => props.tabActiveName, (newVal) => {
-  if (newVal === 'FundFlowChart') {
-    if(myChart) {
-      myChart.dispose();
-      myChart = null;
-    }
-    loading.value = true
-    getFundFlowDataApi({
-      code: props.code,
-      // type: 'M',
-      startDate: getMonthAgoDate(1),
-      endDate: new Date().toISOString().slice(0, 10)
-    }).then((res) => {
-      xAxisData.value = res.x
-      seriesData.value = res.y
-      initChart()
-      loading.value = false
-    }).catch(() => {
-      loading.value = false
-    })
-  }
-}, { immediate: true });
-// function getRecentDates(days: number) {
-//   const arr: string[] = [];
-//   const today = new Date("2025-05-16");
-//   for (let i = days - 1; i >= 0; i--) {
-//     const d = new Date(today);
-//     d.setDate(today.getDate() - i);
-//     arr.push(d.toISOString().slice(0, 10));
-//   }
-//   return arr;
-// }
-// const xAxisData = getRecentDates(15);
 
-const { isMobile } = useDevice();
+const dateRange = ref(["2025-01-01", "2025-09-30"]);
+
+watch(
+  () => props.tabActiveName,
+  (newVal) => {
+    if (newVal === "FundFlowChart") {
+      getFundFlowChart();
+      getScaleAndPriceChart();
+    }
+  },
+  { immediate: true }
+);
+
+const handleDateRangeChange = (value: string) => {
+  console.log(value, dateRange.value);
+  getFundFlowChart();
+  getScaleAndPriceChart();
+};
 
 const handleChange = (type: string) => {
-  activeBtn.value = type
-  if(myChart) {
+  getFundFlowChart();
+  getScaleAndPriceChart();
+};
+function getFundFlowChart() {
+  loading.value = true;
+  getFundFlowChartApi({
+    code: props.code,
+    dimension: activeBtn.value,
+    start: dateRange.value[0],
+    end: dateRange.value[1],
+  })
+    .then((res) => {
+      const Xdata: string[] = res.dates;
+      const seriesData: number[] = res.fundFlow;
+      initFundFlowChart(Xdata, seriesData);
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+}
+
+function initFundFlowChart(Xdata: string[], seriesData: number[]) {
+  if (myChart) {
     myChart.dispose();
     myChart = null;
   }
-  let startDate = ''
-  let endDate = ''
-  let typeVal = ''
-  if (type === '1month') {
-    startDate = getMonthAgoDate(1)
-    endDate = new Date().toISOString().slice(0, 10)
-    typeVal = 'M'
-  } else if (type === '3month') {
-    startDate = getMonthAgoDate(3)
-    endDate = new Date().toISOString().slice(0, 10)
-    typeVal = 'M'
-  } else if (type === '6month') {
-    startDate = getMonthAgoDate(6)
-    endDate = new Date().toISOString().slice(0, 10)
-    typeVal = 'M'
-  } else if (type === '1year') {
-    startDate = getYearAgoDate(1)
-    endDate = new Date().toISOString().slice(0, 10)
-    typeVal = 'Y'
-  } else if (type === '3year') {
-    startDate = getYearAgoDate(3)
-    endDate = new Date().toISOString().slice(0, 10)
-    typeVal = 'Y'
-  }
-  loading.value = true
-  getFundFlowDataApi({
-    code: props.code,
-    // type: typeVal,
-    startDate,
-    endDate
-  }).then((res) => {
-    xAxisData.value = res.x
-    seriesData.value = res.y
-    initChart()
-    loading.value = false
-  }).catch(() => {
-    loading.value = false
-  })
-}
-
-const chartTwoData = {
-  dates: [
-    "14. Apr", "15. Apr", "16. Apr", "17. Apr", "18. Apr", "19. Apr", "20. Apr",
-    "21. Apr", "22. Apr", "23. Apr", "24. Apr", "25. Apr", "26. Apr", "27. Apr",
-    "28. Apr", "29. Apr", "30. Apr", "1. May", "2. May", "3. May", "4. May",
-    "5. May", "6. May", "7. May", "8. May", "9. May", "10. May", "11. May",
-    "12. May", "13. May"
-  ],
-  priceInfluence: [10, 4, 3, 0, 0, -12, -12, 0, 14, 12, 0, 0, 0, 0, 0, 0, 0, 0, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 18, 6],
-  fundFlow: [-2, -9, 0, 0, 0, 0, 0, -8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, -2, -2, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-}
-
-const initChart = async () => {
-  disposeCharts();
   const chartDom = document.getElementById("fund-flow-chart");
-  const chartDomTwo = document.getElementById("fund-flow-chart-2");
   myChart = echarts.init(chartDom);
-  myTwoChart = echarts.init(chartDomTwo);
-  if(myChart){
-    myChart.setOption({
-    // title: {
-    //   text: "1 Month Fund Flows",
-    //   left: "left",
-    //   top: "bottom",
-    //   textStyle: {
-    //     fontSize: 14,
-    //   },
-    // },
+  myChart.setOption({
+    title: {
+      text: "资金净流入额（百万元）",
+      textStyle: {
+        fontSize: 14,
+      },
+    },
     grid: {
       left: "3%",
       right: "3%",
-      bottom: 40,
-      top: 10,
+      bottom: 60,
+      top: 40,
       containLabel: true,
     },
+    dataZoom: [
+        {
+          type: "inside",
+          start: 0,
+          end: 60,
+        },
+        {
+          start: 0,
+          end: 60,
+        },
+      ],
     xAxis: {
       type: "category",
-      data: xAxisData.value,
+      data: Xdata,
       axisTick: { show: false },
       axisLine: { show: false },
       axisLabel: {
@@ -198,7 +183,7 @@ const initChart = async () => {
     series: [
       {
         type: "bar",
-        data: seriesData.value,
+        data: seriesData,
         itemStyle: {
           color: function (params: { value: number }) {
             return params.value >= 0 ? "#2ca02c" : "#d62728";
@@ -207,81 +192,137 @@ const initChart = async () => {
         // barWidth: isMobile() ? 8 : 16,
       },
     ],
-    graphic: seriesData.value.length === 0 ? [{
-      type: 'text',
-      left: 'center',
-      top: 'middle',
-      style: {
-        text: '暂无数据',
-        fontSize: 16,
-        fill: '#999'
-      }
-    }] : [],
+    graphic:
+      seriesData.length === 0
+        ? [
+            {
+              type: "text",
+              left: "center",
+              top: "middle",
+              style: {
+                text: "暂无数据",
+                fontSize: 16,
+                fill: "#999",
+              },
+            },
+          ]
+        : [],
     tooltip: {
       trigger: "axis",
       axisPointer: { type: "shadow" },
-      formatter: function (
-        params: {
-          axisValue: string;
-          value: string;
-        }[]
-      ) {
-        return params[0].axisValue + ": " + params[0].value + " B";
-      },
+      // formatter: function (
+      //   params: {
+      //     axisValue: string;
+      //     value: string;
+      //   }[]
+      // ) {
+      //   return params[0].axisValue + ": " + params[0].value + " B";
+      // },
     },
   });
+  window.addEventListener("resize", resizeChart);
+}
+
+function getScaleAndPriceChart() {
+  chartTwoLoading.value = true;
+  getScaleAndPriceChartApi({
+    code: props.code,
+    dimension: activeBtn.value,
+    start: dateRange.value[0],
+    end: dateRange.value[1],
+  })
+    .then((res) => {
+      const Xdata: string[] = res.dates;
+      const assetChange: number[] = res.assetChange;
+      const priceInfluence: number[] = res.priceInfluence;
+      initScaleAndPriceChart(Xdata, assetChange, priceInfluence);
+    })
+    .finally(() => {
+      chartTwoLoading.value = false;
+    });
+}
+function initScaleAndPriceChart(
+  Xdata: string[],
+  assetChange: number[],
+  priceInfluence: number[]
+) {
+  if (myTwoChart) {
+    myTwoChart.dispose();
+    myTwoChart = null;
   }
-  if(myTwoChart){
-    myTwoChart.setOption({
-     tooltip: {
-        trigger: 'axis',
-        axisPointer: { type: 'shadow' }
+  const chartDomTwo = document.getElementById("fund-flow-chart-2");
+  myTwoChart = echarts.init(chartDomTwo);
+  myTwoChart.setOption({
+    title: {
+      text: "资产规模变化",
+      textStyle: {
+        fontSize: 14,
       },
-      legend: {
-        data: [
-          { name: 'Price Influence', icon: 'circle', textStyle: { color: '#2D1C5A' } },
-          { name: 'Fund Flow', icon: 'circle', textStyle: { color: '#1CA9A6' } }
-        ],
-        bottom: 0
-      },
-      grid: { left: 40, right: 40, bottom: 60, top: 40 },
-      xAxis: {
-        type: 'category',
-        data: chartTwoData.dates,
-        // axisTick: { alignWithLabel: true },
-        // axisLabel: { interval: 2 } // 只显示部分日期，防止重叠
-      },
-      yAxis: {
-        type: 'value',
-        position: 'right',
-        axisLabel: {
-          formatter: function (value: number) {
-            return value + ' B';
-          }
-        }
-      },
-      series: [
+    },
+    tooltip: {
+      trigger: "axis",
+      axisPointer: { type: "shadow" },
+    },
+    legend: {
+      data: [
         {
-          name: 'Price Influence',
-          type: 'bar',
-          stack: 'one',
-          data: chartTwoData.priceInfluence,
-          itemStyle: { color: '#2D1C5A' },
-          // barWidth: isMobile() ? 8 : 16
+          name: "Price Influence",
+          icon: "circle",
+          textStyle: { color: "#2D1C5A" },
+        },
+        { name: "Fund Flow", icon: "circle", textStyle: { color: "#1CA9A6" } },
+      ],
+      bottom: 0,
+    },
+    dataZoom: [
+        {
+          type: "inside",
+          start: 0,
+          end: 60,
         },
         {
-          name: 'Fund Flow',
-          type: 'bar',
-          stack: 'one',
-          data: chartTwoData.fundFlow,
-          itemStyle: { color: '#1CA9A6' },
-          // barWidth: isMobile() ? 8 : 16
-        }
-      ]
-    })
-  }
+          start: 0,
+          end: 60,
+        },
+      ],
+    grid: { left: 40, right: 40, bottom: 90, top: 40 },
+    xAxis: {
+      type: "category",
+      data: Xdata,
+      // axisTick: { alignWithLabel: true },
+      // axisLabel: { interval: 2 } // 只显示部分日期，防止重叠
+    },
+    yAxis: {
+      type: "value",
+      position: "right",
+      axisLabel: {
+        formatter: function (value: number) {
+          return value + " B";
+        },
+      },
+    },
+    series: [
+      {
+        name: "资金流动",
+        type: "bar",
+        stack: "one",
+        data: assetChange,
+        itemStyle: { color: "#2D1C5A" },
+        // barWidth: isMobile() ? 8 : 16
+      },
+      {
+        name: "价格变化",
+        type: "bar",
+        stack: "one",
+        data: priceInfluence,
+        itemStyle: { color: "#1CA9A6" },
+        // barWidth: isMobile() ? 8 : 16
+      },
+    ],
+  });
   window.addEventListener("resize", resizeChart);
-};
+}
+
 function resizeChart() {
   if (myChart) {
     myChart.resize();
@@ -310,9 +351,10 @@ onUnmounted(() => {
 .fund-flow-chart {
   width: 100%;
   height: 100%;
-  #fund-flow-chart, #fund-flow-chart-2 {
+  #fund-flow-chart,
+  #fund-flow-chart-2 {
     width: 100%;
-    height: 400px;
+    height: 500px;
   }
 }
 @media (max-width: 768px) {
