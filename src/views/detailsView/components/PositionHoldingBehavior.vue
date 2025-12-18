@@ -5,11 +5,12 @@
           v-model="yearValue"
           value-format="YYYY"
           type="year"
-          placeholder="Pick a year"
+          placeholder="选择年份"
+          @change="yearChange"
         />
       <div style="margin-left: 10px;">
-        <el-button :type="periodType === 'half' ? 'primary' : ''" @click="periodType = 'half'">半年度</el-button>
-        <el-button :type="periodType === 'year' ? 'primary' : ''" @click="periodType = 'year'">年度</el-button>
+        <el-button :type="periodType === 'half' ? 'primary' : ''" @click="dateBtnClick">半年度</el-button>
+        <el-button :type="periodType === 'year' ? 'primary' : ''" @click="dateBtnClick">年度</el-button>
       </div>
     </div>
     <div style="display: flex; justify-content: space-between; gap: 40px">
@@ -179,6 +180,27 @@ watch(
     }
   }, { immediate: true }
 );
+function yearChange() {
+  nextTick(() => {
+    getHoldingChangeTop5List();
+    getMVRatioChart();
+    getAreaRatioChart();
+    getGICSRatioChart();
+    getICBRatioChart();
+  });
+}
+function dateBtnClick() {
+  periodType.value = periodType.value === 'half' ? 'year' : 'half';
+  nextTick(() => {
+    getHoldingChangeTop5List();
+    getMVRatioChart();
+    getAreaRatioChart();
+    getGICSRatioChart();
+    getICBRatioChart();
+  });
+}
+
+
 const yearValue = ref(new Date().getFullYear().toString());
 const periodType = ref('half');
 const tableloading = ref(false);
@@ -190,7 +212,7 @@ const gupiaoTableData = ref([]);
 function getHoldingChangeTop5List() {
   tableloading.value = true;
   getHoldingChangeTop5Api({
-    etfCode: '159150.OF',
+    etfCode: props.code,
     date: dateParam.value,
   }).then((res) => {
     tableloading.value = false;
@@ -215,7 +237,7 @@ function getMVRatioChart(){
   }
    behaviorChart1 = echarts.init(document.getElementById("behavior-chart1") as HTMLElement);
   getMVRatioChartApi({
-    etfCode: '159150.OF',
+    etfCode: props.code,
     date: dateParam.value,
   }).then((res) => {
     initCharts(behaviorChart1 as echarts.ECharts, res.xaxis, res.series, 'ETF持股市值占比');
@@ -232,7 +254,7 @@ function getAreaRatioChart(){
   }
   behaviorChart2 = echarts.init(document.getElementById("behavior-chart2") as HTMLElement);
   getAreaRatioChartApi({
-    etfCode: '159150.OF',
+    etfCode: props.code,
     date: dateParam.value,
   }).then((res) => {
     initCharts(behaviorChart2 as echarts.ECharts, res.xaxis, res.series, 'ETF地区占比变化图');
@@ -248,7 +270,7 @@ function getGICSRatioChart(){
   }
   behaviorChart3 = echarts.init(document.getElementById("behavior-chart3") as HTMLElement);
   getGICSRatioChartApi({
-    etfCode: '159150.OF',
+    etfCode: props.code,
     date: dateParam.value,
   }).then((res) => {
     initCharts(behaviorChart3 as echarts.ECharts, res.xaxis, res.series, 'GICS 一级行业配置变化图');
@@ -265,7 +287,7 @@ function getICBRatioChart(){
   }
   behaviorChart4 = echarts.init(document.getElementById("behavior-chart4") as HTMLElement);
   getICBRatioChartApi({
-    etfCode: '159150.OF',
+    etfCode: props.code,
     date: dateParam.value,
   }).then((res) => {
     initCharts(behaviorChart4 as echarts.ECharts, res.xaxis, res.series, 'IBC 一级行业配置变化图');
@@ -339,14 +361,15 @@ function initCharts(chart: echarts.ECharts, xaxis: any, series: any, title: stri
         containLabel: true,
       },
       xAxis: {
-        type: "value",
+        type: title === 'ETF持股市值占比' || title === 'ETF地区占比变化图' ? "category" : "value",
+        data: title === 'ETF持股市值占比' || title === 'ETF地区占比变化图' ? xaxis : null,
         boundaryGap: [0, 0.1],
-        show: false,
+        show: title === 'ETF持股市值占比' || title === 'ETF地区占比变化图' ? true : false,
       },
 
       yAxis: {
-        type: "category",
-        data: xaxis,
+        type: title === 'ETF持股市值占比' || title === 'ETF地区占比变化图' ? "value" : "category",
+        data: title === 'ETF持股市值占比' || title === 'ETF地区占比变化图' ? null : xaxis,
         axisLine: {
           show: false,
         },

@@ -91,6 +91,7 @@ watch(
 
 const handleDateRangeChange = (value: string) => {
   console.log(value, dateRange.value);
+  if(!value) dateRange.value = ["2025-01-01", "2025-09-30"];
   getFundFlowChart();
   getScaleAndPriceChart();
 };
@@ -266,11 +267,11 @@ function initScaleAndPriceChart(
     legend: {
       data: [
         {
-          name: "Price Influence",
+          name: "资金流动",
           icon: "circle",
           textStyle: { color: "#2D1C5A" },
         },
-        { name: "Fund Flow", icon: "circle", textStyle: { color: "#1CA9A6" } },
+        { name: "价格变化", icon: "circle", textStyle: { color: "#1CA9A6" } },
       ],
       bottom: 0,
     },

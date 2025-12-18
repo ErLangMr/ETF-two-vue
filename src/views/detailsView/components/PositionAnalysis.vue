@@ -46,7 +46,14 @@
 import * as echarts from "echarts";
 import { nextTick, onMounted, onUnmounted, watch } from "vue";
 import { ref } from "vue";
-import { getHoldingAnalysisListApi, getGICSLevel1ChartApi, getGICSLevel3ChartApi, getICBLevel1ChartApi, getICBLevel3ChartApi, getAreaChartApi } from "@/api/filterDetails";
+import {
+  getHoldingAnalysisListApi,
+  getGICSLevel1ChartApi,
+  getGICSLevel3ChartApi,
+  getICBLevel1ChartApi,
+  getICBLevel3ChartApi,
+  getAreaChartApi,
+} from "@/api/filterDetails";
 
 const props = defineProps<{
   tabActiveName: string;
@@ -68,7 +75,7 @@ watch(
   },
   { immediate: true }
 );
-const dateValue = ref('2025-06-30');
+const dateValue = ref("2025-06-30");
 function dateValueChange() {
   getListData();
   getGICSLevel1Chart();
@@ -84,11 +91,13 @@ function getListData() {
   getHoldingAnalysisListApi({
     etfCode: props.code,
     date: dateValue.value || null,
-  }).then((res) => {
-    tableData.value = res
-  }).finally(() => {
-    tableLoading.value = false;
-  });
+  })
+    .then((res) => {
+      tableData.value = res;
+    })
+    .finally(() => {
+      tableLoading.value = false;
+    });
 }
 let hangyeChart: echarts.ECharts | null = null;
 let hangye2Chart: echarts.ECharts | null = null;
@@ -106,83 +115,98 @@ function getGICSLevel1Chart() {
   getGICSLevel1ChartApi({
     etfCode: props.code,
     date: dateValue.value || null,
-  }).then((res) => {
-    if(hangyeChart){
-      hangyeChart.dispose();
-      hangyeChart = null
-    }
-    hangyeChart = echarts.init(document.getElementById("hangye1"));
-    initCharts(hangyeChart, res.xaxis, res.series, 'GICS-level1');
-  }).finally(() => {
-    hangye1Loading.value = false;
-  });
+  })
+    .then((res) => {
+      if (hangyeChart) {
+        hangyeChart.dispose();
+        hangyeChart = null;
+      }
+      hangyeChart = echarts.init(document.getElementById("hangye1"));
+      initCharts(hangyeChart, res.xaxis, res.series, "GICS-level1");
+    })
+    .finally(() => {
+      hangye1Loading.value = false;
+    });
 }
 function getGICSLevel3Chart() {
   hangye2Loading.value = true;
   getGICSLevel3ChartApi({
     etfCode: props.code,
     date: dateValue.value || null,
-  }).then((res) => {
-    if(hangye2Chart){
-      hangye2Chart.dispose();
-      hangye2Chart = null
-    }
-    hangye2Chart = echarts.init(document.getElementById("hangye2"));
-    initCharts(hangye2Chart, res.xaxis, res.series, 'GICS-level3');
-  }).finally(() => {
-    hangye2Loading.value = false;
-  });
+  })
+    .then((res) => {
+      if (hangye2Chart) {
+        hangye2Chart.dispose();
+        hangye2Chart = null;
+      }
+      hangye2Chart = echarts.init(document.getElementById("hangye2"));
+      initCharts(hangye2Chart, res.xaxis, res.series, "GICS-level3");
+    })
+    .finally(() => {
+      hangye2Loading.value = false;
+    });
 }
 function getICBLevel1Chart() {
   hangye3Loading.value = true;
   getICBLevel1ChartApi({
     etfCode: props.code,
     date: dateValue.value || null,
-  }).then((res) => {
-    if(hangye3Chart){
-      hangye3Chart.dispose();
-      hangye3Chart = null
-    }
-    hangye3Chart = echarts.init(document.getElementById("hangye3"));
-    initCharts(hangye3Chart, res.xaxis, res.series, 'ICB-level1');
-  }).finally(() => {
-    hangye3Loading.value = false;
-  });
+  })
+    .then((res) => {
+      if (hangye3Chart) {
+        hangye3Chart.dispose();
+        hangye3Chart = null;
+      }
+      hangye3Chart = echarts.init(document.getElementById("hangye3"));
+      initCharts(hangye3Chart, res.xaxis, res.series, "ICB-level1");
+    })
+    .finally(() => {
+      hangye3Loading.value = false;
+    });
 }
 function getICBLevel3Chart() {
   hangye4Loading.value = true;
   getICBLevel3ChartApi({
     etfCode: props.code,
     date: dateValue.value || null,
-  }).then((res) => {
-    if(hangye4Chart){
-      hangye4Chart.dispose();
-      hangye4Chart = null
-    }
-    hangye4Chart = echarts.init(document.getElementById("hangye4"));
-    initCharts(hangye4Chart, res.xaxis, res.series, 'ICB-level3');
-  }).finally(() => {
-    hangye4Loading.value = false;
-  });
+  })
+    .then((res) => {
+      if (hangye4Chart) {
+        hangye4Chart.dispose();
+        hangye4Chart = null;
+      }
+      hangye4Chart = echarts.init(document.getElementById("hangye4"));
+      initCharts(hangye4Chart, res.xaxis, res.series, "ICB-level3");
+    })
+    .finally(() => {
+      hangye4Loading.value = false;
+    });
 }
 function getAreaChart() {
   diquLoading.value = true;
   getAreaChartApi({
     etfCode: props.code,
     date: dateValue.value || null,
-  }).then((res) => {
-    if(diquChart){
-      diquChart.dispose();
-      diquChart = null
-    }
-    diquChart = echarts.init(document.getElementById("diqu"));
-    initCharts(diquChart, res.xaxis, res.series, '投资区域');
-  }).finally(() => {
-    diquLoading.value = false;
-  });
+  })
+    .then((res) => {
+      if (diquChart) {
+        diquChart.dispose();
+        diquChart = null;
+      }
+      diquChart = echarts.init(document.getElementById("diqu"));
+      initCharts(diquChart, res.xaxis, res.series, "投资区域");
+    })
+    .finally(() => {
+      diquLoading.value = false;
+    });
 }
 
-function initCharts(chart: echarts.ECharts, xaxis: string[], series: any, title: string) {
+function initCharts(
+  chart: echarts.ECharts,
+  xaxis: string[],
+  series: any,
+  title: string
+) {
   if (chart) {
     chart.setOption({
       title: {
@@ -219,10 +243,10 @@ function initCharts(chart: echarts.ECharts, xaxis: string[], series: any, title:
       },
       series: [
         {
-          name: series && series.length>0 ? series[0].name : '',
+          name: series && series.length > 0 ? series[0].name : "",
           type: "bar",
           barGap: 0,
-          data: series && series.length>0 ? series[0].data : [],
+          data: series && series.length > 0 ? series[0].data : [],
           label: {
             show: true,
             position: "right",
@@ -230,9 +254,9 @@ function initCharts(chart: echarts.ECharts, xaxis: string[], series: any, title:
           },
         },
         {
-          name: series && series.length>1 ? series[1].name : '',
+          name: series && series.length > 1 ? series[1].name : "",
           type: "bar",
-          data: series && series.length>1 ? series[1].data : [],
+          data: series && series.length > 1 ? series[1].data : [],
           label: {
             show: true,
             position: "right",
@@ -240,16 +264,19 @@ function initCharts(chart: echarts.ECharts, xaxis: string[], series: any, title:
           },
         },
       ],
-      graphic: series && series.length>0 ? [] : {
-      type: 'text',
-      left: 'center',
-      top: 'middle',
-      style: {
-        text: '暂无数据',
-        fontSize: 16,
-        fill: '#999'
-      }
-    }
+      graphic:
+        series && series.length > 0
+          ? []
+          : {
+              type: "text",
+              left: "center",
+              top: "middle",
+              style: {
+                text: "暂无数据",
+                fontSize: 16,
+                fill: "#999",
+              },
+            },
     });
   }
 }
@@ -308,7 +335,7 @@ onUnmounted(() => {
   #hangye1,
   #hangye2,
   #hangye3,
-  #hangye4{
+  #hangye4 {
     width: 50%;
     height: 600px;
   }

@@ -146,7 +146,12 @@ function getBaseInfoChart() {
       chartData.month.share.push(item.shares);
     });
 
-    initChart();
+    // 延迟初始化确保DOM已渲染且可见
+    nextTick(() => {
+      setTimeout(() => {
+        initChart();
+      }, 100);
+    });
   });
 }
 
@@ -168,6 +173,16 @@ function initChart(): void {
 
   const oneElement = document.getElementById("baseDataOne");
   const twoElement = document.getElementById("baseDataTwo");
+
+  // 检查DOM元素是否存在且有尺寸
+  if (!oneElement || oneElement.clientWidth === 0 || oneElement.clientHeight === 0) {
+    console.warn('baseDataOne元素尺寸为0，延迟初始化');
+    return;
+  }
+  if (!twoElement || twoElement.clientWidth === 0 || twoElement.clientHeight === 0) {
+    console.warn('baseDataTwo元素尺寸为0，延迟初始化');
+    return;
+  }
 
   if (oneElement) {
     oneChart = echarts.init(oneElement);
