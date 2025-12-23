@@ -25,13 +25,17 @@
       <p style="margin-bottom: 2rem; font-size: 1rem">
         {{ filterTabs.find((tab) => tab.value === activeTab)?.desc || "" }}
       </p>
-      <component :is="componentTab" :tableData="tableData"></component>
+      <component
+        v-loading="tableLoading"
+        :is="componentTab"
+        :tableData="tableData"
+      ></component>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, markRaw } from "vue";
+import { ref, markRaw, onMounted } from "vue";
 import TableComp from "./components/tableComp.vue";
 import performanceAndRisk from "./components/performanceAndRisk.vue";
 import fundFlows from "./components/fundFlows.vue";
@@ -39,6 +43,18 @@ import holdingsCharacteristics from "./components/holdingsCharacteristics.vue";
 import holdingBehaviorAndHolderBehavior from "./components/holdingBehaviorAndHolderBehavior.vue";
 import { useRouter, useRoute } from "vue-router";
 import { ElMessage, ElMessageBox } from "element-plus";
+import {
+  getCompareOverviewApi,
+  getCompareNetValueApi,
+  getCompareFundFlowApi,
+  getCompareFeeApi,
+  getCompareTradingEfficiencyApi,
+  getCompareDividendApi,
+  getCompareRiskApi,
+  getCompareHoldingFeatureApi,
+  getCompareValuationApi,
+} from "@/api/compareTool";
+
 const router = useRouter();
 const route = useRoute();
 const ETFCodes = route.query.ETFCodes;
@@ -59,6 +75,24 @@ const filterTabs = [
     desc: "收益和成本的一些描述",
   },
   {
+    label: "资金流动",
+    value: "fundFlows",
+    descTitle: "资金流动",
+    desc: "资金流动的一些描述",
+  },
+  {
+    label: "费用",
+    value: "expenses",
+    descTitle: "费用",
+    desc: "费用的一些描述",
+  },
+  {
+    label: "交易效率",
+    value: "tradingEfficiency",
+    descTitle: "交易效率",
+    desc: "交易效率的一些描述",
+  },
+  {
     label: "分工和估值",
     value: "divisionAndValuation",
     descTitle: "分工和估值",
@@ -71,57 +105,75 @@ const filterTabs = [
     desc: "业绩和风险的一些描述",
   },
   {
-    label: "归因分析",
-    value: "attributionAnalysis",
-    descTitle: "归因分析",
-    desc: "归因分析的一些描述",
-  },
-  {
-    label: "资金流动",
-    value: "fundFlows",
-    descTitle: "资金流动",
-    desc: "资金流动的一些描述",
-  },
-  {
     label: "持仓特征",
     value: "holdingsCharacteristics",
     descTitle: "持仓特征",
     desc: "持仓特征的一些描述",
   },
   {
-    label: "持仓行为和持有人行为",
-    value: "holdingBehaviorAndHolderBehavior",
-    descTitle: "持仓行为和持有人行为",
-    desc: "持仓行为和持有人行为的一些描述",
+    label: "估值",
+    value: "valuation",
+    descTitle: "估值",
+    desc: "估值的一些描述",
   },
+  // {
+  //   label: "持仓行为和持有人行为",
+  //   value: "holdingBehaviorAndHolderBehavior",
+  //   descTitle: "持仓行为和持有人行为",
+  //   desc: "持仓行为和持有人行为的一些描述",
+  // },
 ];
+onMounted(() => {
+  getCompareOverview();
+});
 const handleTabClick = (tab: string) => {
   activeTab.value = tab;
   switch (tab) {
     case "basicInformation":
       componentTab.value = markRaw(TableComp);
+      getCompareOverview();
       break;
     case "returnsAndCosts":
       componentTab.value = markRaw(TableComp);
+      getCompareNetValue();
+      break;
+    case "fundFlows":
+      // componentTab.value = markRaw(fundFlows);
+      componentTab.value = markRaw(TableComp);
+      getCompareFundFlow();
+      break;
+    case "expenses":
+      componentTab.value = markRaw(TableComp);
+      getCompareFee();
+      break;
+    case "tradingEfficiency":
+      componentTab.value = markRaw(TableComp);
+      getCompareTradingEfficiency();
       break;
     case "divisionAndValuation":
       componentTab.value = markRaw(TableComp);
+      getCompareDividend();
       break;
     case "performanceAndRisk":
-      componentTab.value = markRaw(performanceAndRisk);
-      break;
-    case "attributionAnalysis":
+      // componentTab.value = markRaw(performanceAndRisk);
       componentTab.value = markRaw(TableComp);
+      getCompareRisk();
       break;
-    case "fundFlows":
-      componentTab.value = markRaw(fundFlows);
+    case "holdingsCharacteristics":
+      // componentTab.value = markRaw(holdingsCharacteristics);
+      componentTab.value = markRaw(TableComp);
+      getCompareHoldingFeature();
       break;
-      case "holdingsCharacteristics":
-      componentTab.value = markRaw(holdingsCharacteristics);
+    case "valuation":
+      componentTab.value = markRaw(TableComp);
+      getCompareValuation();
       break;
-    case "holdingBehaviorAndHolderBehavior":
-      componentTab.value = markRaw(holdingBehaviorAndHolderBehavior);
-      break;
+    // case "attributionAnalysis":
+    //   componentTab.value = markRaw(TableComp);
+    //   break;
+    // case "holdingBehaviorAndHolderBehavior":
+    //   componentTab.value = markRaw(holdingBehaviorAndHolderBehavior);
+    //   break;
   }
 };
 
@@ -135,33 +187,34 @@ interface TableData {
   columns: TableColumn[];
 }
 
+const tableLoading = ref(false);
 const tableData = ref<TableData>({
   data: [],
   columns: [],
 });
+let ETFCodesArr: string[] = [];
 if (!ETFCodes) {
   // ElMessage({
   //   message: "请先选择需要对比的ETF",
   //   type: "warning",
   // });
   ElMessageBox.confirm(
-    '没有选择需要对比的ETF，是否跳转到筛选器页面？',
-    '警告',
+    "没有选择需要对比的ETF，是否跳转到筛选器页面？",
+    "警告",
     {
-      confirmButtonText: '确定',
-      cancelButtonText: '取消',
-      type: 'warning',
+      confirmButtonText: "确定",
+      cancelButtonText: "取消",
+      type: "warning",
     }
   )
     .then(() => {
       router.push({
         name: "screener",
-      })
+      });
     })
-    .catch(() => {
-    })
+    .catch(() => {});
 } else {
-  const ETFCodesArr = (ETFCodes as string).split(",");
+  ETFCodesArr = (ETFCodes as string).split(",");
   const arr = [
     {
       label: "",
@@ -178,6 +231,275 @@ if (!ETFCodes) {
     });
   }
   tableData.value.columns = arr;
+}
+function getCompareOverview() {
+  tableLoading.value = true;
+  getCompareOverviewApi(ETFCodesArr)
+    .then((res) => {
+      if (res && res.length > 0) {
+        const enumData = {
+          etfName: "etf名称",
+          etfFullname: "etf全称",
+          typeI: "资产类型",
+          nav: "份额净值",
+          shares: "份额(百万份)",
+          aum: "资产规模(百万元)",
+          close: "最新收盘价(元)",
+          coverRatio: "折溢价率",
+          ytdPrice: "今年以来价格变化(%)",
+        };
+        tableData.value.data = processData(res, enumData);
+      } else {
+        tableData.value.data = [];
+      }
+    })
+    .finally(() => {
+      tableLoading.value = false;
+    });
+}
+function getCompareNetValue() {
+  tableLoading.value = true;
+  getCompareNetValueApi(ETFCodesArr)
+    .then((res) => {
+      if (res && res.length > 0) {
+        const enumData = {
+          etfName: "ETF简称",
+          weeklyReturns: "近1周回报(%)",
+          ret1: "近1月回报(%)",
+          ret3: "近3月回报(%)",
+          ret6: "近6月回报(%)",
+          ytdNav: "今年以来回报(%)",
+          ret12: "近1年回报(%)",
+          ret36: "近3年回报(%)",
+          ret60: "近5年回报(%)",
+        };
+        tableData.value.data = processData(res, enumData);
+      } else {
+        tableData.value.data = [];
+      }
+    })
+    .finally(() => {
+      tableLoading.value = false;
+    });
+}
+function getCompareFundFlow() {
+  tableLoading.value = true;
+  getCompareFundFlowApi(ETFCodesArr)
+    .then((res) => {
+      if (res && res.length > 0) {
+        const enumData = {
+          etfName: "ETF简称",
+          ff1: "近1月净流入额(百万元)",
+          ff3: "近3月净流入额(百万元)",
+          ff6: "近6月净流入额(百万元)",
+          ytdFf: "今年以来净流入额(百万元)",
+          ff12: "近1年净流入额(百万元)",
+          ff36: "近3年净流入额(百万元)",
+          ff60: "近5年净流入额(百万元)",
+        };
+        tableData.value.data = processData(res, enumData);
+      } else {
+        tableData.value.data = [];
+      }
+    })
+    .finally(() => {
+      tableLoading.value = false;
+    });
+}
+function getCompareFee() {
+  tableLoading.value = true;
+  getCompareFeeApi(ETFCodesArr)
+    .then((res) => {
+      if (res && res.length > 0) {
+        const enumData = {
+          etfName: "ETF简称",
+          issuer: "发行人",
+          managementFee: "管理费率(%)",
+          custodianFee: "托管费率(%)",
+          salesServiceFee: "销售服务费率(%)",
+          subscriptionFee: "最高申购费率(%)",
+          redemptionFee: "最高赎回费率(%)",
+          totalFee: "总费率(%)",
+        };
+        tableData.value.data = processData(res, enumData);
+      } else {
+        tableData.value.data = [];
+      }
+    })
+    .finally(() => {
+      tableLoading.value = false;
+    });
+}
+function getCompareTradingEfficiency() {
+  tableLoading.value = true;
+  getCompareTradingEfficiencyApi(ETFCodesArr)
+    .then((res) => {
+      if (res && res.length > 0) {
+        const enumData = {
+          etfName: "ETF简称",
+          volume1: "近1月日均交易量(百万份)",
+          volume3: "近3月日均交易量(百万份)",
+          amount1: "近1月日均交易额(百万元)",
+          amount3: "近3月日均交易额(百万元)",
+          turnover1: "近1月换手率",
+          turnover3: "近3月换手率",
+          cover1: "近1月日均折溢价率",
+          cover3: "近3月日均折溢价率",
+          dev1: "近1月日均跟踪偏离度",
+          dev3: "近3月日均跟踪偏离度",
+          tr1: "近1月日均跟踪误差",
+          tr3: "近3月日均跟踪误差",
+        };
+        tableData.value.data = processData(res, enumData);
+      } else {
+        tableData.value.data = [];
+      }
+    })
+    .finally(() => {
+      tableLoading.value = false;
+    });
+}
+function getCompareDividend() {
+  getCompareDividendApi(ETFCodesArr)
+    .then((res) => {
+      if (res && res.length > 0) {
+        const enumData = {
+          etfName: "ETF简称",
+          cumD: "单位累计分红(元)",
+          lyD: "上一年度单位分红(元)",
+          ytdD: "今年以来单位分红(元)",
+          cumCount: "累计分红次数",
+          lyCount: "上一年度分红次数",
+          ytdCount: "今年以来分红次数",
+          dp: "年度股息率(%)",
+        };
+        tableData.value.data = processData(res, enumData);
+      } else {
+        tableData.value.data = [];
+      }
+    })
+    .finally(() => {
+      tableLoading.value = false;
+    });
+}
+function getCompareRisk() {
+  tableLoading.value = true;
+  getCompareRiskApi(ETFCodesArr)
+    .then((res) => {
+      if (res && res.length > 0) {
+        const enumData = {
+          etfName: "ETF简称",
+          vol1: "近1月收益标准差",
+          vol3: "近3月收益标准差",
+          vol6: "近6月收益标准差",
+          vol12: "近1年收益标准差",
+          vol36: "近3年收益标准差",
+          beta1: "近1月Beta",
+          beta3: "近3月Beta",
+          beta12: "近1年Beta",
+          beta36: "近3年Beta",
+          maxD12: "近1年最大回撤",
+          maxD36: "近3年最大回撤",
+        };
+        tableData.value.data = processData(res, enumData);
+      } else {
+        tableData.value.data = [];
+      }
+    })
+    .finally(() => {
+      tableLoading.value = false;
+    });
+}
+function getCompareHoldingFeature() {
+  tableLoading.value = true;
+  getCompareHoldingFeatureApi(ETFCodesArr)
+    .then((res) => {
+      if (res && res.length > 0) {
+        const enumData = {
+          etfName: "ETF简称",
+          etfFullname: "ETF全称",
+          stockNumber: "持有证券数量(只)",
+          weightedTotalMarketValue: "持仓证券平均市值(百万元)",
+          top5HoldingPercent: "前五大持仓占比(%)",
+          top10HoldingPercent: "前十大持仓占比(%)",
+          top20HoldingPercent: "前二十大持仓占比(%)",
+          bigCapPercent: "大盘股占比(%)",
+          midCapPercent: "中盘股占比(%)",
+          smallCapPercent: "小盘股占比(%)",
+          weightedPe: "加权平均PE",
+          weightedPb: "加权平均PB",
+          weightedPs: "加权平均PS",
+          weightedPcf: "加权平均PCF",
+        };
+        tableData.value.data = processData(res, enumData);
+      } else {
+        tableData.value.data = [];
+      }
+    })
+    .finally(() => {
+      tableLoading.value = false;
+    });
+}
+function getCompareValuation() {
+  tableLoading.value = true;
+  getCompareValuationApi(ETFCodesArr)
+    .then((res) => {
+      if (res && res.length > 0) {
+        const enumData = {
+          etfName: "ETF简称",
+          unitProfit: "份额盈利",
+          unitNetValue: "份额净资产",
+          unitSalesIncome: "份额销售收入",
+          unitCashFlow: "份额现金流",
+          unitDividend: "份额分红",
+          etfPe: "ETF_PE",
+          etfPB: "ETF_PB",
+          etfPs: "ETF_PS",
+          etfPcf: "ETF_PCF",
+          etfDp: "ETF_DP",
+        };
+        tableData.value.data = processData(res, enumData);
+      } else {
+        tableData.value.data = [];
+      }
+    })
+    .finally(() => {
+      tableLoading.value = false;
+    });
+}
+function processData(data: any[], enumData: Record<string, string>) {
+  // const arr = []
+  // ETFCodesArr.forEach((code) => {
+  //   for(let item of res){
+  //     if(item.etfCode === code){
+  //       (Object.keys(enumData) as Array<keyof typeof enumData>).forEach((key) => {
+  //         const index = arr.findIndex((i) => i.name === enumData[key]);
+  //         if(index === -1){
+  //           arr.push({
+  //             name: enumData[key],
+  //             [code]: item[key],
+  //           });
+  //         }else {
+  //           arr[index][code] = item[key];
+  //         }
+  //       });
+  //     }
+  //   }
+  // })
+  const resMap = new Map(data.map((item) => [item.etfCode, item]));
+  const keys = Object.keys(enumData) as Array<keyof typeof enumData>;
+  const arr = keys.map(
+    (key) => ({ name: enumData[key] } as Record<string, any>)
+  );
+  ETFCodesArr.forEach((code) => {
+    const item = resMap.get(code);
+    if (item) {
+      keys.forEach((key, index) => {
+        arr[index][code] = item[key];
+      });
+    }
+  });
+  return arr;
 }
 </script>
 
