@@ -30,14 +30,20 @@ const categoryOrder: Record<string, number> = {
   GOODS: 4
 };
 
+const activeCategory = ref('EQUITY');
+
+const getCurrentCategoryData = (categoryValue: string) => {
+  const group = indexList.value.find((item: any) => item.category === categoryValue);
+  return group?.data || [];
+};
+
 const setActiveTab = (val: string) => {
+  loading.value = true;
   activeTab.value = val;
   getPopularIndicesApi(activeTab.value).then((res) => {
     const data = res as any;
     if (data && data.length > 0) {
-      // 过滤掉 CURRENCY 类别的数据
       const filteredData = data.filter((item: any) => item.category !== 'CURRENCY');
-      // 按照指定顺序排序
       filteredData.sort((a: any, b: any) => {
         const orderA = categoryOrder[a.category] || 999;
         const orderB = categoryOrder[b.category] || 999;
@@ -47,6 +53,8 @@ const setActiveTab = (val: string) => {
     } else {
       indexList.value = [];
     }
+  }).finally(() => {
+    loading.value = false;
   });
 };
 const handleIndexClick = (item: any) => {
@@ -57,13 +65,15 @@ const handleIndexClick = (item: any) => {
       },
     });
 };
+
+const loading = ref(false);
+
 onMounted(() => {
+  loading.value = true;
   getPopularIndicesApi(activeTab.value).then((res) => {
     const data = res as any;
     if (data && data.length > 0) {
-      // 过滤掉 CURRENCY 类别的数据
       const filteredData = data.filter((item: any) => item.category !== 'CURRENCY');
-      // 按照指定顺序排序
       filteredData.sort((a: any, b: any) => {
         const orderA = categoryOrder[a.category] || 999;
         const orderB = categoryOrder[b.category] || 999;
@@ -73,6 +83,8 @@ onMounted(() => {
     } else {
       indexList.value = [];
     }
+  }).finally(() => {
+    loading.value = false;
   });
 });
 </script>
@@ -96,57 +108,63 @@ onMounted(() => {
         {{ tab.label }}
       </span>
     </div>
-    <div class="tool-content">
-      <div v-for="group in indexList" :key="group.category" class="index-group-block">
-        <div class="index-group-title">{{ categoryList.find((item) => item.value === group.category)?.label }}</div>
-        <template v-if="group.data.length > 0">
-          <div class="index-card-list">
-            <div
-              v-for="item in group.data"
-              :key="item.trackIndexName"
-              class="index-card"
-              @click="handleIndexClick(item)"
-            >
-              <div class="index-card-title-row">
-                <span class="index-card-title">{{ item.trackIndexName }}</span>
-                <span class="index-card-value">{{ item.currentClose }}</span>
-              </div>
-              <div class="index-card-info-row" v-if="activeTab === 'day'">
-                <span class="index-card-period">日涨幅</span>
-                <span class="index-card-rate">{{ formatValue(item.change) }}<span class="index-card-rate-percent">%</span></span>
-              </div>
-              <div class="index-card-info-row" v-if="activeTab === 'weekly'">
-                <span class="index-card-period">近1周</span>
-                <span class="index-card-rate">{{ formatValue(item.weeklyChange) }}<span class="index-card-rate-percent">%</span></span>
-              </div>
-              <div class="index-card-info-row" v-if="activeTab === 'monthly'">
-                <span class="index-card-period">近1月</span>
-                <span class="index-card-rate">{{ formatValue(item.monthlyChange) }}<span class="index-card-rate-percent">%</span></span>
-              </div>
-              <div class="index-card-info-row" v-if="activeTab === 'threeMonth'">
-                <span class="index-card-period">近3月</span>
-                <span class="index-card-rate">{{ formatValue(item.threeMonthChange) }}<span class="index-card-rate-percent">%</span></span>
-              </div>
-              <div class="index-card-info-row" v-if="activeTab === 'sixMonth'">
-                <span class="index-card-period">近6月</span>
-                <span class="index-card-rate">{{ formatValue(item.sixMonthChange) }}<span class="index-card-rate-percent">%</span></span>
-              </div>
-              <div class="index-card-info-row" v-if="activeTab === 'yearly'">
-                <span class="index-card-period">近1年</span>
-                <span class="index-card-rate">{{ formatValue(item.yearlyChange) }}<span class="index-card-rate-percent">%</span></span>
-              </div>
-              <div class="index-card-link-row">
-                <span class="index-card-link">
-                  查看<span style="color: #e53935">{{ item.count }}</span>只指数相关ETF
-                </span>
+    <div v-loading="loading" element-loading-text="加载中..." class="tool-content">
+      <el-tabs v-model="activeCategory" class="category-tabs">
+        <el-tab-pane
+          v-for="category in categoryList"
+          :key="category.value"
+          :label="category.label"
+          :name="category.value"
+        >
+          <template v-if="getCurrentCategoryData(category.value).length > 0">
+            <div class="index-card-list">
+              <div
+                v-for="item in getCurrentCategoryData(category.value)"
+                :key="item.trackIndexName"
+                class="index-card"
+                @click="handleIndexClick(item)"
+              >
+                <div class="index-card-title-row">
+                  <span class="index-card-title">{{ item.trackIndexName }}</span>
+                  <span class="index-card-value">{{ item.currentClose }}</span>
+                </div>
+                <div class="index-card-info-row" v-if="activeTab === 'day'">
+                  <span class="index-card-period">日涨幅</span>
+                  <span class="index-card-rate">{{ formatValue(item.change) }}<span class="index-card-rate-percent">%</span></span>
+                </div>
+                <div class="index-card-info-row" v-if="activeTab === 'weekly'">
+                  <span class="index-card-period">近1周</span>
+                  <span class="index-card-rate">{{ formatValue(item.weeklyChange) }}<span class="index-card-rate-percent">%</span></span>
+                </div>
+                <div class="index-card-info-row" v-if="activeTab === 'monthly'">
+                  <span class="index-card-period">近1月</span>
+                  <span class="index-card-rate">{{ formatValue(item.monthlyChange) }}<span class="index-card-rate-percent">%</span></span>
+                </div>
+                <div class="index-card-info-row" v-if="activeTab === 'threeMonth'">
+                  <span class="index-card-period">近3月</span>
+                  <span class="index-card-rate">{{ formatValue(item.threeMonthChange) }}<span class="index-card-rate-percent">%</span></span>
+                </div>
+                <div class="index-card-info-row" v-if="activeTab === 'sixMonth'">
+                  <span class="index-card-period">近6月</span>
+                  <span class="index-card-rate">{{ formatValue(item.sixMonthChange) }}<span class="index-card-rate-percent">%</span></span>
+                </div>
+                <div class="index-card-info-row" v-if="activeTab === 'yearly'">
+                  <span class="index-card-period">近1年</span>
+                  <span class="index-card-rate">{{ formatValue(item.yearlyChange) }}<span class="index-card-rate-percent">%</span></span>
+                </div>
+                <div class="index-card-link-row">
+                  <span class="index-card-link">
+                    查看<span style="color: #e53935">{{ item.count }}</span>只指数相关ETF
+                  </span>
+                </div>
               </div>
             </div>
-          </div>
-        </template>
-        <template v-else>
-          <el-empty description="暂无数据" />
-        </template>
-      </div>
+          </template>
+          <template v-else>
+            <el-empty description="暂无数据" />
+          </template>
+        </el-tab-pane>
+      </el-tabs>
     </div>
   </div>
 </template>
@@ -171,15 +189,30 @@ onMounted(() => {
 .tool-content {
   margin-top: 20px;
 }
-.index-group-block {
-  margin-bottom: 32px;
-}
-.index-group-title {
-  font-size: 1.35rem;
-  font-weight: 700;
-  color: #222;
-  margin-bottom: 12px;
-  padding-left: 2px;
+.category-tabs {
+  :deep(.el-tabs__header) {
+    margin-bottom: 20px;
+  }
+  :deep(.el-tabs__nav-wrap::after) {
+    height: 1px;
+  }
+  :deep(.el-tabs__item) {
+    font-size: 1.1rem;
+    font-weight: 500;
+    color: #666;
+    padding: 0 24px;
+    &.is-active {
+      color: #ff5722;
+      font-weight: 600;
+    }
+    &:hover {
+      color: #ff5722;
+    }
+  }
+  :deep(.el-tabs__active-bar) {
+    background-color: #ff5722;
+    height: 3px;
+  }
 }
 .index-card-list {
   display: grid;

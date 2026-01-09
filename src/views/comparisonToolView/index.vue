@@ -26,10 +26,16 @@
         {{ filterTabs.find((tab) => tab.value === activeTab)?.desc || "" }}
       </p>
       <component
+        v-if="ETFCodes"
         v-loading="tableLoading"
         :is="componentTab"
         :tableData="tableData"
       ></component>
+      <div v-else>
+        <el-empty description="请选择ETF代码">
+          <el-button type="primary" @click="() => router.push({ name: 'screener' })">跳转到筛选器</el-button>
+        </el-empty>
+      </div>
     </div>
   </div>
 </template>
@@ -193,28 +199,30 @@ const tableData = ref<TableData>({
   columns: [],
 });
 let ETFCodesArr: string[] = [];
-if (!ETFCodes) {
+// if (!ETFCodes) {
   // ElMessage({
   //   message: "请先选择需要对比的ETF",
   //   type: "warning",
   // });
-  ElMessageBox.confirm(
-    "没有选择需要对比的ETF，是否跳转到筛选器页面？",
-    "警告",
-    {
-      confirmButtonText: "确定",
-      cancelButtonText: "取消",
-      type: "warning",
-    }
-  )
-    .then(() => {
-      router.push({
-        name: "screener",
-      });
-    })
-    .catch(() => {});
-} else {
-  ETFCodesArr = (ETFCodes as string).split(",");
+  // ElMessageBox.confirm(
+  //   "没有选择需要对比的ETF，是否跳转到筛选器页面？",
+  //   "警告",
+  //   {
+  //     confirmButtonText: "确定",
+  //     cancelButtonText: "取消",
+  //     type: "warning",
+  //   }
+  // )
+  //   .then(() => {
+  //     router.push({
+  //       name: "screener",
+  //     });
+  //   })
+  //   .catch(() => {});
+// } else {
+// }
+if (ETFCodes){
+   ETFCodesArr = (ETFCodes as string).split(",");
   const arr = [
     {
       label: "",

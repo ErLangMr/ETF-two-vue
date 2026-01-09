@@ -6,7 +6,7 @@ import type { FilterItem } from "@/components/ScreenerFilter.vue";
 import ScreenerTable from "@/components/ScreenerTable.vue";
 import { useDevice } from "@/utils/device";
 import { Operation } from "@element-plus/icons-vue";
-import { getFilterTableApi, getEtfFilterDataApi, getEtfOverviewPageApi, getEtfNetValuePageApi, getEtfFundFlowPageApi, getEtfFeePageApi, getEtfTradingEfficiencyPageApi, getEtfDividendPageApi, getEtfRiskPageApi, getEtfHoldingFeaturePageApi } from "@/api/filterTable";
+import { getFilterTableApi, getEtfFilterDataApi, getEtfOverviewPageApi, getEtfNetValuePageApi, getEtfFundFlowPageApi, getEtfFeePageApi, getEtfTradingEfficiencyPageApi, getEtfDividendPageApi, getEtfRiskPageApi, getEtfHoldingFeaturePageApi, getEtfValuationPageApi } from "@/api/filterTable";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
 import { usePortfolioSimulatorStore } from "@/store/portfolioSimulator";
@@ -225,6 +225,14 @@ function getEtfTableData(params?: Record<string, any>) {
     return
   } else if( tableFilterTab.value === 'holdings'){
     getEtfHoldingFeaturePageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+  } else if( tableFilterTab.value === 'valuation'){
+    getEtfValuationPageApi(obj).then((res: any) => {
       etfList.value = res.content
       total.value = res.totalElements
     }).catch((err: any) => {

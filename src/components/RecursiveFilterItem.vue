@@ -34,46 +34,97 @@
 
     <!-- Level >= 1: 多选列表 -->
     <div v-else class="children-list" :class="{ 'is-level-one': level === 1 }">
+      <!-- 有子项的节点：使用折叠面板 -->
+      <van-collapse v-model="collapseActiveNames" accordion>
+        <!-- 标题节点（有子项） -->
+        <van-collapse-item
+          v-for="item in items.filter(i => i.count === null && i.codes === null && i.children && i.children.length > 0)"
+          :key="item.value"
+          :name="item.value"
+          :is-link="true"
+          class="group-collapse-item"
+        >
+          <template #title>
+            <div class="group-title">{{ item.label }}</div>
+          </template>
+          <recursive-filter-item
+            :items="item.children"
+            :level="level + 1"
+            :parent-value="item.value"
+            :selected-child="selectedChild"
+            :selected-codes="selectedCodes"
+            @checkbox-change="(item, checked) => $emit('checkboxChange', item, checked)"
+            class="nested-children"
+          />
+        </van-collapse-item>
+
+        <!-- 可选节点（有子项） -->
+        <van-collapse-item
+          v-for="item in items.filter(i => (i.count !== null || i.codes !== null) && i.children && i.children.length > 0)"
+          :key="item.value"
+          :name="item.value"
+          :is-link="true"
+          class="item-collapse-item"
+        >
+          <template #title>
+            <div class="item-header">
+              <el-checkbox
+                :model-value="isChecked(item)"
+                @change="(val: boolean | string | number) => $emit('checkboxChange', item, !!val)"
+                @click.stop
+              >
+                {{ item.label }}
+              </el-checkbox>
+              <span
+                v-if="item.count !== null && item.count !== undefined"
+                class="alt-count"
+                :class="{ 'alt-count-zero': item.count === '0' || item.count === 0 }"
+              >
+                {{ item.count }}
+              </span>
+            </div>
+          </template>
+          <recursive-filter-item
+            :items="item.children"
+            :level="level + 1"
+            :parent-value="item.value"
+            :selected-child="selectedChild"
+            :selected-codes="selectedCodes"
+            @checkbox-change="(item, checked) => $emit('checkboxChange', item, checked)"
+            class="nested-children"
+          />
+        </van-collapse-item>
+      </van-collapse>
+
+      <!-- 没有子项的节点：直接显示 -->
+      <!-- 标题节点（无子项） -->
       <div
-        v-for="item in items"
+        v-for="item in items.filter(i => i.count === null && i.codes === null && (!i.children || i.children.length === 0))"
         :key="item.value"
-        class="classification-group"
+        class="group-title"
       >
-        <!-- 标题节点：count 和 codes 都为 null -->
-        <div v-if="item.count === null && item.codes === null" class="group-title">
+        {{ item.label }}
+      </div>
+
+      <!-- 可选节点（无子项） -->
+      <div
+        v-for="item in items.filter(i => (i.count !== null || i.codes !== null) && (!i.children || i.children.length === 0))"
+        :key="item.value"
+        class="item-header"
+      >
+        <el-checkbox
+          :model-value="isChecked(item)"
+          @change="(val: boolean | string | number) => $emit('checkboxChange', item, !!val)"
+        >
           {{ item.label }}
-        </div>
-
-        <!-- 可选节点：有 count 或 codes -->
-        <div v-else class="item-header">
-          <van-checkbox
-            :model-value="isChecked(item)"
-            @update:model-value="(checked) => $emit('checkboxChange', item, checked)"
-            shape="square"
-            icon-size="14px"
-          >
-            {{ item.label }}
-          </van-checkbox>
-          <span
-            v-if="item.count !== null && item.count !== undefined"
-            class="alt-count"
-            :class="{ 'alt-count-zero': item.count === '0' || item.count === 0 }"
-          >
-            {{ item.count }}
-          </span>
-        </div>
-
-        <!-- 递归渲染子节点 -->
-        <recursive-filter-item
-          v-if="item.children && item.children.length > 0"
-          :items="item.children"
-          :level="level + 1"
-          :parent-value="item.value"
-          :selected-child="selectedChild"
-          :selected-codes="selectedCodes"
-          @checkbox-change="(item, checked) => $emit('checkboxChange', item, checked)"
-          class="nested-children"
-        />
+        </el-checkbox>
+        <span
+          v-if="item.count !== null && item.count !== undefined"
+          class="alt-count"
+          :class="{ 'alt-count-zero': item.count === '0' || item.count === 0 }"
+        >
+          {{ item.count }}
+        </span>
       </div>
     </div>
   </div>
@@ -95,57 +146,68 @@ const emit = defineEmits(['radioChange', 'checkboxChange']);
 // 手风琴模式下 v-model 绑定字符串类型
 const childActiveName = ref<string>('');
 
+// Level >= 1 的折叠面板状态，手风琴模式使用字符串类型
+const collapseActiveNames = ref<string>('');
+
 const isChecked = (item: any) => {
   if (!item.codes || item.codes.length === 0) return false;
   return item.codes.every((code: string) => props.selectedCodes.includes(code));
 };
 </script>
 
-<style scoped lang="scss">
+<style lang="scss" scoped>
 .recursive-filter-item {
   .children-list {
-    padding: 2px 8px;
-    // 移除内层滚动条，由外层折叠面板统一管理
-    max-height: none;
-    overflow-y: visible;
+    // 标题样式
+    .group-title {
+      font-size: var(--font-size-base);
+      font-weight: 500;
+      color: #666;
+      padding: 3px 0 2px 0;
+      margin-top: 4px;
 
-    .classification-group {
-      margin-bottom: 0;
-
-      // 标题样式
-      .group-title {
-        font-size: var(--font-size-base);
-        font-weight: 500;
-        color: #666;
-        padding: 3px 0 2px 0;
-        margin-top: 4px;
-
-        &:first-child {
-          margin-top: 0;
-        }
-      }
-
-      // 可选项样式
-      .item-header {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        padding: 5px 0;
-
-        :deep(.van-checkbox) {
-          flex: 1;
-          font-size: var(--font-size-base);
-          color: #222;
-        }
-      }
-
-      // 嵌套子项样式 - 最小间距
-      .nested-children {
-        margin-left: 8px;
+      &:first-child {
         margin-top: 0;
-        border-left: 1px solid #e8e8e8;
-        padding-left: 6px;
       }
+    }
+
+    // 可选项样式
+    .item-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0;
+    }
+
+    // 折叠面板样式
+    .group-collapse-item,
+    .item-collapse-item {
+      :deep(.van-collapse-item__title) {
+        padding: 5px 0;
+        user-select: none;
+      }
+
+      :deep(.van-cell__title){
+        padding-left: 10px;
+      }
+
+      :deep(.van-cell) {
+        padding: 0;
+        background: transparent;
+      }
+
+      :deep(.van-icon) {
+        margin-left: auto;
+        color: #999;
+      }
+    }
+
+    // 嵌套子项样式 - 最小间距
+    .nested-children {
+      margin-left: 8px;
+      margin-top: 0;
+      border-left: 1px solid #e8e8e8;
+      padding-left: 6px;
     }
   }
 }
@@ -172,3 +234,17 @@ const isChecked = (item: any) => {
   color: #fff;
 }
 </style>
+
+
+
+
+
+
+
+
+
+
+
+
+
+

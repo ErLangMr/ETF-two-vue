@@ -66,7 +66,7 @@
 
 <script setup lang="ts">
 import { ref, onMounted, nextTick, computed, watch } from "vue";
-import ScreenerFilter from "@/components/ScreenerFilter.vue";
+import ScreenerFilter from "@/components/ScreenerFilterV2.vue";
 import type { FilterItem } from "@/components/ScreenerFilter.vue";
 import ScreenerTable from "@/components/ScreenerTable.vue";
 import { useDevice } from "@/utils/device";

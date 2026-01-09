@@ -71,6 +71,14 @@ export const getEtfRiskPageApi = (data: Record<string, any>) => {
 export const getEtfHoldingFeaturePageApi = (data: Record<string, any>) => {
   return post('/api/etf/holding-feature/page', data)
 }
+
+/**
+ * 获取etf 估值分页数据
+ * @param params
+ */
+export const getEtfValuationPageApi = (data: Record<string, any>) => {
+  return post('/api/etf/valuation/page', data)
+}
 // /**
 //  * 获取etf 资金流动分页数据
 //  * @param params

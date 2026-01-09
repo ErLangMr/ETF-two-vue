@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRouter, useRoute } from "vue-router";
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { Search, Menu } from "@element-plus/icons-vue";
 import { useDevice } from "@/utils/device";
 import Breadcrumb from "@/components/Breadcrumb.vue";
@@ -26,6 +26,13 @@ const toggleMenu = () => {
 const router = useRouter();
 const route = useRoute();
 const activeIndex = computed(() => route.path);
+
+watch(() => route.path, () => {
+  const appElement = document.querySelector('.app');
+  if (appElement) {
+    appElement.scrollTop = 0;
+  }
+});
 
 </script>
 

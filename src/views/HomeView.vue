@@ -489,6 +489,7 @@ h3{
   padding: 20px;
   box-shadow: 0px 0px 10px 4px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
+  cursor: pointer;
 }
 .card:hover {
   transform: translateY(-2px);
