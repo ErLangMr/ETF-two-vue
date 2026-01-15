@@ -7,7 +7,8 @@
         <ScreenerTable
           class="table-area"
           :table-data="etfList"
-          :hasTableFilter="true">
+          :hasTableFilter="true"
+          @tableFilterTab="handleTableFilterTab">
           <template #table-pagination>
             <el-pagination
               v-model:current-page="page"
@@ -27,12 +28,12 @@
 import ScreenerTable from '@/components/ScreenerTable.vue';
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
-import { getFilterTableApi } from "@/api/filterTable";
+// import { getFilterTableApi } from "@/api/filterTable";
 import { useDevice } from "@/utils/device";
+import { getEtfOverviewPageApi, getEtfNetValuePageApi, getEtfFundFlowPageApi, getEtfFeePageApi, getEtfTradingEfficiencyPageApi, getEtfDividendPageApi, getEtfRiskPageApi, getEtfHoldingFeaturePageApi, getEtfValuationPageApi } from "@/api/filterTable";
 
 const route = useRoute();
 const index = JSON.parse(route.query.index as string || '{}');
-console.log(index, 111);
 
 const { isMobile } = useDevice();
 
@@ -41,23 +42,109 @@ const pageSize = ref(20)
 const total = ref(0)
 const handlePageChange = (newPage: number) => {
   page.value = newPage;
-  getFilterTableData();
-};
-const getFilterTableData = async () => {
-  const obj = {
-    page: page.value,
-    pageSize: pageSize.value,
-    codes: index.codes,
-  }
-  const res: any = await getFilterTableApi(obj);
-  etfList.value = res.content
-  total.value = res.totalElements
+  getEtfTableData();
 };
 
 const etfList = ref<any[]>([])
+let paramsObj: Record<string, any> = {
+  codes: index.codes,
+}
+// 顶部筛选Tab变化，获取表格数据
+const tableFilterTabVal = ref("overview");
+function handleTableFilterTab(tab: string) {
+  tableFilterTabVal.value = tab;
+  getEtfTableData(paramsObj)
+}
 
+function getEtfTableData(params?: Record<string, any>) {
+  const obj = {
+    page: page.value,
+    size: pageSize.value,
+    ...params
+  }
+  if( tableFilterTabVal.value === 'overview'){
+    getEtfOverviewPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTabVal.value === 'returns'){
+    getEtfNetValuePageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTabVal.value === 'fundFlows'){
+    getEtfFundFlowPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  }else if( tableFilterTabVal.value === 'expenses'){
+    getEtfFeePageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTabVal.value === 'efficiency'){
+    getEtfTradingEfficiencyPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTabVal.value === 'dividends'){
+    getEtfDividendPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTabVal.value === 'risk'){
+    getEtfRiskPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTabVal.value === 'holdings'){
+    getEtfHoldingFeaturePageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+  } else if( tableFilterTabVal.value === 'valuation'){
+    getEtfValuationPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+  }
+}
 onMounted(() => {
-  getFilterTableData();
+  getEtfTableData(paramsObj);
 });
 </script>
 

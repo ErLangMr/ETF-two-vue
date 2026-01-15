@@ -142,12 +142,12 @@ function initFundFlowChart(Xdata: string[], seriesData: number[]) {
     dataZoom: [
         {
           type: "inside",
-          start: 0,
-          end: 60,
+          start: 40,
+          end: 100,
         },
         {
-          start: 0,
-          end: 60,
+          start: 40,
+          end: 100,
         },
       ],
     xAxis: {
@@ -278,12 +278,12 @@ function initScaleAndPriceChart(
     dataZoom: [
         {
           type: "inside",
-          start: 0,
-          end: 60,
+          start: 40,
+          end: 100,
         },
         {
-          start: 0,
-          end: 60,
+          start: 40,
+          end: 100,
         },
       ],
     grid: { left: 40, right: 40, bottom: 90, top: 40 },

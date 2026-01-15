@@ -3,6 +3,7 @@
     <div style="display: flex; justify-content: flex-end; align-items: center;">
       <el-date-picker
           v-model="yearValue"
+          :clearable="false"
           value-format="YYYY"
           type="year"
           placeholder="选择年份"

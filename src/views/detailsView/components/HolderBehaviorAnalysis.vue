@@ -3,6 +3,7 @@
     <div style="display: flex; justify-content: flex-end; align-items: center;">
       <el-date-picker
           v-model="yearValue"
+          :clearable="false"
           value-format="YYYY"
           type="year"
           placeholder="选择年份"
@@ -31,17 +32,17 @@
           }"
           :cell-style="{ height: '30px', padding: 0, fontSize: '16px' }"
         >
-          <el-table-column prop="activity" label="持有人行为" />
-          <el-table-column prop="holderName" label="持有人名称" />
-          <el-table-column prop="holderNum" label="持有份额" />
-          <el-table-column prop="holderNum1" label="上一期持有份额" />
-          <el-table-column prop="holderV" label="持有规模（元）" />
-          <el-table-column prop="holderV1" label="上一期持有规模" />
-          <el-table-column prop="holderWeight" label="持有比例（%）" />
-          <el-table-column prop="holderWeight1" label="上一期持有比例（%）" />
-          <el-table-column prop="lx" label="持有人类型编码" />
-          <el-table-column prop="net" label="持有人净买卖规模" />
-          <el-table-column prop="ret" label="过去6个月ETF累计收益" />
+          <el-table-column prop="activity" label="持有人行为" show-overflow-tooltip min-width="120" />
+          <el-table-column prop="holderName" label="持有人名称" show-overflow-tooltip min-width="150" />
+          <el-table-column prop="holderNum" label="持有份额" show-overflow-tooltip min-width="120" />
+          <el-table-column prop="holderNum1" label="上一期持有份额" show-overflow-tooltip min-width="150" />
+          <el-table-column prop="holderV" label="持有规模（元）" show-overflow-tooltip min-width="150" />
+          <el-table-column prop="holderV1" label="上一期持有规模" show-overflow-tooltip min-width="150" />
+          <el-table-column prop="holderWeight" label="持有比例（%）" show-overflow-tooltip min-width="150" />
+          <el-table-column prop="holderWeight1" label="上一期持有比例（%）" show-overflow-tooltip min-width="180" />
+          <el-table-column prop="lx" label="持有人类型编码" show-overflow-tooltip min-width="130" />
+          <el-table-column prop="net" label="持有人净买卖规模" show-overflow-tooltip min-width="150" />
+          <el-table-column prop="ret" label="过去6个月ETF累计收益" show-overflow-tooltip min-width="180" />
         </el-table>
       </div>
       <!-- <div style="width: 50%">

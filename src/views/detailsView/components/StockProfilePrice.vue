@@ -2,7 +2,7 @@
   <div class="stock-profile-price">
     <div class="stock-profile-price-container">
       <!-- 第一行 -->
-      <div class="row">
+      <div class="row" v-loading="infoLoading">
         <div class="block">
           <div class="section-title">基本信息</div>
           <div class="info-list">
@@ -98,9 +98,9 @@
       </div>
       <!-- 第四行：ETF Database Large Cap Growth Equities Category -->
       <div class="">
-        <div id="detailOneEcart"></div>
+        <div id="detailOneEcart" v-loading="chartLoading"></div>
       </div>
-      <div style="text-align: right;">
+      <div v-loading="tableLoading" element-loading-text="加载中..." style="text-align: right;">
         <el-date-picker
           v-model="tableDate"
           value-format="YYYY-MM-DD"
@@ -117,6 +117,8 @@
             v-for="column in columns"
             :prop="column.key"
             :label="column.label"
+            :min-width="column.minWidth"
+            :show-overflow-tooltip="column.showOverflowTooltip"
           >
             <template #default="scope">
               {{ formatValue(scope.row[column.key]) }}
@@ -150,7 +152,9 @@ const props = defineProps({
     required: true,
   },
 });
-
+const infoLoading = ref(false);
+const chartLoading = ref(false);
+const tableLoading = ref(false);
 const categoryList = ref([
   { label: "股票", value: "EQUITY" },
   { label: "债券", value: "BOND" },
@@ -169,11 +173,15 @@ watch(
   () => props.tabActiveName,
   (newVal) => {
     if (newVal === "StockProfilePrice") {
+      infoLoading.value = true;
       getSnapshotInfoApi({
         code: props.code,
       }).then((res) => {
         detailsData.value = res as Record<string, any>;
+      }).finally(() => {
+        infoLoading.value = false;
       });
+      chartLoading.value = true;
       getSnapshotLineApi({
         code: props.code,
       }).then((res) => {
@@ -225,6 +233,8 @@ watch(
           ltdNavData,
           ltdPriceData,
         ]);
+      }).finally(() => {
+        chartLoading.value = false;
       });
       getSnapshotReturns();
     }
@@ -232,6 +242,7 @@ watch(
   { immediate: true }
 );
 function getSnapshotReturns() {
+  tableLoading.value = true;
   getSnapshotReturnsApi({
         code: props.code,
         date: tableDate.value || null,
@@ -283,20 +294,22 @@ function getSnapshotReturns() {
             ltd: res.ltdMkt,
           },
         ];
+      }).finally(() => {
+        tableLoading.value = false;
       });
 }
 const detailsData = ref<Record<string, any>>({});
 const columns = [
-  { key: "type", label: "" },
-  { key: "ytd", label: "今年以来" },
-  { key: "mt1", label: "近一个月" },
-  { key: "mt3", label: "近三个月" },
-  { key: "mt6", label: "近六个月" },
-  { key: "mt12", label: "近一年" },
-  { key: "mt36", label: "近三年" },
-  { key: "mt60", label: "近五年" },
-  { key: "ltd", label: "上市至今总回报" },
-  { key: "ytdReturns", label: "年化回报" },
+  { key: "type", label: "", minWidth: "150", showOverflowTooltip: true },
+  { key: "ytd", label: "今年以来", minWidth: "100", showOverflowTooltip: true },
+  { key: "mt1", label: "近一个月", minWidth: "100", showOverflowTooltip: true },
+  { key: "mt3", label: "近三个月", minWidth: "100", showOverflowTooltip: true },
+  { key: "mt6", label: "近六个月", minWidth: "100", showOverflowTooltip: true },
+  { key: "mt12", label: "近一年", minWidth: "100", showOverflowTooltip: true },
+  { key: "mt36", label: "近三年", minWidth: "100", showOverflowTooltip: true },
+  { key: "mt60", label: "近五年", minWidth: "100", showOverflowTooltip: true },
+  { key: "ltd", label: "上市至今总回报", minWidth: "160", showOverflowTooltip: true },
+  { key: "ytdReturns", label: "年化回报", minWidth: "100", showOverflowTooltip: true },
 ];
 
 const tableData = ref<Record<string, any>[]>([]);

@@ -75,10 +75,10 @@ const tableColumnList = ref<Record<string, TableColumn[]>>(
       { prop: "nav", label: "份额净值", width: 100, showTooltip: false },
       { prop: "shares", label: "份额(百万份)", width: 120, showTooltip: false },
       // { prop: "aum", label: "资产规模(百万元)", unit: "million" },
-      { prop: "aum", label: "资产规模(百万元)", width: 110, showTooltip: true },
-      { prop: "close", label: "最新收盘价(元)", width: 110, showTooltip: true },
+      { prop: "aum", label: "资产规模(百万元)", width: 160, showTooltip: true },
+      { prop: "close", label: "最新收盘价(元)", width: 160, showTooltip: true },
       { prop: "coverRatio", label: "折溢价率", width: 110, showTooltip: true },
-      { prop: "ytdPrice", label: "今年以来价格变化(%)", width: 110, showTooltip: true }
+      { prop: "ytdPrice", label: "今年以来价格变化(%)", width: 180, showTooltip: true }
     ],
     returns: [
       { prop: "etfCode", label: "ETF代码", width: 110, showTooltip: false },

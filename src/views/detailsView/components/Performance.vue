@@ -182,12 +182,12 @@ function initBarChart(xData: string[], seriesData: SeriesItem[]) {
     dataZoom: [
         {
           type: "inside",
-          start: 0,
-          end: 10,
+          start: 90,
+          end: 100,
         },
         {
-          start: 0,
-          end: 10,
+          start: 90,
+          end: 100,
         },
       ],
     legend: {},

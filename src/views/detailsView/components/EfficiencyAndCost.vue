@@ -173,6 +173,7 @@ const handleChange = (type: string) => {
   console.log(type);
   activeBtn.value = type;
   getData();
+  getLineData();
 };
 
 let myChart: echarts.ECharts | null = null;

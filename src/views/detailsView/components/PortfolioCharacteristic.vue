@@ -28,9 +28,9 @@ let myChart: echarts.ECharts | null = null
 
 function getPortfolioChart() {
   loading.value = true
-  return getPortfolioChartApi({etfCode: '159150.OF' }).then(res => {
+  return getPortfolioChartApi({etfCode: props.code }).then(res => {
     console.log(res)
-    initChart(res.xaxis, res.series)
+    initChart(res.xaxis || [], res.series || [])
   }).finally(() => {
     loading.value = false
   })

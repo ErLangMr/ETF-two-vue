@@ -3,6 +3,7 @@
     <div style="text-align: right">
       <el-date-picker
         v-model="dateValue"
+        :clearable="false"
         value-format="YYYY-MM-DD"
         type="date"
         placeholder="选择日期"
@@ -16,17 +17,17 @@
       :style="{ margin: '20px 0' }"
       v-loading="tableLoading"
     >
-      <el-table-column prop="etfCode" label="ETF代码" />
-      <el-table-column prop="etfName" label="ETF简称" />
-      <el-table-column prop="date" label="日期" />
-      <el-table-column prop="stockNumber" label="持有证券数量（只）" />
-      <el-table-column prop="date" label="日期" />
-      <el-table-column prop="bigCapPercent" label="大盘股占比（%）" />
-      <el-table-column prop="midCapPercent" label="中盘股占比（%）" />
-      <el-table-column prop="smallCapPercent" label="小盘股占比（%）" />
-      <el-table-column prop="top5HoldingPercent" label="前五大持仓占比（%）" />
-      <el-table-column prop="top10HoldingPercent" label="前十大持仓占比%）" />
-      <el-table-column prop="top20HoldingPercent" label="前二十大持仓占比%）" />
+      <el-table-column prop="etfCode" label="ETF代码" show-overflow-tooltip min-width="120" />
+      <el-table-column prop="etfName" label="ETF简称" show-overflow-tooltip min-width="150" />
+      <el-table-column prop="date" label="日期" show-overflow-tooltip min-width="120" />
+      <el-table-column prop="stockNumber" label="持有证券数量（只）" show-overflow-tooltip min-width="170" />
+      <el-table-column prop="date" label="日期" show-overflow-tooltip min-width="130" />
+      <el-table-column prop="bigCapPercent" label="大盘股占比（%）" show-overflow-tooltip min-width="150" />
+      <el-table-column prop="midCapPercent" label="中盘股占比（%）" show-overflow-tooltip min-width="150" />
+      <el-table-column prop="smallCapPercent" label="小盘股占比（%）" show-overflow-tooltip min-width="150" />
+      <el-table-column prop="top5HoldingPercent" label="前五大持仓占比（%）" show-overflow-tooltip min-width="190" />
+      <el-table-column prop="top10HoldingPercent" label="前十大持仓占比%）" show-overflow-tooltip min-width="170" />
+      <el-table-column prop="top20HoldingPercent" label="前二十大持仓占比%）" show-overflow-tooltip min-width="190" />
     </el-table>
     <div style="display: flex; width: 100%; justify-content: space-between">
       <div id="hangye1" v-loading="hangye1Loading"></div>

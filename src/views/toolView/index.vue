@@ -92,7 +92,7 @@ onMounted(() => {
 <template>
   <div class="tool-view-container">
     <div class="tool-view-header">
-      <h1>ETF 跟踪指数</h1>
+      <!-- <h1>特色榜单</h1> -->
       <!-- <p class="tool-view-desc">
         How It Works: Use either the map tool or drop down box to find the equity ETFs with exposure to a particular country. Once a country is selected, click the icon to see all ETFs with exposure to that country.
       </p> -->
@@ -216,7 +216,7 @@ onMounted(() => {
 }
 .index-card-list {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   gap: 18px 18px;
   margin-top: 10px;
 }

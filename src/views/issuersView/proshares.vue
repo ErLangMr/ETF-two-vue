@@ -32,7 +32,8 @@
         <ScreenerTable
           class="table-area"
           :table-data="etfList"
-          :hasTableFilter="true">
+          :hasTableFilter="true"
+          @tableFilterTab="handleTableFilterTab">
           <template #table-pagination>
             <el-pagination
               v-model:current-page="page"
@@ -57,6 +58,7 @@ import { getFilterTableApi } from "@/api/filterTable";
 import { useDevice } from "@/utils/device";
 import { getIssuerNetInflowApi } from "@/api/issuers";
 import { formatValue } from '@/utils/formatValue'
+import { getEtfOverviewPageApi, getEtfNetValuePageApi, getEtfFundFlowPageApi, getEtfFeePageApi, getEtfTradingEfficiencyPageApi, getEtfDividendPageApi, getEtfRiskPageApi, getEtfHoldingFeaturePageApi, getEtfValuationPageApi } from "@/api/filterTable";
 
 const route = useRoute();
 const issue = JSON.parse(route.query.issuer as string || '{}');
@@ -66,6 +68,104 @@ const { isMobile } = useDevice();
 const page = ref(1)
 const pageSize = ref(20)
 const total = ref(0)
+const etfList = ref<any[]>([])
+let paramsObj: Record<string, any> = {
+  codes: issue.codes,
+}
+// 顶部筛选Tab变化，获取表格数据
+const tableFilterTabVal = ref("overview");
+function handleTableFilterTab(tab: string) {
+  tableFilterTabVal.value = tab;
+  getEtfTableData(paramsObj)
+}
+
+function getEtfTableData(params?: Record<string, any>) {
+  const obj = {
+    page: page.value,
+    size: pageSize.value,
+    ...params
+  }
+  if( tableFilterTabVal.value === 'overview'){
+    getEtfOverviewPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTabVal.value === 'returns'){
+    getEtfNetValuePageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTabVal.value === 'fundFlows'){
+    getEtfFundFlowPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  }else if( tableFilterTabVal.value === 'expenses'){
+    getEtfFeePageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTabVal.value === 'efficiency'){
+    getEtfTradingEfficiencyPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTabVal.value === 'dividends'){
+    getEtfDividendPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTabVal.value === 'risk'){
+    getEtfRiskPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+    return
+  } else if( tableFilterTabVal.value === 'holdings'){
+    getEtfHoldingFeaturePageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+  } else if( tableFilterTabVal.value === 'valuation'){
+    getEtfValuationPageApi(obj).then((res: any) => {
+      etfList.value = res.content
+      total.value = res.totalElements
+    }).catch((err: any) => {
+      etfList.value = []
+      total.value = 0
+    });
+  }
+}
 
 let xAxisData: (string | number)[] = [];
 let yAxisData: (number | string)[] = [];
@@ -88,25 +188,25 @@ function getNetInflowData() {
     initChart();
   });
 }
-const getFilterTableData = async () => {
-  const res: any = await getFilterTableApi({
-    page: page.value,
-    pageSize: pageSize.value,
-    fundMgrs: issue.issuer || issue.fundMgrs,
-  });
-  etfList.value = res.content;
-  total.value = res.totalElements;
-};
+// const getFilterTableData = async () => {
+//   const res: any = await getFilterTableApi({
+//     page: page.value,
+//     pageSize: pageSize.value,
+//     fundMgrs: issue.issuer || issue.fundMgrs,
+//   });
+//   etfList.value = res.content;
+//   total.value = res.totalElements;
+// };
 
 const handlePageChange = (newPage: number) => {
   page.value = newPage;
-  getFilterTableData();
+  getEtfTableData(paramsObj)
 };
 
 let myChart: any = null;
 
 onMounted(() => {
-  getFilterTableData();
+  getEtfTableData(paramsObj)
   getNetInflowData();
 });
 
@@ -117,7 +217,6 @@ onUnmounted(() => {
     myChart = null;
   }
 });
-const etfList = ref<any[]>([]);
 // function getRecentDates(days: number) {
 //   const arr = [];
 //   const today = new Date("2025-05-16");

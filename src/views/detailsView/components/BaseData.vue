@@ -200,12 +200,12 @@ function initChart(): void {
       dataZoom: [
         {
           type: "inside",
-          start: 0,
-          end: 40,
+          start: 60,
+          end: 100,
         },
         {
-          start: 0,
-          end: 40,
+          start: 60,
+          end: 100,
         },
       ],
       tooltip: {
@@ -258,12 +258,12 @@ function initChart(): void {
       dataZoom: [
         {
           type: "inside",
-          start: 0,
-          end: 10,
+          start: 90,
+          end: 100,
         },
         {
-          start: 0,
-          end: 10,
+          start: 90,
+          end: 100,
         },
       ],
       xAxis: {

@@ -37,64 +37,94 @@
           <el-button @click="searchChange(ETFSearch)" :icon="Search" />
         </template>
       </el-input>
-      <div style="display: flex; align-items: center">
-        <el-date-picker
-          v-model="yearValue"
-          type="year"
-          value-format="YYYY"
-          placeholder="选择年份"
-          style="margin-right: 5px"
-          @change="periodChange"
-        />
-        <PeriodSelector
-          v-model="activeBtn"
-          :options="periodOptions"
-          prefix=""
-          suffix=""
-          @change="periodChange"
-        />
-      </div>
     </div>
     <div class="divider"></div>
-    <p class="titleP">最受欢迎的{{total}}只股票及其ETF替代方案</p>
-    <el-table
-      :data="tableData"
-      v-loading="tableLoading"
-      element-loading-text="加载中..."
-      :header-cell-style="{
-        background: '#f5f5fa',
-        color: '#333',
-        fontWeight: 'bold',
-        fontSize: '1rem',
-      }"
-    >
-      <el-table-column prop="stkCode" label="股票代码" min-width="120">
-        <template #default="scope">
-          <span class="tableLink" @click="toEtfLocator(scope.row)">{{
-            scope.row.stkCode
-          }}</span>
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="stkName"
-        label="股票名称"
-        min-width="150"
-        :show-overflow-tooltip="true"
-      ></el-table-column>
-      <el-table-column prop="holdMv" label="持有股票市值" min-width="130" :show-overflow-tooltip="true" />
-      <el-table-column prop="holdNum" label="持有股票数量" min-width="130" :show-overflow-tooltip="true" />
-      <el-table-column prop="port" label="占ETF净值比" min-width="130" :show-overflow-tooltip="true" />
-      <el-table-column prop="rank" label="占ETF净值比排序" min-width="150" :show-overflow-tooltip="true" />
-      <el-table-column prop="reportType" label="定期报告类型" min-width="150" :show-overflow-tooltip="true" />
-      <el-table-column prop="w1" label="占股票总市值比" min-width="150" :show-overflow-tooltip="true" />
-      <el-table-column prop="w2" label="占股票流通A股市值比" min-width="180" :show-overflow-tooltip="true" />
-    </el-table>
-    <el-pagination
+    <div style="display: flex; align-items: center;justify-content: space-between">
+      <p class="titleP">最受欢迎的{{ total }}只股票及其ETF替代方案</p>
+      <div style="display: flex; align-items: center">
+          <el-date-picker
+            v-model="yearValue"
+            type="year"
+            value-format="YYYY"
+            placeholder="选择年份"
+            style="margin-right: 5px;width: 120px;"
+            @change="periodChange"
+          />
+          <PeriodSelector
+            v-model="activeBtn"
+            :options="periodOptions"
+            prefix=""
+            suffix=""
+            @change="periodChange"
+          />
+        </div>
+    </div>
+  <div style="padding: 20px">
+      <el-table
+        :data="tableData"
+        v-loading="tableLoading"
+        element-loading-text="加载中..."
+        :header-cell-style="{
+          background: '#f5f5fa',
+          color: '#333',
+          fontWeight: 'bold',
+          fontSize: '1rem',
+        }"
+      >
+        <el-table-column prop="stkCode" label="股票代码" min-width="120">
+          <!-- <template #default="scope">
+            <span class="tableLink" @click="toEtfDetail(scope.row)">{{
+              scope.row.stkCode
+            }}</span>
+          </template> -->
+        </el-table-column>
+        <el-table-column
+          prop="stkName"
+          label="股票名称"
+          min-width="150"
+          show-overflow-tooltip
+        ></el-table-column>
+        <el-table-column
+          prop="date"
+          label="日期"
+          min-width="120"
+        ></el-table-column>
+        <el-table-column
+          prop="stkHn"
+          label="ETF持有数量"
+          width="120"
+        ></el-table-column>
+        <el-table-column
+          prop="stkHv"
+          label="ETF持有市值"
+          min-width="120"
+        ></el-table-column>
+        <el-table-column
+          prop="stkHvAmv"
+          label="ETF持有市值占股票流通A股市值比"
+          min-width="250"
+        ></el-table-column>
+        <el-table-column
+          prop="stkHvTmv"
+          label="ETF持有市值占股票总市值比"
+          min-width="210"
+        ></el-table-column>
+        <el-table-column
+          prop="rank"
+          label="ETF持有市值排序"
+          min-width="200"
+          sortable
+        ></el-table-column>
+      </el-table>
+      <el-pagination
         v-model:current-page="page"
         layout="total, prev, pager, next"
         :total="total"
         :page-size="pageSize"
-        @current-change="handlePageChange" />
+        style="justify-content: flex-end; margin-top: 20px"
+        @current-change="handlePageChange"
+      />
+    </div>
   </div>
 </template>
 
@@ -113,8 +143,8 @@ const total = ref(0);
 const pageSize = ref(10);
 const page = ref(1);
 onMounted(() => {
-  yearValue.value = "2023";
-  getStockList1()
+  yearValue.value = "2025";
+  getStockList2();
 });
 interface PeriodOption {
   label: string;
@@ -123,44 +153,21 @@ interface PeriodOption {
 const yearValue = ref("");
 const activeBtn = ref("-06-30");
 const periodOptions: PeriodOption[] = [
-  { label: "1 月底", value: "-01-31" },
-  { label: "3 月底", value: "-03-31" },
-  { label: "6 月底", value: "-06-30" },
-  { label: "9 月底", value: "-09-30" },
-  { label: "12 月底", value: "-12-31" },
+  { label: "Q1", value: "-03-31" },
+  { label: "Q2", value: "-06-30" },
+  { label: "Q3", value: "-09-30" },
+  { label: "Q4", value: "-12-31" },
 ];
 const periodValue = ref("");
 const periodChange = (value: string) => {
-  // periodValue.value = yearValue.value + activeBtn.value;
-  // console.log(periodValue.value, "periodChange");
-};
-const handlePageChange = (val: number) => {
-  page.value = val;
-  getStockList1();
+  periodValue.value = yearValue.value + activeBtn.value;
+  getStockList2();
 };
 
 // const loading = ref(false);
 const tableLoading = ref(false);
 // const options = ref<{ value: string; label: string }[]>([]);
-function getStockList1() {
-  tableLoading.value = true;
-  const params = {
-    date: yearValue.value + activeBtn.value,
-    req: ETFSearch.value,
-    page: page.value,
-    size: pageSize.value,
-  };
-  getStockList1Api(params).then((res: any) => {
-    // loading.value = false;
-    // options.value = res.content.map((item: any) => {
-    //   return { value: item.stkCode, label: item.etfName };
-    // });
-    tableData.value = res.content;
-    total.value = res.totalPages;
-  }).finally(() => {
-    tableLoading.value = false;
-  });
-}
+
 // function remoteMethod(query: string) {
 //   if (query) {
 //     loading.value = true;
@@ -171,30 +178,40 @@ function getStockList1() {
 // }
 
 function searchChange(value: string) {
-  getStockList1();
+    router.push({
+    name: "StockLocatorDetails",
+    query: { etf: value },
+  });
+}
+
+function toEtfDetail(etf: any) {
+  router.push({
+    path: "/details",
+    query: { code: "159395.SZ" },
+  });
 }
 
 function getStockList2() {
+  tableLoading.value = true;
   const params = {
     date: yearValue.value + activeBtn.value,
-    req: ETFSearch.value,
     page: page.value,
     size: pageSize.value,
   };
   getStockList2Api(params)
-    .then((res: any) => {})
+    .then((res: any) => {
+      tableData.value = res.content;
+      total.value = res.totalElements;
+    })
     .finally(() => {
       tableLoading.value = false;
     });
 }
-
-const toEtfLocator = (row: any) => {
-  console.log(row);
-  router.push({
-    name: "StockLocatorDetails",
-    query: { etf: JSON.stringify(row.stkCode) },
-  });
+const handlePageChange = (val: number) => {
+  page.value = val;
+  getStockList2();
 };
+
 </script>
 
 <style lang="scss" scoped>

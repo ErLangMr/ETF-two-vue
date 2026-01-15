@@ -4,8 +4,10 @@
       <el-date-picker
         v-model="yearValue"
         type="year"
+        :clearable="false"
         placeholder="选择年份"
         value-format="YYYY"
+        @change="yearChange"
       />
     </div>
     <div>
@@ -65,6 +67,14 @@
             </template>
           </el-table-column>
         </el-table>
+        <div style="display: flex; justify-content: flex-end;margin-top: 10px;">
+          <el-pagination
+            :current-page="currentPage3"
+            layout="total, prev, pager, next"
+            :total="total3"
+            @current-change="(val) => tab1handleCurrentChange(val, '3')"
+          />
+        </div>
       </div>
     </div>
     <div style="margin-top: 30px">
@@ -93,6 +103,14 @@
           </template>
         </el-table-column>
       </el-table>
+      <div style="display: flex; justify-content: flex-end;margin-top: 10px;">
+        <el-pagination
+          :current-page="currentPage5"
+          layout="total, prev, pager, next"
+          :total="total5"
+          @current-change="(val) => tab1handleCurrentChange(val, '5')"
+        />
+      </div>
       <h4 style="margin-top: 20px">年报</h4>
       <el-table
         :data="tableData6"
@@ -115,6 +133,14 @@
           </template>
         </el-table-column>
       </el-table>
+      <div style="display: flex; justify-content: flex-end;margin-top: 10px;">
+        <el-pagination
+          :current-page="currentPage6"
+          layout="total, prev, pager, next"
+          :total="total6"
+          @current-change="(val) => tab1handleCurrentChange(val, '6')"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -189,12 +215,24 @@ const tab1handleCurrentChange = (val: number, type: string) => {
     currentPageRef.value = val;
   }
   const obj = {
-    etfCode: "159150.OF",
+    etfCode: props.code,
     year: yearValue.value,
     reportType: type,
     pageSize: 10,
     currentPage: val,
   }
+  getAnnualHoldingsApi(obj).then((res: any) => {
+      const tableDataRef = tableDataMap[type];
+      const totalRef = totalMap[type];
+      if (tableDataRef && totalRef) {
+        tableDataRef.value = res;
+        totalRef.value = res.total || 0;
+      }
+    });
+};
+
+const yearChange = (val: string) => {
+  getAnnualHoldings();
 };
 
 const tableColumns = [
@@ -209,16 +247,16 @@ function getAnnualHoldings() {
   const typeArr = ["1", "3", "5", "6"];
   typeArr.forEach((type) => {
     getAnnualHoldingsApi({
-      etfCode: "159150.OF",
+      etfCode: '159150.OF',
       year: yearValue.value,
       reportType: type,
     }).then((res: any) => {
-      // const tableDataRef = tableDataMap[type];
-      // const totalRef = totalMap[type];
-      // if (tableDataRef && totalRef) {
-      //   tableDataRef.value = res.data;
-      //   totalRef.value = res.total;
-      // }
+      const tableDataRef = tableDataMap[type];
+      const totalRef = totalMap[type];
+      if (tableDataRef && totalRef) {
+        tableDataRef.value = res;
+        totalRef.value = res.total || 0;
+      }
     });
   });
 }
