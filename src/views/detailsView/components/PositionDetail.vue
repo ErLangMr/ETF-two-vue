@@ -219,14 +219,14 @@ const tab1handleCurrentChange = (val: number, type: string) => {
     year: yearValue.value,
     reportType: type,
     pageSize: 10,
-    currentPage: val,
+    pageNum: val,
   }
   getAnnualHoldingsApi(obj).then((res: any) => {
       const tableDataRef = tableDataMap[type];
       const totalRef = totalMap[type];
       if (tableDataRef && totalRef) {
-        tableDataRef.value = res;
-        totalRef.value = res.total || 0;
+        tableDataRef.value = res.content;
+        totalRef.value = res.totalElements || 0;
       }
     });
 };
@@ -247,15 +247,17 @@ function getAnnualHoldings() {
   const typeArr = ["1", "3", "5", "6"];
   typeArr.forEach((type) => {
     getAnnualHoldingsApi({
-      etfCode: '159150.OF',
+      etfCode: props.code,
       year: yearValue.value,
       reportType: type,
+      pageSize: 10,
+      pageNum: 1
     }).then((res: any) => {
       const tableDataRef = tableDataMap[type];
       const totalRef = totalMap[type];
       if (tableDataRef && totalRef) {
-        tableDataRef.value = res;
-        totalRef.value = res.total || 0;
+        tableDataRef.value = res.content;
+        totalRef.value = res.totalElements || 0;
       }
     });
   });

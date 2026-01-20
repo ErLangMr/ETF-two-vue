@@ -14,7 +14,7 @@ export const formatValue = (value: any, unit?: string) => {
       return value;
     } else {
       // 非整数，保留两位小数
-      return value.toFixed(2);
+      // return value.toFixed(2);
     }
   }
   return value;

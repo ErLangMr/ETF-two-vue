@@ -91,23 +91,23 @@
         ></el-table-column>
         <el-table-column
           prop="stkHn"
-          label="ETF持有数量"
-          width="120"
+          label="ETF持有数量（万）"
+          width="180"
         ></el-table-column>
         <el-table-column
           prop="stkHv"
-          label="ETF持有市值"
-          min-width="120"
+          label="ETF持有市值（亿元）"
+          min-width="190"
         ></el-table-column>
         <el-table-column
           prop="stkHvAmv"
-          label="ETF持有市值占股票流通A股市值比"
-          min-width="250"
+          label="ETF持有市值占股票流通A股市值比（%）"
+          min-width="330"
         ></el-table-column>
         <el-table-column
           prop="stkHvTmv"
-          label="ETF持有市值占股票总市值比"
-          min-width="210"
+          label="ETF持有市值占股票总市值比（%）"
+          min-width="300"
         ></el-table-column>
         <el-table-column
           prop="rank"
