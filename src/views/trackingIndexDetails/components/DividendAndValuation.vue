@@ -304,16 +304,7 @@ function initValuationChart(chart: echarts.ECharts) {
             },
             {
               yAxis: 100,
-            },
-            {
-              yAxis: 150,
-            },
-            {
-              yAxis: 200,
-            },
-            {
-              yAxis: 300,
-            },
+            }
           ],
         },
       },
@@ -324,6 +315,20 @@ function initValuationChart(chart: echarts.ECharts) {
         symbol: "none",
         // smooth: true,
         data: [20, 82, 131, 200, 260, 290, 310],
+        markLine: {
+          silent: true,
+          lineStyle: {
+            color: "#333",
+          },
+          data: [
+            {
+              yAxis: 200,
+            },
+            {
+              yAxis: 300,
+            },
+          ],
+        },
       },
     ],
   });

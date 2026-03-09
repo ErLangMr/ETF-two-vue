@@ -1,8 +1,69 @@
 <template>
   <div class="indexSnapshot">
+    <div style="text-align: right">
+      <el-date-picker
+        v-model="dateValue"
+        value-format="YYYY-MM-DD"
+        type="date"
+        placeholder="选择日期"
+        style="margin-bottom: 10px"
+        @change="baseDataDateChange"
+      />
+    </div>
     <div class="indexSnapshot-container">
+      <div class="block">
+          <div class="section-title">基本信息</div>
+          <div class="info-list">
+            <div class="info-row">
+              <span>指数代码</span>
+              <span>{{ detailsData?.indexCode  }}</span>
+            </div>
+            <div class="info-row">
+              <span>指数名称</span>
+              <span>{{ detailsData?.indexName  }}</span>
+            </div>
+            <div class="info-row">
+              <span>发布日期</span>
+              <span>{{ detailsData?.launchDate  }}</span>
+            </div>
+            <div class="info-row">
+              <span>规模变动</span
+              ><span
+                >{{ detailsData?.aumChg }}</span
+              >
+            </div>
+            <div class="info-row">
+              <span>基日</span
+              ><span
+                >{{ detailsData?.baseDate }}</span
+              >
+            </div>
+            <div class="info-row">
+              <span>最新交易日</span>
+              <span>{{ detailsData?.latestTradeDate }}</span>
+            </div>
+            <div class="info-row">
+              <span>相关ETF产品规模（亿元）</span>
+              <span>{{ detailsData?.etfAUM }}</span>
+            </div>
+            <div class="info-row">
+              <span>相关ETF产品数量</span>
+              <span>{{
+                detailsData?.etfNum
+              }}</span>
+            </div>
+            <div class="info-row">
+              <span>最新收盘价</span>
+              <span>{{ detailsData?.indexClose  }}</span>
+            </div>
+            <div class="info-row">
+              <span>最新流通规模（亿元）</span>
+              <span>{{ detailsData?.tamv  }}</span>
+            </div>
+          </div>
+        </div>
       <!-- 第一行 -->
-      <div class="row">
+      <!-- <div class="row">
         <div class="block">
           <div class="section-title">基本信息</div>
           <div class="info-list">
@@ -10,38 +71,38 @@
               <span>基日</span
               ><span
                 class="linkStyle"
-                @click.stop="clickVitals(props.detailsData?.fundInfoByVitals)"
-                >{{ props.detailsData?.fundInfoByVitals?.fundMgrs }}</span
+                @click.stop="clickVitals(detailsData?.fundInfoByVitals)"
+                >{{ detailsData?.fundInfoByVitals?.fundMgrs }}</span
               >
             </div>
             <div class="info-row">
               <span>基点</span
               ><span
                 class="linkStyle"
-                @click.stop="clickVitals(props.detailsData?.fundInfoByVitals)"
-                >{{ props.detailsData?.fundInfoByVitals?.shortName }}</span
+                @click.stop="clickVitals(detailsData?.fundInfoByVitals)"
+                >{{ detailsData?.fundInfoByVitals?.shortName }}</span
               >
             </div>
             <div class="info-row">
               <span>发布日期</span>
               <span>{{
-                formatValue(props.detailsData?.fundInfoByVitals?.fee, "percent")
+                formatValue(detailsData?.fundInfoByVitals?.fee, "percent")
               }}</span>
             </div>
             <div class="info-row">
               <span>发布机构</span>
-              <span>{{ props.detailsData?.fundInfoByVitals?.setupDate }}</span>
+              <span>{{ detailsData?.fundInfoByVitals?.setupDate }}</span>
             </div>
             <div class="info-row">
               <span>加权方式</span>
               <span>{{
-                props.detailsData?.fundInfoByVitals?.trackIndexName
+                detailsData?.fundInfoByVitals?.trackIndexName
               }}</span>
             </div>
             <div class="info-row">
               <span>收益处理方式</span>
               <span>{{
-                props.detailsData?.fundInfoByVitals?.trackIndexName
+                detailsData?.fundInfoByVitals?.trackIndexName
               }}</span>
             </div>
           </div>
@@ -56,7 +117,7 @@
                   categoryList.find(
                     (item) =>
                       item.value ===
-                      props.detailsData?.fundInfoByThemes?.category
+                      detailsData?.fundInfoByThemes?.category
                   )?.label
                 }}
               </span>
@@ -64,25 +125,25 @@
             <div class="info-row">
               <span>最新收盘价</span
               ><span>
-                {{ props.detailsData?.fundInfoByThemes?.styleAttribute }}
+                {{ detailsData?.fundInfoByThemes?.styleAttribute }}
               </span>
             </div>
             <div class="info-row">
               <span>总市值（万亿元）</span
               ><span>
-                {{ props.detailsData?.fundInfoByThemes?.compMarketCap }}
+                {{ detailsData?.fundInfoByThemes?.compMarketCap }}
               </span>
             </div>
             <div class="info-row">
               <span>自由流通市值（万亿元）</span
               ><span>
-                {{ props.detailsData?.fundInfoByThemes?.investStrategy }}
+                {{ detailsData?.fundInfoByThemes?.investStrategy }}
               </span>
             </div>
           </div>
         </div>
-      </div>
-      <div class="snapshot_ProductOverview">
+      </div> -->
+      <!-- <div class="snapshot_ProductOverview">
         <h4>挂钩产品概览</h4>
         <div class="snapshot_ProductOverview_list">
           <div>
@@ -111,8 +172,8 @@
       <div style="display: flex">
         <div id="indexSnapshotOneChart"></div>
         <div id="indexSnapshotTwoChart"></div>
-      </div>
-      <div>
+      </div> -->
+      <!-- <div>
         <el-table
           :data="tableData"
           :header-cell-style="{ background: '#d7d9dc', color: '#333' }"
@@ -133,7 +194,7 @@
           />
           <el-table-column prop="ytdReturns" label="年初至今回报(%)" />
         </el-table>
-      </div>
+      </div> -->
     </div>
   </div>
 </template>
@@ -143,15 +204,17 @@ import { useRouter } from "vue-router";
 import * as echarts from "echarts";
 import { formatValue } from "@/utils/formatValue";
 import { nextTick, onUnmounted, ref, watch } from "vue";
+import { getIndexSnapshotApi } from "@/api/trackingIndex";
+
+
 
 const router = useRouter();
-const props = defineProps({
-  detailsData: {
-    type: Object,
-    required: true,
-    default: () => ({}),
-  },
-});
+const props = defineProps<{
+  tabActiveName: string
+  code: string
+}>();
+
+const detailsData = ref<Record<string, any>>({});
 
 const categoryList = ref([
   { label: "股票", value: "EQUITY" },
@@ -169,38 +232,32 @@ function clickVitals(data: any) {
     },
   });
 }
-
+const dateValue = ref("");
 watch(
-  () => props.detailsData,
+  () => props.tabActiveName,
   (newVal) => {
-    if (newVal) {
-      if (newVal.fundInfoByIndexData) {
-        tableData.value = [];
-        Object.keys(newVal.fundInfoByIndexData).forEach((key) => {
-          let typeName = "";
-          if (key === "bestReturn") {
-            typeName = "年初至今回报最高";
-          } else if (key === "highestVolume") {
-            typeName = "流动性最高";
-          } else if (key === "largestSize") {
-            typeName = "规模最大";
-          } else if (key === "lowestFee") {
-            typeName = "费用最低";
-          }
-          tableData.value.push({
-            type: typeName,
-            shortName: newVal.fundInfoByIndexData[key].shortName,
-            fee: newVal.fundInfoByIndexData[key].fee,
-            totalMarketValue: newVal.fundInfoByIndexData[key].totalMarketValue,
-            avgDailyVolumeForYear:
-              newVal.fundInfoByIndexData[key].avgDailyVolumeForYear,
-            ytdReturns: newVal.fundInfoByIndexData[key].ytdReturns,
-          });
-        });
-      }
+    if (newVal === "IndexSnapshot") {
+      //  getChartData();
+        getIndexSnapshot();
     }
-  }
+  },
+  { immediate: true }
 );
+
+function getIndexSnapshot() {
+  getIndexSnapshotApi({
+    code: props.code,
+    date: dateValue.value,
+  }).then((res) => {
+    detailsData.value = res;
+  });
+}
+
+function baseDataDateChange() {
+  getIndexSnapshot();
+}
+
+
 
 const columns = [
   { key: "type", label: "类型" },
@@ -380,14 +437,6 @@ function initTwoChart(chart: echarts.ECharts) {
     },
   });
 }
-watch(
-  () => props.detailsData,
-  () => {
-    nextTick(() => {
-      getChartData();
-    });
-  }
-);
 function disposeCharts() {
   const charts = [indexSnapshotOneChart, indexSnapshotTwoChart];
 

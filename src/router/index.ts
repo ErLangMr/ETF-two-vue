@@ -155,6 +155,14 @@ const router = createRouter({
         title: '组合模拟器'
       }
     },
+    {
+      path: '/developing',
+      name: 'Developing',
+      component: () => import('../views/developing.vue'),
+      meta: {
+        title: '开发中'
+      }
+    },
   ],
 })
 

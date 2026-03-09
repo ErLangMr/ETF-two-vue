@@ -327,7 +327,7 @@ const handleSelectionChange = (val: any[]) => {
               <span
                 class="link-cell"
                 v-if="column.type === 'link'"
-                @click="handleJump(column.url??'', scope.row.etfCode || '', scope.row.etfName || '')"
+                @click="handleJump(column.url??'', scope.row.etfCode || scope.row.indexCode || '', scope.row.etfName || scope.row.indexName || '')"
               >
                 {{ scope.row[column.prop] }}
               </span>

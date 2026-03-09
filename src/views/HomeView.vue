@@ -60,11 +60,11 @@ const etfToolArr = [
     path: "/portfolioSimulator",
   },
   {
-    title: "ETF 国际资产配置",
+    title: "跨境ETF",
     desc: "快速轻松地查找由50多家不同发行人发行的ETF。",
     icon: OfficeBuilding,
     img: intlAssetAllocation,
-    path: "/portfolioSimulator",
+    path: "/developing",
   },
 ]
 const etfChannel = [
@@ -78,7 +78,7 @@ const etfChannel = [
     title: "ETF 热门产品",
     desc: "想要拥有特定指数的投资组合吗?关注ETF追踪指数。",
     icon: Setting,
-    path: "/portfolioSimulator",
+    path: "/developing",
   },
   {
     title: "ETF 发行人",
@@ -389,7 +389,7 @@ const featuredCategories = [
         <div class="index-list-item-title">{{ item.category }}</div>
         <div class="index-list-item-content">
           <div class="index-list-item-content-item" v-for="child in item.data" :key="child.title" @click="handleIndexClick(child)">
-            <div class="index-list-item-content-item-title">{{ child.trackIndexName }}</div>
+            <div class="index-list-item-content-item-title" :title="child.trackIndexName">{{ child.trackIndexName }}</div>
           </div>
         </div>
       </div>
@@ -567,6 +567,9 @@ h3{
       border: 1px solid #eeeeee;
       color: var(--theme-purple);
       cursor: pointer;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
       &:hover {
         color: #1da4a8;
       }

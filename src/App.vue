@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { RouterLink, RouterView, useRouter, useRoute } from "vue-router";
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { Search, Menu } from "@element-plus/icons-vue";
 import { useDevice } from "@/utils/device";
 import Breadcrumb from "@/components/Breadcrumb.vue";
+import { incrementViewCountApi } from "@/api/home";
 
 const searchValue = ref("");
 const isMenuOpen = ref(false);
@@ -32,6 +33,13 @@ watch(() => route.path, () => {
   if (appElement) {
     appElement.scrollTop = 0;
   }
+});
+
+const viewCount = ref(0);
+onMounted(() => {
+  incrementViewCountApi().then((res: any) => {
+    viewCount.value = res.data.value
+  });
 });
 
 </script>
@@ -72,19 +80,22 @@ watch(() => route.path, () => {
               <el-menu-item index="/portfolioSimulator"
                 >ETF组合模拟器</el-menu-item
               >
-              <el-menu-item index="21">国际资产配置</el-menu-item>
+              <el-menu-item index="/developing?type=assetAllocation">国际资产配置</el-menu-item>
             </el-sub-menu>
             <el-sub-menu index="3">
               <template #title>ETF频道</template>
               <el-menu-item index="/trackingIndex">ETF跟踪指数</el-menu-item>
               <el-menu-item index="/issuers">ETF发行人</el-menu-item>
-              <el-menu-item index="/31">ETF热门产品</el-menu-item>
+              <el-menu-item index="/developing">ETF热门产品</el-menu-item>
               <el-menu-item index="/tool">ETF特色榜单</el-menu-item>
             </el-sub-menu>
-            <el-menu-item index="4">ETF研究院</el-menu-item>
+            <el-menu-item index="/developing?type=research">ETF研究院</el-menu-item>
           </el-menu>
         </div>
         <div class="right-section">
+          <span style="color: var(--el-text-color-regular);">
+            网页访问量{{ viewCount }}
+          </span>
           <!-- <el-autocomplete
             v-if="!isMobile()"
             v-model="searchValue"

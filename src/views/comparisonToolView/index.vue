@@ -99,10 +99,10 @@ const filterTabs = [
     desc: "交易效率的一些描述",
   },
   {
-    label: "分工和估值",
+    label: "分红和估值",
     value: "divisionAndValuation",
-    descTitle: "分工和估值",
-    desc: "分工和估值的一些描述",
+    descTitle: "分红和估值",
+    desc: "分红和估值的一些描述",
   },
   {
     label: "业绩和风险",

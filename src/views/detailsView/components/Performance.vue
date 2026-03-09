@@ -103,6 +103,9 @@ function getPerformanceBar() {
   if (oneChart) {
     oneChart.showLoading();
   }
+  if (!props.code) {
+    return;
+  }
   getPerformanceBarApi({
     etfCode: props.code,
     date: dateValue.value || null,
@@ -120,6 +123,9 @@ function getPerformanceLine() {
   if (twoChart) {
     twoChart.showLoading();
   }
+  if (!props.code) {
+    return;
+  }
   getPerformanceLineApi({
     etfCode: props.code,
     date: dateValue.value || null,
@@ -134,6 +140,9 @@ function getPerformanceLine() {
   });
 }
 function getPerformanceData() {
+  if (!props.code) {
+    return;
+  }
   getPerformanceListApi({
     etfCode: props.code,
     date: dateValue.value || null,
