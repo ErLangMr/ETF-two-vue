@@ -1,38 +1,87 @@
 <template>
   <div class="dividend-and-valuation">
-    <h4 style="margin-bottom: 10px">基本面</h4>
+    <div
+      style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+      "
+    >
+      <h4>基本面</h4>
+      <div style="width: auto">
+        <el-date-picker
+          v-model="dateValue"
+          type="daterange"
+          range-separator="To"
+          start-placeholder="开始日期"
+          end-placeholder="结束日期"
+          value-format="YYYY-MM-DD"
+          @change="handleDateChange"
+        />
+      </div>
+    </div>
     <el-table
       :data="tableData"
       :header-cell-style="{ background: '#d7d9dc', color: '#333' }"
       style="width: 100%"
     >
-      <el-table-column prop="tradingDate" label="营业收入" />
-      <el-table-column prop="closePrice" label="营业收入增幅" />
-      <el-table-column prop="change" label="净利润">
+      <el-table-column prop="indexCode" label="指数代码" min-width="100" />
+      <el-table-column prop="indexName" label="指数名称" min-width="100" />
+      <el-table-column prop="tys" label="营业收入(单位：亿元)" min-width="180">
         <template #default="{ row }">
-          <span :style="{ color: row.change >= 0 ? 'red' : 'green' }">
-            {{ row.change }}
+          <span>
+            {{ (row.tys/100000000).toFixed(4) }}
           </span>
         </template>
       </el-table-column>
-      <el-table-column prop="changePercent" label="净利润增速">
+      <el-table-column prop="ysZS" label="营业收入增幅" min-width="150">
         <template #default="{ row }">
-          <span :style="{ color: row.change >= 0 ? 'red' : 'green' }">
-            {{ row.changePercent }}
+          <span :style="{ color: row.ysZS >= 0 ? 'red' : 'green' }">
+            {{ row.ysZS.toFixed(4) }}
           </span>
         </template>
       </el-table-column>
-      <el-table-column prop="openDateChange" label="加权平均ROE" />
+      <el-table-column prop="tnp" label="净利润(单位：亿元)" min-width="180">
+        <template #default="{ row }">
+          <span :style="{ color: row.tnp >= 0 ? 'red' : 'green' }">
+            {{ (row.tnp/100000000).toFixed(4) }}
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="npZS" label="净利润增速" min-width="150">
+        <template #default="{ row }">
+          <span :style="{ color: row.npZS >= 0 ? 'red' : 'green' }">
+            {{ row.npZS.toFixed(4) }}
+          </span>
+        </template>
+      </el-table-column>
+      <el-table-column prop="troe" label="加权平均ROE" min-width="150">
+        <template #default="{ row }">
+          <span>
+            {{ row.troe.toFixed(4) }}
+          </span>
+        </template>
+      </el-table-column>
     </el-table>
-    <div id="ValuationChart" style="height: 400px"></div>
+    <div style="display: flex; justify-content: flex-end; margin-top: 20px">
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 30, 40]"
+        layout="total, sizes, prev, pager, next"
+        :total="total"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
+    </div>
+    <!-- <div id="ValuationChart" style="height: 400px"></div>
     <div>
       <h4 style="margin-bottom: 10px">分红概览</h4>
       <div class="dividend-overview">
-        <!-- 股息率 -->
         <div class="overview-card">
           <div class="card-title">
             股息率(近12个月)
-            <!-- <span class="view-history">查看历史</span> -->
           </div>
           <div class="card-value">2.66%</div>
           <div class="card-detail">
@@ -46,8 +95,6 @@
             </div>
           </div>
         </div>
-
-        <!-- 分红总额 -->
         <div class="overview-card">
           <div class="card-title">分红总额(已宣告)</div>
           <div class="card-value">
@@ -65,8 +112,6 @@
             </div>
           </div>
         </div>
-
-        <!-- 分红公司家数 -->
         <div class="overview-card">
           <div class="card-title">分红公司家数</div>
           <div class="card-value">
@@ -86,125 +131,76 @@
         </div>
       </div>
     </div>
-    <!-- <div style="display: flex; justify-content: space-between; gap: 20px">
-
+    <div id="dividendChart" style="height: 400px"></div>
+    <div style="height: 400px">
+      <el-table
+        :data="tableData"
+        :header-cell-style="{ background: '#d7d9dc', color: '#333' }"
+        style="width: 100%"
+      >
+        <el-table-column prop="tradingDate" label="营业收入" />
+        <el-table-column prop="closePrice" label="营业收入增幅" />
+        <el-table-column prop="change" label="净利润">
+          <template #default="{ row }">
+            <span :style="{ color: row.change >= 0 ? 'red' : 'green' }">
+              {{ row.change }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="changePercent" label="净利润增速">
+          <template #default="{ row }">
+            <span :style="{ color: row.change >= 0 ? 'red' : 'green' }">
+              {{ row.changePercent }}
+            </span>
+          </template>
+        </el-table-column>
+        <el-table-column prop="openDateChange" label="加权平均ROE" />
+      </el-table>
     </div> -->
-    <div id="dividendChart" style="height: 400px;"></div>
-      <div style="height: 400px">
-        <el-table
-          :data="tableData"
-          :header-cell-style="{ background: '#d7d9dc', color: '#333' }"
-          style="width: 100%"
-        >
-          <el-table-column prop="tradingDate" label="营业收入" />
-          <el-table-column prop="closePrice" label="营业收入增幅" />
-          <el-table-column prop="change" label="净利润">
-            <template #default="{ row }">
-              <span :style="{ color: row.change >= 0 ? 'red' : 'green' }">
-                {{ row.change }}
-              </span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="changePercent" label="净利润增速">
-            <template #default="{ row }">
-              <span :style="{ color: row.change >= 0 ? 'red' : 'green' }">
-                {{ row.changePercent }}
-              </span>
-            </template>
-          </el-table-column>
-          <el-table-column prop="openDateChange" label="加权平均ROE" />
-        </el-table>
-      </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { nextTick, onUnmounted, ref, watch } from "vue";
 import * as echarts from "echarts";
+import { getIndexDividendFundamentalsApi } from "@/api/trackingIndex";
 
-const tableData = ref([
-  {
-    tradingDate: "2025-09-19",
-    openPrice: 4499.09,
-    highPrice: 4533.09,
-    lowPrice: 4491.84,
-    closePrice: 4501.92,
-    change: 3.81,
-    changePercent: "0.08%",
-    openDateChange: -189.51,
-    openDateChangePercent: "-4.04%",
-    volume: "2,250,440.00",
-    turnover: "60,388,705.98",
-  },
-  {
-    tradingDate: "2025-09-18",
-    openPrice: 4546.03,
-    highPrice: 4573.83,
-    lowPrice: 4454.99,
-    closePrice: 4498.11,
-    change: -52.91,
-    changePercent: "-1.16%",
-    openDateChange: -193.32,
-    openDateChangePercent: "-4.12%",
-    volume: "3,098,598.26",
-    turnover: "83,998,712.74",
-  },
-  {
-    tradingDate: "2025-09-17",
-    openPrice: 4517.29,
-    highPrice: 4556.03,
-    lowPrice: 4503.8,
-    closePrice: 4551.02,
-    change: 27.69,
-    changePercent: "0.61%",
-    openDateChange: -140.41,
-    openDateChangePercent: "-2.99%",
-    volume: "2,357,164.72",
-    turnover: "60,845,420.05",
-  },
-  {
-    tradingDate: "2025-09-16",
-    openPrice: 4539.92,
-    highPrice: 4552.42,
-    lowPrice: 4494.79,
-    closePrice: 4523.34,
-    change: -9.72,
-    changePercent: "-0.21%",
-    openDateChange: -168.09,
-    openDateChangePercent: "-3.58%",
-    volume: "2,492,692.06",
-    turnover: "61,372,833.48",
-  },
-  {
-    tradingDate: "2025-09-15",
-    openPrice: 4534.89,
-    highPrice: 4566.91,
-    lowPrice: 4522.5,
-    closePrice: 4533.06,
-    change: 11.06,
-    changePercent: "0.24%",
-    openDateChange: -158.37,
-    openDateChangePercent: "-3.38%",
-    volume: "2,318,856.78",
-    turnover: "61,331,465.24",
-  },
-  {
-    tradingDate: "2025-09-12",
-    openPrice: 4544.59,
-    highPrice: 4564.67,
-    lowPrice: 4517.79,
-    closePrice: 4522.0,
-    change: -26.04,
-    changePercent: "-0.57%",
-    openDateChange: -169.43,
-    openDateChangePercent: "-3.61%",
-    volume: "2,664,420.03",
-    turnover: "68,957,607.57",
-  },
-]);
+const tableData = ref([]);
 const props = defineProps<{
   tabActiveName: string;
+  code: string;
 }>();
+
+const dateValue = ref(['2011-12-31', '2025-09-30']);
+
+function handleDateChange() {
+  getChartData();
+}
+// 分页相关
+const total = ref(0);
+const currentPage = ref(1);
+const pageSize = ref(10);
+function handleSizeChange(val: number) {
+  pageSize.value = val;
+  getIndexDividendFundamentals();
+}
+function handleCurrentChange(val: number) {
+  currentPage.value = val;
+  getIndexDividendFundamentals();
+}
+function getIndexDividendFundamentals() {
+  getIndexDividendFundamentalsApi({
+    indexCode: props.code,
+    start: dateValue.value[0],
+    end: dateValue.value[1],
+    pageNum: currentPage.value,
+    pageSize: pageSize.value,
+  }).then((res) => {
+    tableData.value = res.content;
+    total.value = res.totalElements;
+  });
+}
+
 let ValuationChart: echarts.ECharts | null = null;
 let dividendChart: echarts.ECharts | null = null;
 function getChartData() {
@@ -304,7 +300,7 @@ function initValuationChart(chart: echarts.ECharts) {
             },
             {
               yAxis: 100,
-            }
+            },
           ],
         },
       },
@@ -379,7 +375,8 @@ watch(
   (newVal) => {
     if (newVal === "DividendAndValuation") {
       nextTick(() => {
-        getChartData();
+        getIndexDividendFundamentals();
+        // getChartData();
       });
     }
   }

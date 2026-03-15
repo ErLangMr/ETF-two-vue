@@ -197,7 +197,7 @@ const tabList = ref([
   padding: 20px;
   .details-header {
     display: flex;
-    align-items: flex-start;
+    align-items: flex-end;
     gap: 18px;
     .details-symbol {
       background: var(--theme-purple);

@@ -3,7 +3,7 @@
   <div class="quick-facts">
       <div class="facts-title">{{ props.title }}</div>
       <slot name="description"></slot>
-      <div class="facts-row">
+      <div class="facts-row" v-loading="props.loading">
         <div
           class="fact-item"
           v-for="(fact, idx) in props.facts"
@@ -23,6 +23,7 @@
 const props = defineProps<{
   facts: { title?: string; label: string; value: string | number }[];
   title?: string;
+  loading?: boolean;
 }>();
 </script>
 

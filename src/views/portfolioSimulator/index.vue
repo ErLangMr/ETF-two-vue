@@ -3,108 +3,159 @@
     <div class="page-header">
       <h1>ETF组合模拟器</h1>
     </div>
-    <div class="config-ratio-box">
-      <h3>配置比例</h3>
-      <p>配置比例不得低于或高于100%。</p>
-      <div class="ratio-container">
-        <div
-          class="etf-ratio-item"
-          v-for="(etf, index) in etfList"
-          :key="etf.code"
-        >
+    <div v-if="etfCodes">
+      <div class="config-ratio-box">
+        <h3>配置比例</h3>
+        <p style="display: flex; justify-content: space-between">
+          <span>配置比例不得低于或高于100%。</span>
+          <el-date-picker
+            v-model="dayValue"
+            type="date"
+            placeholder="请选择日期"
+            value-format="YYYY-MM-DD"
+            @change="handleDateChange"
+          />
+        </p>
+        <div class="ratio-container" v-loading="codeInfoLoading">
           <div
-            class="etf-close-btn"
-            @click="removeETF(index)"
-            v-if="etfList.length > 2"
+            class="etf-ratio-item"
+            v-for="(etf, index) in etfList"
+            :key="etf.code"
           >
-            <span>×</span>
+            <div
+              class="etf-close-btn"
+              @click="removeETF(index)"
+              v-if="etfList.length > 2"
+            >
+              <span>×</span>
+            </div>
+            <div class="etf-info">
+              <div class="etf-code">{{ etf.code }}</div>
+              <div class="etf-name">{{ etf.name }}</div>
+            </div>
+            <div class="etf-details">
+              <div class="detail-item">
+                <div class="label">费率</div>
+                <div class="value">{{ etf.expenseRatio }}</div>
+              </div>
+              <div class="detail-item">
+                <div class="label">ETF 评分</div>
+                <div class="value">--</div>
+              </div>
+            </div>
+            <div class="ratio-control">
+              <div class="slider-wrapper">
+                <el-slider v-model="etf.ratio" :min="0" :max="100" />
+              </div>
+              <div class="ratio-input">
+                <el-input-number
+                  v-model="etf.ratio"
+                  :min="0"
+                  :max="100"
+                  :controls="false"
+                />
+              </div>
+            </div>
           </div>
-          <div class="etf-info">
-            <div class="etf-code">{{ etf.code }}</div>
-            <div class="etf-name">{{ etf.name }}</div>
-          </div>
-          <div class="etf-details">
-            <div class="detail-item">
-              <div class="label">费率</div>
-              <div class="value">{{ etf.expenseRatio }}</div>
-            </div>
-            <div class="detail-item">
-              <div class="label">ESG 评分</div>
-              <div class="value">{{ etf.esgScore }}</div>
-            </div>
-          </div>
-          <div class="ratio-control">
-            <div class="slider-wrapper">
-              <el-slider v-model="etf.ratio" :min="0" :max="100" />
-            </div>
-            <div class="ratio-input">
-              <el-input-number
-                v-model="etf.ratio"
-                :min="0"
-                :max="100"
-                :controls="false"
-              />
-            </div>
+        </div>
+        <div class="ratio-footer">
+          <el-button
+            type="primary"
+            class="analyze-btn"
+            :disabled="totalRatio > 100 || totalRatio < 100"
+            @click="handleAnalyzeClick"
+            >分 析</el-button
+          >
+          <div class="total-ratio" :class="{ 'ratio-error': totalRatio > 100 }">
+            {{ totalRatio }} %
           </div>
         </div>
       </div>
-      <div class="ratio-footer">
-        <el-button
-          type="primary"
-          class="analyze-btn"
-          :disabled="totalRatio > 100 || totalRatio < 100"
-          >分 析</el-button
-        >
-        <div class="total-ratio" :class="{ 'ratio-error': totalRatio > 100 }">
-          {{ totalRatio }} %
+      <div class="divider"></div>
+      <div style="padding: 20px">
+        <QuickFacts
+          :facts="facts"
+          :loading="quickFactLoading"
+          title="成本"
+        ></QuickFacts>
+        <div style="height: 30px"></div>
+        <!-- <Performance /> -->
+        <div>
+          <el-table
+            :data="tableData"
+            v-loading="tableLoading"
+            :header-cell-style="{ background: '#d7d9dc', color: '#333' }"
+            :style="{ width: '100%', margin: '20px 0' }"
+          >
+            <el-table-column
+              :prop="column.prop"
+              :label="column.label"
+              v-for="column in tableColumn"
+              :key="column.prop"
+            >
+              <template #default="{ row }">
+                <span
+                  v-if="column.prop === 'dataType' || column.prop === 'dataLabel'"
+                  >{{ row[column.prop] }}</span
+                >
+                <span v-else :style="{ color: styleColor(row[column.prop]) }">
+                  {{ row[column.prop] ? Number(row[column.prop]).toFixed(4) : '--' }}
+                  <span v-if="row[column.prop]">%</span>
+                </span>
+              </template>
+            </el-table-column>
+          </el-table>
         </div>
+        <div style="height: 30px"></div>
+        <div>
+          <div class="block">
+            <div class="section-title">组合风险</div>
+            <div class="info-list" v-loading="tableLoading">
+              <div class="info-row">
+                <span>过去5日波动率</span
+                ><span class="linkStyle">{{ formatValue(portfolioRisk.vol5d) }}</span>
+              </div>
+              <div class="info-row">
+                <span>过去20日波动率</span
+                ><span class="linkStyle">{{ formatValue(portfolioRisk.vol20d) }}</span>
+              </div>
+              <div class="info-row">
+                <span>过去50日波动率</span>
+                <span class="linkStyle">{{ formatValue(portfolioRisk.vol50d) }}</span>
+              </div>
+              <div class="info-row">
+                <span>过去200日波动率</span>
+                <span class="linkStyle">{{ formatValue(portfolioRisk.vol200d) }}</span>
+              </div>
+              <div class="info-row">
+                <span>Beta</span>
+                <span class="linkStyle">{{ formatValue(portfolioRisk.beta) }}</span>
+              </div>
+              <div class="info-row">
+                <span>标准差</span>
+                <span class="linkStyle">{{ formatValue(portfolioRisk.std) }}</span>
+              </div>
+              <div class="info-row">
+                <span>夏普比率</span>
+                <span class="linkStyle">{{ formatValue(portfolioRisk.sharpeRatio) }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="height: 30px"></div>
+        <!-- <AnalystOpinions /> -->
+        <div style="height: 30px"></div>
+        <ComboPositionFeature :etfList="etfList" :dayValue="dayValue" v-model:analyzeBtnClick="analyzeBtnClick" />
       </div>
     </div>
-    <div class="divider"></div>
-    <div style="padding: 20px">
-      <QuickFacts :facts="facts" title="成本"></QuickFacts>
-      <div style="height: 30px;"></div>
-      <Performance />
-      <div style="height: 30px;"></div>
-      <div>
-        <div class="block">
-          <div class="section-title">组合风险</div>
-          <div class="info-list">
-            <div class="info-row">
-              <span>过去5日波动率</span
-              ><span class="linkStyle">{{ "val" }}</span>
-            </div>
-            <div class="info-row">
-              <span>过去20日波动率</span
-              ><span class="linkStyle">{{ "val" }}</span>
-            </div>
-            <div class="info-row">
-              <span>过去50日波动率</span>
-              <span>{{ formatValue(29.9999, "percent") }}</span>
-            </div>
-            <div class="info-row">
-              <span>过去200日波动率</span>
-              <span>{{ "val" }}</span>
-            </div>
-            <div class="info-row">
-              <span>Beta</span>
-              <span>{{ "val" }}</span>
-            </div>
-            <div class="info-row">
-              <span>标准差</span>
-              <span>{{ "val" }}</span>
-            </div>
-            <div class="info-row">
-              <span>夏普比率</span>
-              <span>{{ "val" }}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div style="height: 30px;"></div>
-      <AnalystOpinions />
-      <div style="height: 30px;"></div>
-      <ComboPositionFeature />
+    <div v-else>
+      <el-empty description="请选择ETF代码">
+        <el-button
+          type="primary"
+          @click="() => router.push({ name: 'screener' })"
+          >跳转到筛选器</el-button
+        >
+      </el-empty>
     </div>
   </div>
 </template>
@@ -113,14 +164,22 @@
 import { ref, computed, onMounted } from "vue";
 import { usePortfolioSimulatorStore } from "@/store/portfolioSimulator";
 import { ElMessageBox } from "element-plus";
-import { useRouter } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
 import { formatValue } from "@/utils/formatValue";
 import QuickFacts from "@/components/QuickFacts.vue";
 import Performance from "@/views/detailsView/components/Performance.vue";
 import AnalystOpinions from "./details/AttributionAnalysis.vue";
 import ComboPositionFeature from "./details/comboPositionFeature.vue";
+import {
+  getPortfolioSimulatorCalculateApi,
+  getPortfolioSimulatorInfoApi,
+  getPortfolioSimulatorReturnVolApi,
+} from "@/api/portfolioSimulator";
 const router = useRouter();
+const route = useRoute();
 
+const etfCodes = route.query.ETFCodes as string;
+const etfCodeList = etfCodes && etfCodes.split(",");
 interface ETFItem {
   code: string;
   name: string;
@@ -129,48 +188,39 @@ interface ETFItem {
   ratio: number;
 }
 
-const etfList = ref<ETFItem[]>([
-  {
-    code: "QQQ",
-    name: "Invesco QQQ Trust Series I",
-    expenseRatio: "0.20",
-    esgScore: "6.27",
-    ratio: 37,
-  },
-  {
-    code: "SPY",
-    name: "SPDR S&P 500 ETF Trust",
-    expenseRatio: "0.09",
-    esgScore: "6.27",
-    ratio: 63,
-  },
-]);
+const etfList = ref<ETFItem[]>([]);
+const dayValue = ref(new Date().toISOString().slice(0, 10));
 
 const portfolioSimulatorStore = usePortfolioSimulatorStore();
 onMounted(() => {
-  console.log(portfolioSimulatorStore.selectETFList, "selectETFList");
-  // if (portfolioSimulatorStore.selectETFList.length === 0){
-  //   ElMessageBox.confirm(
-  //   '没有选择需要组合的ETF，是否跳转到筛选器页面？',
-  //   '警告',
-  //   {
-  //     confirmButtonText: '确定',
-  //     cancelButtonText: '取消',
-  //     type: 'warning',
-  //   }
-  // )
-  //   .then(() => {
-  //     router.push({
-  //       name: "screener",
-  //     })
-  //   })
-  //   .catch(() => {
-  //   })
-  // } else{
-  //   etfList.value = portfolioSimulatorStore.selectETFList;
-  // }
+  getPortfolioSimulatorInfo();
 });
-
+const codeInfoLoading = ref(false);
+// 获取组合模拟信息
+function getPortfolioSimulatorInfo() {
+  if (!etfCodeList || etfCodeList.length === 0) return;
+  codeInfoLoading.value = true;
+  getPortfolioSimulatorInfoApi(etfCodeList)
+    .then((res) => {
+      if (res.code === 200) {
+        etfList.value = res.data.etfBasicInfos.map(
+          (item: Record<string, any>) => ({
+            code: item.etfCode,
+            name: item.etfName,
+            expenseRatio: item.comprehensiveFee,
+            esgScore: "--",
+            ratio: 0,
+          })
+        );
+      }
+    })
+    .finally(() => {
+      codeInfoLoading.value = false;
+    });
+}
+function handleDateChange() {
+  console.log(dayValue.value);
+}
 const totalRatio = computed(() => {
   return etfList.value.reduce((sum, etf) => sum + etf.ratio, 0);
 });
@@ -179,14 +229,101 @@ const removeETF = (index: number) => {
   if (etfList.value.length <= 2) return;
   etfList.value.splice(index, 1);
 };
+const quickFactLoading = ref(false);
 const facts = ref([
-  { label: "加权平均管理费率", value: "0.77%" },
+  { label: "加权平均管理费率", value: "0%" },
   {
     label: "加权平均托管费率",
-    value: "100.00%",
+    value: "0%",
   },
-  { label: "加权平均总成本", value: "0.00%" },
+  { label: "加权平均总成本", value: "0%" },
 ]);
+
+const etfCodesParams: string[] = [];
+const weightsParams: number[] = [];
+const analyzeBtnClick = ref(false);
+// 分析按钮事件
+function handleAnalyzeClick() {
+  analyzeBtnClick.value = true;
+  etfCodesParams.length = 0;
+  weightsParams.length = 0;
+  etfList.value.forEach((item) => {
+    etfCodesParams.push(item.code);
+    weightsParams.push(item.ratio);
+  });
+  getPortfolioSimulatorCalculate();
+  getPortfolioSimulatorReturnVol();
+}
+// 获取组合模拟成本
+function getPortfolioSimulatorCalculate() {
+  quickFactLoading.value = true;
+  getPortfolioSimulatorCalculateApi({
+    etfCodes: etfCodesParams,
+    baseDate: dayValue.value,
+    weights: weightsParams,
+  })
+    .then((res) => {
+      if (res.code === 200) {
+        quickFactLoading.value = false;
+        facts.value = [
+          {
+            label: "加权平均管理费率",
+            value: res.data.costResult.weightedAvgManagementFee + "%",
+          },
+          {
+            label: "加权平均托管费率",
+            value: res.data.costResult.weightedAvgCustodianFee + "%",
+          },
+          {
+            label: "加权平均总成本",
+            value: res.data.costResult.weightedAvgTotalCost + "%",
+          },
+        ];
+      }
+    })
+    .finally(() => {
+      quickFactLoading.value = false;
+    });
+}
+
+const tableData = ref([]);
+const tableColumn = [
+  { prop: "dataLabel", label: "数据标签" },
+  { prop: "dataType", label: "数据类型" },
+  { prop: "oneMonth", label: "近一月" },
+  { prop: "threeMonth", label: "近三月" },
+  { prop: "sixMonth", label: "近六个月" },
+  { prop: "ytd", label: "今年以来" },
+  { prop: "oneYear", label: "近一年" },
+  { prop: "threeYear", label: "近三年" },
+  { prop: "fiveYear", label: "近五年" },
+  { prop: "ltd", label: "成立以来" },
+];
+function styleColor(value: any) {
+  if (value) {
+    return value >= 0 ? "red" : "green";
+  } else {
+    return "black";
+  }
+}
+const tableLoading = ref(false);
+const portfolioRisk = ref<Record<string, any>>({});
+// 获取组合模拟波动率
+function getPortfolioSimulatorReturnVol() {
+  tableLoading.value = true;
+  getPortfolioSimulatorReturnVolApi({
+    etfCodes: etfCodesParams,
+    baseDate: dayValue.value,
+    weights: weightsParams,
+  }).then((res) => {
+    if (res.code === 200) {
+      tableData.value = res.data.returnVolTable;
+      portfolioRisk.value = res.data.riskIndicator;
+    }
+  }).finally(() => {
+    tableLoading.value = false;
+  });
+}
 
 </script>
 
@@ -252,7 +389,8 @@ const facts = ref([
         }
 
         .etf-info {
-          min-width: 200px;
+          min-width: 300px;
+          width: 30%;
           padding-left: 30px;
 
           .etf-code {
@@ -271,7 +409,8 @@ const facts = ref([
         .etf-details {
           display: flex;
           gap: 40px;
-          min-width: 500px;
+          min-width: 400px;
+          width: 35%;
           justify-content: space-evenly;
           .detail-item {
             .label {

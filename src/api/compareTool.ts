@@ -71,3 +71,21 @@ export const getCompareHoldingFeatureApi = (data: Record<string, any>) => {
 export const getCompareValuationApi = (data: Record<string, any>) => {
   return post<Record<string, any>[]>('/api/compare/valuation', data)
 }
+
+// 深度对比
+
+/**
+ * 获取对比工具-深度对比-两个ETF数据
+ * @param data
+ */
+export const getDeepCompareTwoEtfApi = (params: Record<string, any>) => {
+  return get<Record<string, any>>('/api/deep/compare/two-etf', params)
+}
+
+/**
+ * 获取对比工具-深度对比-ETF行业占比差异图表数据
+ * @param data
+ */
+export const getDeepCompareIndustryChartApi = (params: Record<string, any>) => {
+  return get<Record<string, any>>('/api/deep/compare/industry/chart', params)
+}

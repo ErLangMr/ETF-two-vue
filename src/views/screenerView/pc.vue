@@ -275,7 +275,9 @@ function handleAnalysis() {
     return
   }
   portfolioSimulatorStore.selectETFList = selectEtfList.value
-  router.push({name: "PortfolioSimulator"})
+  router.push({name: "PortfolioSimulator", query: {
+    ETFCodes: tableSelestValue.value.join(",")
+  }})
 }
 function handleCompare() {
   if(tableSelestValue.value.length === 0) {

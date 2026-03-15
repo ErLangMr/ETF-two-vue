@@ -3,7 +3,7 @@
     <div class="contentBox">
       <div class="overlap-card mainBox">
         <header class="section-title">持仓重合度</header>
-        <div class="main-content">
+        <div class="main-content" v-loading="dataLoading">
           <!-- 左侧：圆环图 -->
           <div class="venn-diagram">
             <svg
@@ -73,7 +73,7 @@
                 <span class="stat-text">持仓数</span>
               </div>
               <div class="detail-stat">
-                <span class="stat-num">{{ overlapData.etf1.alsoInEtf2 }}%</span>
+                <span class="stat-num">{{ overlapData.etf1.alsoInEtf2 }}</span>
                 <span class="stat-text">重合部分</span>
               </div>
             </div>
@@ -95,7 +95,7 @@
                 <span class="stat-text">持仓数</span>
               </div>
               <div class="detail-stat">
-                <span class="stat-num">{{ overlapData.etf2.alsoInEtf1 }}%</span>
+                <span class="stat-num">{{ overlapData.etf2.alsoInEtf1 }}</span>
                 <span class="stat-text">重合部分</span>
               </div>
             </div>
@@ -103,7 +103,15 @@
         </div>
       </div>
       <div class="mainBox">
-        <header class="section-title">两只ETF持仓权重之差</header>
+        <header class="section-title" style="display: flex; align-items: center; justify-content: space-between;">
+          <span>ETF行业占比差异</span>
+          <div style="width: 120px;">
+            <el-select v-model="industryType" placeholder="Select" @change="handleIndustryTypeChange">
+              <el-option value="GICS"></el-option>
+              <el-option value="ICB"></el-option>
+            </el-select>
+          </div>
+        </header>
         <div id="chart"></div>
       </div>
     </div>
@@ -112,6 +120,7 @@
         <header class="section-title" style="margin-bottom: 10px;">重合持有的股票明细</header>
         <el-table
           :data="tableData"
+          v-loading="dataLoading"
           :header-cell-style="{
             background: '#f5f5fa',
             color: '#333',
@@ -124,24 +133,33 @@
             :key="col.prop"
             :prop="col.prop"
             :label="col.label"
-          />
+          >
+            <template #default="scope">
+              {{ scope.row[col.prop] }}{{ col.prop !== 'stkCode' && col.prop !== 'stkName' ? '%' : '' }}
+            </template>
+          </el-table-column>
         </el-table>
       </div>
     </div>
     <div class="contentBox">
       <div class="mainBox">
-        <header class="section-title">两只ETF持仓权重之差</header>
-        <div class="weight-diff-container">
+        <header class="section-title">配置更多的前15只股票（{{ etfCodes[0] }} - {{ etfCodes[1] }} 差值最大）</header>
+        <div class="weight-diff-container" v-loading="dataLoading">
           <div
-            v-for="item in weightDiffData"
-            :key="item.stockCode"
+            v-for="item in moreConfigTop15"
+            :key="item.stkCode"
             class="weight-diff-item"
           >
-            <div class="stock-name">{{ item.stockName }}</div>
+            <div class="stock-name">{{ item.stkName }}（{{ item.stkCode }}）</div>
             <div class="progress-wrapper">
+              <div class="center-line"></div>
               <div
                 class="progress-bar"
-                :style="{ width: (item.weightDiff / maxWeightDiff * 100) + '%' }"
+                :class="{ 'progress-bar-negative': item.weightDiff < 0 }"
+                :style="{
+                  width: (Math.abs(item.weightDiff) / moreMaxWeightDiff * 50) + '%',
+                  left: item.weightDiff >= 0 ? '50%' : (50 - Math.abs(item.weightDiff) / moreMaxWeightDiff * 50) + '%'
+                }"
               ></div>
             </div>
             <div class="weight-value">{{ item.weightDiff }}%</div>
@@ -149,18 +167,23 @@
         </div>
       </div>
       <div class="mainBox">
-        <header class="section-title">两只ETF持仓权重之差</header>
-        <div class="weight-diff-container">
+        <header class="section-title">配置更少的前15只股票（{{ etfCodes[0] }} - {{ etfCodes[1] }} 差值最小）</header>
+        <div class="weight-diff-container" v-loading="dataLoading">
           <div
-            v-for="item in weightDiffData"
-            :key="item.stockCode"
+            v-for="item in lessConfigTop15"
+            :key="item.stkCode"
             class="weight-diff-item"
           >
-            <div class="stock-name">{{ item.stockName }}</div>
+            <div class="stock-name">{{ item.stkName }}（{{ item.stkCode }}）</div>
             <div class="progress-wrapper">
+              <div class="center-line"></div>
               <div
                 class="progress-bar"
-                :style="{ width: (item.weightDiff / maxWeightDiff * 100) + '%' }"
+                :class="{ 'progress-bar-negative': item.weightDiff < 0 }"
+                :style="{
+                  width: (Math.abs(item.weightDiff) / lessMaxWeightDiff * 50) + '%',
+                  left: item.weightDiff >= 0 ? '50%' : (50 - Math.abs(item.weightDiff) / lessMaxWeightDiff * 50) + '%'
+                }"
               ></div>
             </div>
             <div class="weight-value">{{ item.weightDiff }}%</div>
@@ -175,10 +198,15 @@
 import { ref, onMounted, computed, onUnmounted } from "vue";
 import { useRoute } from "vue-router";
 import * as echarts from "echarts";
+import { getDeepCompareTwoEtfApi, getDeepCompareIndustryChartApi } from "@/api/compareTool";
 
 const route = useRoute();
+const etfCodes = ref<string[]>([]);
+const etfColors = ref<string[]>(["#1e5a78", "#7ba3d1"]);
+const ETFCodes = route.query.codes;
+const industryType = ref<string>("GICS");
+
 onMounted(() => {
-  const ETFCodes = route.query.codes;
   if (ETFCodes) {
     window.addEventListener("resize", () => {
       if (myChart) {
@@ -186,32 +214,40 @@ onMounted(() => {
       }
     });
     etfCodes.value = (ETFCodes as string).split(",");
-    etfCodes.value.forEach((code) => {
-      tableColumn.value.push({ prop: code, label: code + "权重" });
-    });
-    tableColumn.value.push({ prop: "overlap", label: "重叠" });
+    tableColumn.value = [
+      { prop: "stkCode", label: "股票代码" },
+      { prop: "stkName", label: "股票名称" },
+      { prop: "etf1Port", label: etfCodes.value[0] + "权重" },
+      { prop: "etf2Port", label: etfCodes.value[1] + "权重" },
+      { prop: "overlapRatio", label: "重叠" }
+    ];
     fetchOverlapData();
-    initChart();
+    getDeepCompareIndustryChart();
   }
 });
 
 const tableData = ref([]);
-const tableColumn = ref([{ prop: "stockCode", label: "" }]);
-const etfCodes = ref<string[]>([]);
-const etfColors = ref<string[]>(["#1e5a78", "#7ba3d1"]);
+const tableColumn = ref<{ prop: string; label: string; }[]>([]);
+const dataLoading = ref(false);
 
 interface WeightDiffData {
-  stockCode: string;
-  stockName: string;
+  stkCode: string;
+  stkName: string;
   weightDiff: number;
 }
+const moreConfigTop15 = ref<WeightDiffData[]>([]);
+const lessConfigTop15 = ref<WeightDiffData[]>([]);
 
-const weightDiffData = ref<WeightDiffData[]>([]);
-
-const maxWeightDiff = computed(() => {
-  if (weightDiffData.value.length === 0) return 10;
-  return Math.max(...weightDiffData.value.map(item => item.weightDiff));
+const moreMaxWeightDiff = computed(() => {
+  if (moreConfigTop15.value.length === 0) return 10;
+  return Math.max(...moreConfigTop15.value.map(item => Math.abs(item.weightDiff)));
 });
+const lessMaxWeightDiff = computed(() => {
+  if (lessConfigTop15.value.length === 0) return 10;
+  return Math.max(...lessConfigTop15.value.map(item => Math.abs(item.weightDiff)));
+});
+
+
 
 interface OverlapData {
   weightPercentage: number;
@@ -232,12 +268,12 @@ const overlapData = ref<OverlapData>({
   weightPercentage: 0,
   holdingsCount: 0,
   etf1: {
-    ETFCode: "",
+    ETFCode: etfCodes.value[0],
     totalHoldings: 0,
     alsoInEtf2: 0,
   },
   etf2: {
-    ETFCode: "",
+    ETFCode: etfCodes.value[1],
     totalHoldings: 0,
     alsoInEtf1: 0,
   },
@@ -282,39 +318,65 @@ const fetchOverlapData = async () => {
   // TODO: 调用API获取实际数据
   // const response = await getOverlapDataApi(etfCodes.value);
   // overlapData.value = response.data;
+  dataLoading.value = true;
+  const response = await getDeepCompareTwoEtfApi({
+    etfCode1: etfCodes.value[0],
+    etfCode2: etfCodes.value[1],
+    // etfCode1: "159150.OF",
+    // etfCode2: "159206.OF",
+  });
+  const data = response.data;
+  dataLoading.value = false;
+  if (response.code !== 200) {
+    return;
+  }
   overlapData.value = {
-    weightPercentage: 40,
-    holdingsCount: 88,
+    weightPercentage: Number(data.overlapRatio.slice(0, -1)),
+    holdingsCount: data.overlapStockCount,
     etf1: {
       ETFCode: etfCodes.value[0],
-      totalHoldings: 503,
-      alsoInEtf2: 1,
+      totalHoldings: data.etf1StockCount,
+      alsoInEtf2: data.etf1Ratio,
     },
     etf2: {
       ETFCode: etfCodes.value[1],
-      totalHoldings: 102,
-      alsoInEtf1: 87,
+      totalHoldings: data.etf2StockCount,
+      alsoInEtf1: data.etf2Ratio,
     },
   };
+  tableData.value = data.overlapStockList;
 
-  // TODO: 调用API获取权重差异数据
-  // 模拟数据
-  weightDiffData.value = [
-    { stockCode: "NVDA", stockName: "NVIDIA CORP", weightDiff: 8.8 },
-    { stockCode: "AAPL", stockName: "APPLE INC", weightDiff: 6.6 },
-    { stockCode: "MSFT", stockName: "MICROSOFT CORP", weightDiff: 6.1 },
-    { stockCode: "AVGO", stockName: "BROADCOM INC.", weightDiff: 1.8 },
-    { stockCode: "ORCL", stockName: "ORACLE CORP", weightDiff: 1.5 },
-    { stockCode: "AMD", stockName: "ADVANCED MICRO DEVICES", weightDiff: 1.3 },
-    { stockCode: "PLTR", stockName: "PALANTIR TECHNOLOGIES INC. CLASS A", weightDiff: 1.3 },
-    { stockCode: "IBM", stockName: "INTL BUSINESS MACHINES CORP", weightDiff: 0.9 },
-    { stockCode: "CSCO", stockName: "CISCO SYSTEMS INC", weightDiff: 0.9 },
-    { stockCode: "MU", stockName: "MICRON TECHNOLOGY INC", weightDiff: 0.8 },
-  ];
+  moreConfigTop15.value = data.moreConfigTop15;
+  lessConfigTop15.value = data.lessConfigTop15;
 };
-let myChart: echarts.ECharts;
 
-function initChart() {
+function getDeepCompareIndustryChart(){
+  getDeepCompareIndustryChartApi({
+    etfCode1: etfCodes.value[0],
+    etfCode2: etfCodes.value[1],
+    // etfCode1: "159150.OF",
+    // etfCode2: "159206.OF",
+    industryType: industryType.value,
+  }).then(res => {
+    if(res.code === 200){
+      const yAxisData = res.data.industryNames;
+      const seriesData = res.data.ratioDiffValues;
+      if (seriesData.length === 0) {
+        return;
+      }
+      initChart(yAxisData, seriesData);
+    }
+  })
+}
+
+function handleIndustryTypeChange(){
+  getDeepCompareIndustryChart();
+}
+
+
+
+let myChart: echarts.ECharts;
+function initChart(yAxisData: string[], seriesData: number[]) {
   if (myChart) {
     myChart.dispose();
   }
@@ -338,7 +400,7 @@ function initChart() {
     },
     yAxis: {
       type: "category",
-      data: ["Brazil", "Indonesia", "USA", "India", "China", "World"],
+      data: yAxisData,
       position: "right",
       axisTick: {
         show: false,
@@ -349,7 +411,7 @@ function initChart() {
         name: "2011",
         type: "bar",
         barGap: 0,
-        data: [-18203, -23489, -29034, 104970, -131744, -130230],
+        data: seriesData,
       },
     ],
   });
@@ -445,7 +507,7 @@ onUnmounted(() => {
   .detail-stats {
     display: flex;
     justify-content: space-between;
-    gap: 20px;
+    gap: 10px;
   }
 
   .detail-stat {
@@ -503,7 +565,7 @@ onUnmounted(() => {
   }
 
   .stock-name {
-    width: 80%;
+    width: 60%;
     flex-shrink: 0;
     text-align: left;
   }
@@ -513,14 +575,29 @@ onUnmounted(() => {
     background: rgba(255, 255, 255, 0.1);
     height: 16px;
     border-radius: 2px;
-    overflow: hidden;
+    position: relative;
+  }
+
+  .center-line {
+    position: absolute;
+    left: 50%;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background: #999;
+    transform: translateX(-50%);
   }
 
   .progress-bar {
+    position: absolute;
     height: 100%;
     background: #5b8fb9;
-    border-radius: 0 2px 2px 0;
-    transition: width 0.6s ease;
+    transition: width 0.6s ease, left 0.6s ease;
+    top: 0;
+  }
+
+  .progress-bar-negative {
+    background: #e74c3c;
   }
 
   .weight-value {

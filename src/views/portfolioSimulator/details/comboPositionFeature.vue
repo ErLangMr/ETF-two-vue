@@ -2,6 +2,7 @@
   <div class="combo-position-feature">
     <h3>组合持股明细</h3>
     <el-table
+      v-loading="tableLoading"
       :data="tableData"
       default-expand-all
       :header-cell-style="{
@@ -13,71 +14,222 @@
       }"
       :cell-style="{ height: '30px', padding: 0, fontSize: '16px' }"
     >
-      <el-table-column prop="name" label="" />
-      <el-table-column prop="shizhi" label="百分比" />
-      <el-table-column prop="shouyi" label="数量" />
+      <el-table-column prop="stkCode" label="股票代码" />
+      <el-table-column prop="stkName" label="股票名称" />
+      <el-table-column prop="pport" label="组合权重（%）" />
+      <el-table-column prop="pholdNumRatio" label="组合持股数量占比（%）" />
     </el-table>
-    <div style="height: 30px;"></div>
-    <div id="shizhi"></div>
-    <div style="height: 30px;"></div>
-    <div style="display: flex">
-      <div id="hangye" style="width: 35%"></div>
-      <div id="diqu" style="width: 65%">
+    <div style="display: flex; justify-content: flex-end; margin-top: 20px">
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 30, 40]"
+        layout="total, sizes, prev, pager, next"
+        :total="total"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
+      />
+    </div>
+    <div style="height: 30px"></div>
+    <h3>市值分布</h3>
+    <div v-if="shizhiShow" id="shizhi" v-loading="shizhiChartLoading"></div>
+    <el-empty v-else description="description" />
+    <div style="height: 30px"></div>
+    <div style="position: relative">
+      <h3>行业分布</h3>
+      <div v-if="hangyeShow" id="hangye" style="width: 100%" v-loading="hangyeChartLoading"></div>
+      <el-empty v-else description="description" />
+      <div
+        style="
+          width: 120px;
+          position: absolute;
+          top: 0;
+          left: calc(100% - 130px);
+        "
+      >
+        <el-select
+          v-model="industryType"
+          placeholder="Select"
+          @change="handleIndustryTypeChange"
+        >
+          <el-option value="GICS"></el-option>
+          <el-option value="ICB"></el-option>
+        </el-select>
+      </div>
+      <div id="diqu" style="width: 100%">
         <h3>地区分布</h3>
-        <CustomCharts :sectorData="sectorData" />
+        <CustomCharts v-show="sectorData.length > 0" :sectorData="sectorData" />
+        <el-empty v-show="sectorData.length === 0" description="description" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from "vue";
+import { onMounted, onUnmounted, ref, watch } from "vue";
 import * as echarts from "echarts";
 import CustomCharts from "@/components/CustomCharts.vue";
+import {
+  getPortfolioSimulatorHoldingsApi,
+  getPortfolioSimulatorCapDistributionApi,
+  getPortfolioSimulatorIndustryDistributionApi,
+  getPortfolioSimulatorAreaDistributionApi,
+} from "@/api/portfolioSimulator";
 
-const tableData = ref([
-  {
-    id: "1",
-    name: "中科华华",
-    shizhi: "0.05%",
-    shouyi: "0.05%",
-  },
-  {
-    id: "2",
-    name: "中科华华",
-    shizhi: "0.05%",
-    shouyi: "0.05%",
-  },
-]);
+const props = defineProps<{
+  etfList: Record<string, any>[];
+  dayValue: string;
+  analyzeBtnClick: boolean;
+}>();
 
-const sectorData = ref([
-  { name: "Electronic Technology", value: 21.94 },
-  { name: "Technology Services", value: 20.78 },
-  { name: "Finance", value: 15.21 },
-  { name: "Retail Trade", value: 8.18 },
-  { name: "Health Technology", value: 7.54 },
-  { name: "Consumer Non-Durables", value: 3.85 },
-  { name: "Producer Manufacturing", value: 3.34 },
-  { name: "Consumer Services", value: 3.02 },
-  { name: "Utilities", value: 2.48 },
-  { name: "Energy Minerals", value: 2.45 },
-  { name: "Consumer Durables", value: 2.43 },
-  { name: "Transportation", value: 1.55 },
-  { name: "Process Industries", value: 1.48 },
-  { name: "Commercial Services", value: 1.08 },
-  { name: "Health Services", value: 1.32 },
-  { name: "Communications", value: 0.97 },
-  { name: "Industrial Services", value: 0.93 },
-  { name: "Distribution Services", value: 0.66 },
-  { name: "Non-Energy Minerals", value: 0.45 },
-  { name: "CASH", value: 0.22 },
-  { name: "Miscellaneous", value: 0.05 },
-]);
+const emit = defineEmits<{
+  "update:analyzeBtnClick": [value: boolean];
+}>();
+const etfCodesParams: string[] = [];
+const weightsParams: number[] = [];
+
+watch(
+  () => props.analyzeBtnClick,
+  function (newVal, oldVal) {
+    if (newVal) {
+      etfCodesParams.length = 0;
+      weightsParams.length = 0;
+      getComboPositionFeature();
+      getComboPositionFeatureCapDistribution();
+      getComboPositionFeatureIndustryDistribution();
+      getComboPositionFeatureAreaDistribution();
+      emit("update:analyzeBtnClick", false);
+    }
+  }
+);
+
+// 获取组合持股明细
+function getComboPositionFeature() {
+  tableLoading.value = true;
+  props.etfList.forEach((item) => {
+    etfCodesParams.push(item.code);
+    weightsParams.push(item.ratio);
+  });
+  getPortfolioSimulatorHoldingsApi({
+    etfCodes: etfCodesParams,
+    baseDate: props.dayValue,
+    weights: weightsParams,
+    pageNum: currentPage.value,
+    pageSize: pageSize.value,
+  })
+    .then((res) => {
+      if (res.code === 200) {
+        tableData.value = res.data.holdingsPage.list;
+        total.value = res.data.holdingsPage.total;
+      }
+    })
+    .finally(() => {
+      tableLoading.value = false;
+    });
+}
+
+const tableLoading = ref(false);
+const tableData = ref([]);
+// 分页相关
+const total = ref(0);
+const currentPage = ref(1);
+const pageSize = ref(10);
+function handleSizeChange(val: number) {
+  pageSize.value = val;
+  etfCodesParams.length = 0;
+  weightsParams.length = 0;
+  getComboPositionFeature();
+}
+function handleCurrentChange(val: number) {
+  currentPage.value = val;
+  etfCodesParams.length = 0;
+  weightsParams.length = 0;
+  getComboPositionFeature();
+}
+
+const shizhiChartLoading = ref(false);
+const shizhiShow = ref(false);
+// 获取市值分布图表数据
+function getComboPositionFeatureCapDistribution() {
+  shizhiChartLoading.value = true;
+  shizhiShow.value = true;
+  getPortfolioSimulatorCapDistributionApi({
+    etfCodes: etfCodesParams,
+    baseDate: props.dayValue,
+    weights: weightsParams,
+  })
+    .then((res) => {
+      if (res.code === 200) {
+        const yAxis = res.data.names;
+        const seriesData = res.data.values;
+        if (seriesData.length > 0) {
+          initShizhiChart(yAxis, seriesData);
+        }
+      }
+    })
+    .finally(() => {
+      shizhiChartLoading.value = false;
+    });
+}
+
+const hangyeChartLoading = ref(false);
+const hangyeShow = ref(false);
+const industryType = ref<string>("GICS");
+function handleIndustryTypeChange() {
+  getComboPositionFeatureIndustryDistribution();
+}
+// 获取行业分布图表数据
+function getComboPositionFeatureIndustryDistribution() {
+  hangyeChartLoading.value = true;
+  hangyeShow.value = true;
+  getPortfolioSimulatorIndustryDistributionApi({
+    etfCodes: etfCodesParams,
+    baseDate: props.dayValue,
+    weights: weightsParams,
+  })
+    .then((res) => {
+      if (res.code === 200) {
+        if (industryType.value === "GICS") {
+          const yAxis = res.data.gicsData.names;
+          const seriesData1 = res.data.gicsData.currentValues;
+          const seriesData2 = res.data.gicsData.lastValues;
+          if (yAxis.length > 0) {
+            initHangyeChart(yAxis, seriesData1, seriesData2);
+          }else{
+            hangyeShow.value = false;
+          }
+        } else if (industryType.value === "ICB") {
+          const yAxis = res.data.icbData.names;
+          const seriesData1 = res.data.icbData.currentValues;
+          const seriesData2 = res.data.icbData.lastValues;
+          if (yAxis.length > 0) {
+            initHangyeChart(yAxis, seriesData1, seriesData2);
+          }else{
+            hangyeShow.value = false;
+          }
+        }
+      }
+    })
+    .finally(() => {
+      hangyeChartLoading.value = false;
+    });
+}
+
+function getComboPositionFeatureAreaDistribution() {
+  getPortfolioSimulatorAreaDistributionApi({
+    etfCodes: etfCodesParams,
+    baseDate: props.dayValue,
+    weights: weightsParams,
+  }).then((res) => {
+    if (res.code === 200) {
+      sectorData.value = res.data.areaDistributionList;
+    }
+  });
+}
+const sectorData = ref([]);
 
 onMounted(() => {
   window.addEventListener("resize", resizeChart);
-  initShizhiChart();
-  initHangyeChart();
 });
 
 onUnmounted(() => {
@@ -86,75 +238,16 @@ onUnmounted(() => {
 
 let shizhiChart: echarts.ECharts | null = null;
 let hangyeChart: echarts.ECharts | null = null;
-function initHangyeChart() {
+function initHangyeChart(
+  yAxis: string[],
+  seriesData1: number[],
+  seriesData2: number[]
+) {
   hangyeChart = echarts.init(document.getElementById("hangye"));
   hangyeChart.setOption({
-    title: {
-      text: "行业分布",
-    },
-    tooltip: {
-      trigger: "axis",
-      axisPointer: {
-        type: "shadow",
-      },
-    },
-    // legend: {},
-    grid: {
-      left: "30%",
-      right: "4%",
-      bottom: "3%",
-      containLabel: true,
-    },
-    xAxis: {
-      type: "value",
-      boundaryGap: [0, 0.1],
-      show: false,
-    },
-
-    yAxis: {
-      type: "category",
-      data: ["Brazil", "Indonesia", "USA", "India", "China", "World"],
-      axisLine: {
-        show: false,
-      },
-      axisTick: {
-        show: false,
-      },
-    },
-    series: [
-      {
-        name: "2011",
-        type: "bar",
-        barGap: 0,
-        data: [18203, 23489, 29034, 104970, 131744, 630230],
-        label: {
-          show: true,
-          position: "right",
-          valueAnimation: true,
-        },
-      },
-      {
-        name: "2012",
-        type: "bar",
-        data: [19325, 23438, 31000, 121594, 134141, 681807],
-        label: {
-          show: true,
-          position: "right",
-          valueAnimation: true,
-        },
-      },
-    ],
-  });
-}
-
-function initDiquChart() {}
-
-function initShizhiChart() {
-  shizhiChart = echarts.init(document.getElementById("shizhi"));
-  shizhiChart.setOption({
-    title: {
-      text: "市值分布",
-    },
+    // title: {
+    //   text: "行业分布",
+    // },
     tooltip: {
       trigger: "axis",
       axisPointer: {
@@ -176,7 +269,7 @@ function initShizhiChart() {
 
     yAxis: {
       type: "category",
-      data: ["Brazil", "Indonesia", "USA", "India", "China", "World"],
+      data: yAxis,
       axisLine: {
         show: false,
       },
@@ -189,7 +282,72 @@ function initShizhiChart() {
         name: "2011",
         type: "bar",
         barGap: 0,
-        data: [18203, 23489, 29034, 104970, 131744, 630230],
+        barWidth: 15,
+        data: seriesData1,
+        label: {
+          show: true,
+          position: "right",
+          valueAnimation: true,
+        },
+      },
+      {
+        name: "2012",
+        type: "bar",
+        barWidth: 15,
+        data: seriesData2,
+        label: {
+          show: true,
+          position: "right",
+          valueAnimation: true,
+        },
+      },
+    ],
+  });
+}
+
+function initDiquChart() {}
+
+function initShizhiChart(yAxis: string[], seriesData: number[]) {
+  shizhiChart = echarts.init(document.getElementById("shizhi"));
+  shizhiChart.setOption({
+    // title: {
+    //   text: "市值分布",
+    // },
+    tooltip: {
+      trigger: "axis",
+      axisPointer: {
+        type: "shadow",
+      },
+    },
+    // legend: {},
+    grid: {
+      left: "10%",
+      right: "4%",
+      bottom: "3%",
+      containLabel: true,
+    },
+    xAxis: {
+      type: "value",
+      boundaryGap: [0, 0.1],
+      show: false,
+    },
+
+    yAxis: {
+      type: "category",
+      data: yAxis,
+      axisLine: {
+        show: false,
+      },
+      axisTick: {
+        show: false,
+      },
+    },
+    series: [
+      {
+        type: "bar",
+        barGap: 0,
+        barWidth: 30,
+        data: seriesData,
         label: {
           show: true,
           position: "right",
@@ -226,6 +384,9 @@ function disposeCharts() {
   #diqu {
     width: 100%;
     height: 400px;
+  }
+  #hangye {
+    height: 600px;
   }
 }
 </style>

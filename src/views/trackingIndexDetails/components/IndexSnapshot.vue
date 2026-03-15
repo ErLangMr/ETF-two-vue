@@ -10,7 +10,7 @@
         @change="baseDataDateChange"
       />
     </div>
-    <div class="indexSnapshot-container">
+    <div class="indexSnapshot-container" v-loading="loading">
       <div class="block">
           <div class="section-title">基本信息</div>
           <div class="info-list">
@@ -24,27 +24,27 @@
             </div>
             <div class="info-row">
               <span>发布日期</span>
-              <span>{{ detailsData?.launchDate  }}</span>
+              <span>{{ formatValue(detailsData?.launchDate) }}</span>
             </div>
             <div class="info-row">
               <span>规模变动</span
               ><span
-                >{{ detailsData?.aumChg }}</span
+                >{{ formatValue(detailsData?.aumChg) }}</span
               >
             </div>
             <div class="info-row">
               <span>基日</span
               ><span
-                >{{ detailsData?.baseDate }}</span
+                >{{ formatValue(detailsData?.baseDate) }}</span
               >
             </div>
             <div class="info-row">
               <span>最新交易日</span>
-              <span>{{ detailsData?.latestTradeDate }}</span>
+              <span>{{ formatValue(detailsData?.latestTradeDate) }}</span>
             </div>
             <div class="info-row">
               <span>相关ETF产品规模（亿元）</span>
-              <span>{{ detailsData?.etfAUM }}</span>
+              <span>{{ formatValue(detailsData?.etfAUM) }}</span>
             </div>
             <div class="info-row">
               <span>相关ETF产品数量</span>
@@ -54,11 +54,11 @@
             </div>
             <div class="info-row">
               <span>最新收盘价</span>
-              <span>{{ detailsData?.indexClose  }}</span>
+              <span>{{ formatValue(detailsData?.indexClose) }}</span>
             </div>
             <div class="info-row">
               <span>最新流通规模（亿元）</span>
-              <span>{{ detailsData?.tamv  }}</span>
+              <span>{{ formatValue(detailsData?.tamv) }}</span>
             </div>
           </div>
         </div>
@@ -233,6 +233,8 @@ function clickVitals(data: any) {
   });
 }
 const dateValue = ref("");
+const loading = ref(false);
+
 watch(
   () => props.tabActiveName,
   (newVal) => {
@@ -245,11 +247,15 @@ watch(
 );
 
 function getIndexSnapshot() {
+  loading.value = true;
   getIndexSnapshotApi({
     code: props.code,
     date: dateValue.value,
   }).then((res) => {
     detailsData.value = res;
+    loading.value = false;
+  }).finally(() => {
+    loading.value = false;
   });
 }
 

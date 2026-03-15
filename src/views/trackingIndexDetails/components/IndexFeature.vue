@@ -1,6 +1,57 @@
 <template>
   <div class="index-feature">
-    <div class="row">
+    <div style="text-align: right">
+      <el-date-picker
+        v-model="dateValue"
+        value-format="YYYY-MM-DD"
+        type="date"
+        placeholder="选择日期"
+        style="margin-bottom: 10px"
+        @change="baseDataDateChange"
+      />
+    </div>
+    <div class="block" v-loading="loading">
+      <!-- <div class="section-title">所属类型</div> -->
+      <div class="info-list">
+        <div class="info-row">
+          <span>样本平均流通A股市值（亿元）</span><span>{{ formatValue(indexFeatureData.aamv) }}</span>
+        </div>
+        <div class="info-row">
+          <span>指数代码</span><span>{{ indexFeatureData.indexCode }}</span>
+        </div>
+        <div class="info-row">
+          <span>指数名称</span>
+          <span>{{ indexFeatureData.indexName }}</span>
+        </div>
+        <div class="info-row">
+          <span>样本流通A股市值中位数（亿元）</span>
+          <span>{{ formatValue(indexFeatureData.mamv) }}</span>
+        </div>
+        <div class="info-row">
+          <span>样本数量</span>
+          <span>{{ formatValue(indexFeatureData.stkNum) }}</span>
+        </div>
+        <div class="info-row">
+          <span>指数流通A股市值（亿元）</span><span>{{ formatValue(indexFeatureData.tamv) }}</span>
+        </div>
+        <div class="info-row">
+          <span>流通A股市值全市场覆盖率</span><span>{{ formatValue(indexFeatureData.tamvCr, "percent") }}</span>
+        </div>
+        <div class="info-row">
+          <span>指数市值（亿元）</span>
+          <span>{{ formatValue(indexFeatureData.tmv) }}</span>
+        </div>
+        <div class="info-row">
+          <span>总市值全市场覆盖率</span>
+          <span>{{ formatValue(indexFeatureData.tmvCr, "percent") }}</span>
+        </div>
+        <div class="info-row">
+          <span>所属类型（股票、债券、商品、货币）</span>
+          <span>{{ formatValue(indexFeatureData.typeI) }}</span>
+        </div>
+      </div>
+    </div>
+    <!-- <div class="row">
       <div class="block">
         <div class="section-title">所属类型</div>
         <div class="info-list">
@@ -47,7 +98,7 @@
           </div>
         </div>
       </div>
-    </div>
+    </div> -->
     <div id="indexFeatureChart" style="width: 100%; height: 400px;"></div>
   </div>
 </template>
@@ -55,10 +106,12 @@
 <script setup lang="ts">
 import { formatValue } from "@/utils/formatValue";
 import * as echarts from "echarts";
-import { nextTick, onUnmounted, watch } from "vue";
+import { nextTick, onUnmounted, ref, watch } from "vue";
+import { getIndexCharacteristicsApi } from "@/api/trackingIndex";
 
 const props = defineProps<{
   tabActiveName: string
+  code: string
 }>();
 let myChart: echarts.ECharts | null = null;
 function initChart() {
@@ -117,16 +170,38 @@ function initChart() {
     ],
   });
 }
+
+const dateValue = ref("");
+const loading = ref(false);
 watch(
   () => props.tabActiveName,
   (newVal) => {
     if (newVal === "IndexFeature") {
       nextTick(() => {
-        initChart();
+        getIndexCharacteristics();
       });
     }
-  }
+  },
+  { immediate: true }
 );
+const indexFeatureData = ref<Record<string, any>>({});
+function getIndexCharacteristics() {
+  loading.value = true;
+  getIndexCharacteristicsApi({
+    code: props.code,
+    date: dateValue.value,
+  }).then((res) => {
+    indexFeatureData.value = res;
+    loading.value = false;
+  }).finally(() => {
+    loading.value = false;
+  });
+}
+
+function baseDataDateChange() {
+  getIndexCharacteristics();
+}
+
 function resizeChart() {
   if (myChart) {
     myChart.resize();

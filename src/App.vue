@@ -70,7 +70,7 @@ onMounted(() => {
             mode="horizontal"
           >
             <el-menu-item index="/">首页</el-menu-item>
-            <el-menu-item index="1">ETF数据库</el-menu-item>
+            <el-menu-item index="/developing?type=etfDatabase">ETF数据库</el-menu-item>
             <el-sub-menu index="2">
               <template #title>ETF工具</template>
               <el-menu-item index="/screener">ETF筛选器</el-menu-item>

@@ -74,3 +74,31 @@ export const getRelatedPageApi = (data: Record<string, any>) => {
 export const getIndexSnapshotApi = (params: Record<string, any>) => {
   return get<Record<string, any>>(`/api/index/info/snapshot`, params);
 };
+
+/**
+ * 获取指数详情-指数特征数据
+ * @param data
+ * @returns
+ */
+export const getIndexCharacteristicsApi = (params: Record<string, any>) => {
+  return get<Record<string, any>>(`/api/index/info/characteristics`, params);
+};
+
+
+/**
+ * 获取指数详情-交易数据
+ * @param data
+ * @returns
+ */
+export const getIndexTransactionApi = (params: Record<string, any>) => {
+  return post<Record<string, any>>(`/api/index/info/transaction`, params);
+};
+
+/**
+ * 获取指数详情-分红数据-基本面
+ * @param data
+ * @returns
+ */
+export const getIndexDividendFundamentalsApi = (params: Record<string, any>) => {
+  return post<Record<string, any>>(`/api/index/info/dividends/fundamentals`, params);
+};

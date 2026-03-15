@@ -93,6 +93,7 @@ function updateChart() {
         type: "custom",
         data: [],
         itemStyle: { color: colors[idx] },
+        renderItem: () => null,
       };
     }
     const { start, end } = percentMap[idx];
@@ -214,6 +215,19 @@ watch(
   },
   { immediate: true }
 );
+watch(
+  () => props.sectorData,
+  (newVal) => {
+    console.log(newVal, 'newVal')
+    if (newVal.length > 0) {
+      legendSelected.value = Array(newVal.length).fill(true);
+      nextTick(() => {
+        initChart();
+      });
+    }
+  },
+  { deep: true }
+);
 
 onMounted(() => {
   // 响应式resize
@@ -223,9 +237,9 @@ onMounted(() => {
     }
   };
   window.addEventListener("resize", resizeHandler);
-  if(!props.active){
-    initChart()
-  }
+  // if(!props.active){
+  //   initChart()
+  // }
 });
 
 onBeforeUnmount(() => {
