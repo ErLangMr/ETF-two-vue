@@ -17,6 +17,7 @@
       <!-- PC端筛选器 -->
       <div class="filter-left pc-filter" v-show="!isMobile()">
         <ScreenerFilter
+          :api-data="responseData"
           v-model:selected-child="selectedChild"
           v-model:selected-items="selectedItems"
           v-model:slider-items="sliderItems"
@@ -72,7 +73,7 @@ import type { FilterItem } from "@/components/ScreenerFilter.vue";
 import ScreenerTable from "@/components/ScreenerTable.vue";
 import { useDevice } from "@/utils/device";
 import { Operation } from "@element-plus/icons-vue";
-import { getOverviewPageApi, getNetValuePageApi, getDividendPageApi, getRiskPageApi, getHoldingFeaturePageApi, getValuationPageApi, getRelatedPageApi } from "@/api/trackingIndex";
+import { getOverviewPageApi, getNetValuePageApi, getDividendPageApi, getRiskPageApi, getHoldingFeaturePageApi, getValuationPageApi, getRelatedPageApi, getEtfTreeApi } from "@/api/trackingIndex";
 
 const { isMobile } = useDevice();
 
@@ -180,7 +181,17 @@ const trankingColumnList: Record<string, TableColumn[]> = {
   ],
 }
 
+// 获取筛选数据
+const responseData = ref<any>([]);
+function getFilterData() {
+  getEtfTreeApi().then((res: any) => {
+    responseData.value = res
+  });
+}
+
 const mobileFilterRef = ref();
+// 控制使用哪个版本的筛选器 (true: 新版, false: 旧版)
+const useNewFilter = ref(true);
 // 单选的值（一级分类）
 const selectedChild = ref("");
 // 多选的值（二级分类）
@@ -188,8 +199,8 @@ const selectedItems = ref<string[]>([]);
 // 滑块的值
 const sliderItems = ref<{ [key: string]: number }>({});
 // 滑块的值（滑块的值）
-let sliderValue: Record<string, any>[] = [];
-let paramsObj: Record<string, any> = {};
+let sliderValue:Record<string, any>[] = []
+let paramsObj: Record<string, any> = {}
 
 // 添加防抖函数
 const debounce = (fn: Function, delay: number) => {
@@ -209,12 +220,19 @@ const debouncedGetFilterTableData = debounce((params?: Record<string, any>) => {
 }, 300);
 
 watch(selectedChild, (newVal) => {
-  if (newVal) {
+  if(newVal) {
+    // 单选时，如果 selectedItems 为空或者是刚刚被清空，才调用接口
+    // 避免与 selectedItems 的 watch 重复调用
     if (!selectedItems.value.length) {
-      paramsObj.category = newVal;
-      paramsObj.codes = null;
-      page.value = 1;
-      getTrackingIndexTableData(paramsObj);
+      paramsObj.category = newVal
+      paramsObj.codes = null
+      page.value = 1
+      // 使用 nextTick 确保 selectedItems 的 watch 先执行
+      nextTick(() => {
+        if (!selectedItems.value.length) {
+          getTrackingIndexTableData(paramsObj)
+        }
+      })
     }
   }
 });
@@ -237,12 +255,8 @@ watch(
       paramsObj.category = null;
       page.value = 1;
       getTrackingIndexTableData(paramsObj);
-    } else if (selectedChild.value) {
-      paramsObj.codes = null;
-      paramsObj.category = selectedChild.value;
-      page.value = 1;
-      debouncedGetFilterTableData(paramsObj);
     }
+    // 删除 else if 分支，避免重复调用
   },
   { deep: true }
 );
@@ -250,7 +264,6 @@ watch(
 watch(
   sliderItems,
   (newVal) => {
-    console.log(newVal, newVal.length, 33333);
     if (Object.keys(newVal).length > 0) {
       const index = sliderValue.findIndex(
         (item) =>
@@ -366,6 +379,7 @@ function closeMobileFilter() {
 
 onMounted(() => {
   getOverviewPage();
+  getFilterData();
 });
 </script>
 

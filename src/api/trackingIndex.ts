@@ -1,5 +1,15 @@
 import { get, post } from '@/utils/request'
 // 跟踪指数模块接口
+
+/**
+ * 获取ETF分类树
+ * @param data
+ * @returns
+ */
+export const getEtfTreeApi = () => {
+  return get<Record<string, any>>(`/api/index/etfTree`);
+};
+
 /**
  * 获取概览页面数据
  * @param data
