@@ -317,7 +317,6 @@ const handleSelectionChange = (val: any[]) => {
           :prop="column.prop"
           :label="column.label"
           :min-width="column.width"
-          :show-overflow-tooltip="column.showTooltip"
         >
           <template #default="scope">
             <template v-if="column.prop === 'category'">

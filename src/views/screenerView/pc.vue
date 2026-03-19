@@ -28,6 +28,7 @@ const sliderItems = ref<{ [key: string]: number }>({});
 // 滑块的值（滑块的值）
 let sliderValue:Record<string, any>[] = []
 let paramsObj: Record<string, any> = {}
+const searchName = ref("")
 
 onMounted(() => {
   getFilterData()
@@ -147,6 +148,11 @@ function getFilterTableData(params?: Record<string, any>) {
   });
 }
 
+// 搜索
+function handleSearch() {
+  getEtfTableData(paramsObj)
+}
+
 // 顶部筛选Tab变化，获取表格数据
 const tableFilterTab = ref("overview");
 function handleTableFilterTab(tab: string) {
@@ -158,6 +164,7 @@ function getEtfTableData(params?: Record<string, any>) {
   const obj = {
     page: page.value,
     size: pageSize.value,
+    name: searchName.value,
     ...params
   }
   if( tableFilterTab.value === 'overview'){
@@ -341,9 +348,6 @@ function handleDeepCompare() {
       <Operation />筛选
     </button>
 
-    <el-button class="theme-button" style="position: absolute; right: 250px;top: -20px;" @click="handleAnalysis">组合分析</el-button>
-    <el-button class="theme-button" style="position: absolute; right: 150px;top: -20px;" @click="handleCompare">ETF对比</el-button>
-    <el-button class="theme-button" style="position: absolute; right: 20px;top: -20px;" @click="handleDeepCompare">ETF深度对比</el-button>
     <!-- PC端筛选器 -->
     <div class="filter-left pc-filter" v-show="!isMobile()">
       <!-- 切换按钮 -->
@@ -411,23 +415,33 @@ function handleDeepCompare() {
         </div>
       </div>
     </div>
-    <ScreenerTable
-      class="table-area"
-      :tableData="etfList"
-      :hasTableFilter="true"
-      @tableSelect="handleTableSelect"
-      @tableFilterTab="handleTableFilterTab"
-    >
-      <template #table-pagination>
-        <el-pagination
-        v-model:current-page="page"
-        layout="total, prev, pager, next"
-        :pager-count="!isMobile() ? 7 : 3"
-        :total="total"
-        :page-size="pageSize"
-        @current-change="handlePageChange" />
-      </template>
-    </ScreenerTable>
+    <div class="filerTableBox">
+      <div class="searchNameBox">
+        <el-input v-model="searchName" style="width: 240px" placeholder="请输入ETF名称、代码" @keyup.enter="handleSearch" @clear="handleSearch" clearable />
+        <div class="buttonBox">
+          <el-button class="theme-button" @click="handleAnalysis">组合分析</el-button>
+          <el-button class="theme-button" @click="handleCompare">ETF对比</el-button>
+          <el-button class="theme-button" @click="handleDeepCompare">ETF深度对比</el-button>
+        </div>
+      </div>
+      <ScreenerTable
+        class="table-area"
+        :tableData="etfList"
+        :hasTableFilter="true"
+        @tableSelect="handleTableSelect"
+        @tableFilterTab="handleTableFilterTab"
+      >
+        <template #table-pagination>
+          <el-pagination
+          v-model:current-page="page"
+          layout="total, prev, pager, next"
+          :pager-count="!isMobile() ? 7 : 3"
+          :total="total"
+          :page-size="pageSize"
+          @current-change="handlePageChange" />
+        </template>
+      </ScreenerTable>
+    </div>
   </div>
 </template>
 
@@ -437,6 +451,18 @@ function handleDeepCompare() {
   padding: 20px;
   padding-bottom: 0;
   background: #fff;
+}
+.filerTableBox {
+  position: relative;
+  .searchNameBox {
+    width: 100%;
+    position: absolute;
+    top: -45px;
+    padding-left: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
 }
 .screener-pc {
   display: flex;

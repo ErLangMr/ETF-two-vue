@@ -478,7 +478,7 @@ h3{
   gap: 24px;
   width: 100%;
   // max-width: 1200px;
-  column-gap: 100px;
+  // column-gap: 20px;
 }
 .card {
   display: flex;
@@ -516,7 +516,7 @@ h3{
 .title {
   font-weight: 600;
   color: $theme-purple;
-  font-size: var(--font-size-medium);
+  font-size: var(--font-size-large);
   margin-bottom: 8px;
   position: relative;
   display: inline-block;
@@ -535,7 +535,7 @@ h3{
 }
 .desc {
   color: #5c5c7b;
-  font-size: var(--font-size-base);
+  font-size: var(--font-size-medium);
   line-height: 1.6;
 }
 .index-list{
@@ -544,7 +544,7 @@ h3{
 .index-list-item {
   margin-bottom: 30px;
   .index-list-item-title {
-    font-size: var(--font-size-medium);
+    font-size: var(--font-size-large);
     font-weight: bold;
     margin-bottom: 10px;
   }
@@ -590,7 +590,7 @@ h3{
   background: var(--theme-purple);
   color: white;
   padding: 12px 20px;
-  font-size: var(--font-size-medium);
+  font-size: var(--font-size-large);
   font-weight: bold;
   text-align: center;
   border-radius: 4px;

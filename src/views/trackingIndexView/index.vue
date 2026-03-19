@@ -43,25 +43,30 @@
           </div>
         </div>
       </div>
-      <ScreenerTable
-        class="table-area"
-        :tableData="etfList"
-        :hasTableFilter="true"
-        :filterTabsProp="trankingTabs"
-        :tableColumnListProp="trankingColumnList"
-        @tableFilterTab="handleTableFilterTab"
-      >
-        <template #table-pagination>
-          <el-pagination
-            v-model:current-page="page"
-            layout="total, prev, pager, next"
-            :pager-count="!isMobile() ? 7 : 3"
-            :total="total"
-            :page-size="pageSize"
-            @current-change="handlePageChange"
-          />
-        </template>
-      </ScreenerTable>
+      <div class="filerTableBox">
+        <div class="searchNameBox">
+          <el-input v-model="searchName" style="width: 240px" placeholder="请输入ETF名称、代码" @keyup.enter="handleSearch" @clear="handleSearch" clearable />
+        </div>
+        <ScreenerTable
+          class="table-area"
+          :tableData="etfList"
+          :hasTableFilter="true"
+          :filterTabsProp="trankingTabs"
+          :tableColumnListProp="trankingColumnList"
+          @tableFilterTab="handleTableFilterTab"
+        >
+          <template #table-pagination>
+            <el-pagination
+              v-model:current-page="page"
+              layout="total, prev, pager, next"
+              :pager-count="!isMobile() ? 7 : 3"
+              :total="total"
+              :page-size="pageSize"
+              @current-change="handlePageChange"
+            />
+          </template>
+        </ScreenerTable>
+      </div>
     </div>
   </div>
 </template>
@@ -201,6 +206,7 @@ const sliderItems = ref<{ [key: string]: number }>({});
 // 滑块的值（滑块的值）
 let sliderValue:Record<string, any>[] = []
 let paramsObj: Record<string, any> = {}
+const searchName = ref("")
 
 // 添加防抖函数
 const debounce = (fn: Function, delay: number) => {
@@ -299,6 +305,12 @@ function handlePageChange(val: number) {
   page.value = val;
   getTrackingIndexTableData(paramsObj);
 }
+
+// 搜索
+function handleSearch() {
+  getTrackingIndexTableData(paramsObj)
+}
+
 // 顶部筛选Tab变化，获取表格数据
 const tableFilterTab = ref("overview");
 function handleTableFilterTab(tab: string) {
@@ -309,6 +321,7 @@ function getTrackingIndexTableData(params?: Record<string, any>) {
   const obj = {
     page: page.value,
     size: pageSize.value,
+    name: searchName.value,
     ...params,
   };
   if(tableFilterTab.value === "overview"){
@@ -400,6 +413,18 @@ onMounted(() => {
     min-height: 100vh;
     padding: 20px;
     background: #ffffff;
+  }
+  .filerTableBox {
+    position: relative;
+    .searchNameBox {
+      width: 100%;
+      position: absolute;
+      top: -45px;
+      padding-left: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
   }
   .filter-left {
     width: 320px;
