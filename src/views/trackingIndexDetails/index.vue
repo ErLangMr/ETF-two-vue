@@ -167,11 +167,11 @@ const tabList = ref([
     value: "PerformanceAndRisk",
     component: markRaw(PerformanceAndRisk),
   },
-  {
-    label: "资金流动",
-    value: "FundsFlow",
-    component: markRaw(FundsFlow),
-  },
+  // {
+  //   label: "资金流动",
+  //   value: "FundsFlow",
+  //   component: markRaw(FundsFlow),
+  // },
   {
     label: "成分股明细",
     value: "ConstituentStockDetails",
