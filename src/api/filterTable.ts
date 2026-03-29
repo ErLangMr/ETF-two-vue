@@ -8,8 +8,8 @@ export const getTypeByCategoryApi = (type: string, category?: string) => {
   return get('/api/funds/by-category/getTypeByCategory', {type,category,})
 }
 
-export const getEtfFilterDataApi = () => {
-  return get('/api/etf/etfTree')
+export const getEtfFilterDataApi = (labels?: string[]) => {
+  return post('/api/etf/etfTree', labels)
 }
 
 /**

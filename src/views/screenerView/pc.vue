@@ -5,7 +5,7 @@ import ScreenerFilterV2 from "@/components/ScreenerFilterV2.vue";
 import type { FilterItem } from "@/components/ScreenerFilter.vue";
 import ScreenerTable from "@/components/ScreenerTable.vue";
 import { useDevice } from "@/utils/device";
-import { Operation } from "@element-plus/icons-vue";
+import { Operation, Search } from "@element-plus/icons-vue";
 import { getFilterTableApi, getEtfFilterDataApi, getEtfOverviewPageApi, getEtfNetValuePageApi, getEtfFundFlowPageApi, getEtfFeePageApi, getEtfTradingEfficiencyPageApi, getEtfDividendPageApi, getEtfRiskPageApi, getEtfHoldingFeaturePageApi, getEtfValuationPageApi } from "@/api/filterTable";
 import { useRouter } from "vue-router";
 import { ElMessage } from "element-plus";
@@ -25,21 +25,31 @@ const selectedChild = ref("");
 const selectedItems = ref<string[]>([]);
 // 滑块的值
 const sliderItems = ref<{ [key: string]: number }>({});
+// 选中的树节点value数组（用于传给后台筛选器接口）
+const selectedFilterValues = ref<string[]>([]);
 // 滑块的值（滑块的值）
 let sliderValue:Record<string, any>[] = []
 let paramsObj: Record<string, any> = {}
 const searchName = ref("")
 
 onMounted(() => {
-  getFilterData()
+  getFilterData([])
   getEtfTableData()
 });
 
 // 获取筛选数据
 const responseData = ref<any>([]);
-function getFilterData() {
-  getEtfFilterDataApi().then((res: any) => {
-    responseData.value = res
+const responseSelectedValues = ref<string[]>([]);
+const filterLoading = ref(false)
+const tableLoading = ref(false)
+let isProgrammaticUpdate = false
+function getFilterData(selectedValues?: string[]) {
+  filterLoading.value = true
+  getEtfFilterDataApi(selectedValues).then((res: any) => {
+    responseData.value = res.result
+    responseSelectedValues.value = res.labels || []
+  }).finally(() => {
+    filterLoading.value = false
   });
 }
 
@@ -61,15 +71,14 @@ const debouncedGetFilterTableData = debounce((params?: Record<string, any>) => {
 }, 300);
 
 watch(selectedChild, (newVal) => {
+  if (isProgrammaticUpdate) return
   console.log(newVal, 11111);
   if(newVal) {
-    // 单选时，如果 selectedItems 为空或者是刚刚被清空，才调用接口
-    // 避免与 selectedItems 的 watch 重复调用
+    getFilterData(selectedFilterValues.value.length > 0 ? selectedFilterValues.value : [newVal])
     if (!selectedItems.value.length) {
       paramsObj.category = newVal
       paramsObj.codes = null
       page.value = 1
-      // 使用 nextTick 确保 selectedItems 的 watch 先执行
       nextTick(() => {
         if (!selectedItems.value.length) {
           getEtfTableData(paramsObj)
@@ -82,9 +91,10 @@ watch(selectedChild, (newVal) => {
 watch(
   selectedItems,
   (newVal) => {
+    if (isProgrammaticUpdate) return
     console.log('selectedItems changed:', newVal);
-    // 如果是重置操作，直接清空参数并请求
     if (newVal.length === 0 && !selectedChild.value) {
+      getFilterData([])
       paramsObj.codes = null;
       paramsObj.category = null;
       page.value = 1;
@@ -92,14 +102,13 @@ watch(
       return;
     }
 
-    // 正常筛选逻辑
     if (newVal.length > 0) {
+      getFilterData(selectedFilterValues.value)
       paramsObj.codes = newVal;
       paramsObj.category = null;
       page.value = 1;
       getEtfTableData(paramsObj);
     }
-    // 删除 else if 分支，避免重复调用
   },
   { deep: true }
 );
@@ -161,6 +170,7 @@ function handleTableFilterTab(tab: string) {
 }
 
 function getEtfTableData(params?: Record<string, any>) {
+  tableLoading.value = true
   const obj = {
     page: page.value,
     size: pageSize.value,
@@ -174,6 +184,8 @@ function getEtfTableData(params?: Record<string, any>) {
     }).catch((err: any) => {
       etfList.value = []
       total.value = 0
+    }).finally(() => {
+      tableLoading.value = false
     });
     return
   } else if( tableFilterTab.value === 'returns'){
@@ -183,6 +195,8 @@ function getEtfTableData(params?: Record<string, any>) {
     }).catch((err: any) => {
       etfList.value = []
       total.value = 0
+    }).finally(() => {
+      tableLoading.value = false
     });
     return
   } else if( tableFilterTab.value === 'fundFlows'){
@@ -192,6 +206,8 @@ function getEtfTableData(params?: Record<string, any>) {
     }).catch((err: any) => {
       etfList.value = []
       total.value = 0
+    }).finally(() => {
+      tableLoading.value = false
     });
     return
   }else if( tableFilterTab.value === 'expenses'){
@@ -201,6 +217,8 @@ function getEtfTableData(params?: Record<string, any>) {
     }).catch((err: any) => {
       etfList.value = []
       total.value = 0
+    }).finally(() => {
+      tableLoading.value = false
     });
     return
   } else if( tableFilterTab.value === 'efficiency'){
@@ -210,6 +228,8 @@ function getEtfTableData(params?: Record<string, any>) {
     }).catch((err: any) => {
       etfList.value = []
       total.value = 0
+    }).finally(() => {
+      tableLoading.value = false
     });
     return
   } else if( tableFilterTab.value === 'dividends'){
@@ -219,6 +239,8 @@ function getEtfTableData(params?: Record<string, any>) {
     }).catch((err: any) => {
       etfList.value = []
       total.value = 0
+    }).finally(() => {
+      tableLoading.value = false
     });
     return
   } else if( tableFilterTab.value === 'risk'){
@@ -228,6 +250,8 @@ function getEtfTableData(params?: Record<string, any>) {
     }).catch((err: any) => {
       etfList.value = []
       total.value = 0
+    }).finally(() => {
+      tableLoading.value = false
     });
     return
   } else if( tableFilterTab.value === 'holdings'){
@@ -237,6 +261,8 @@ function getEtfTableData(params?: Record<string, any>) {
     }).catch((err: any) => {
       etfList.value = []
       total.value = 0
+    }).finally(() => {
+      tableLoading.value = false
     });
   } else if( tableFilterTab.value === 'valuation'){
     getEtfValuationPageApi(obj).then((res: any) => {
@@ -245,6 +271,8 @@ function getEtfTableData(params?: Record<string, any>) {
     }).catch((err: any) => {
       etfList.value = []
       total.value = 0
+    }).finally(() => {
+      tableLoading.value = false
     });
   }
 }
@@ -367,12 +395,14 @@ function handleDeepCompare() {
         v-model:slider-items="sliderItems"
       />
 
-      <!-- 新版筛选器 -->
       <ScreenerFilterV2
         v-else
         :api-data="responseData"
+        :selected-values-from-api="responseSelectedValues"
+        :loading="filterLoading"
         v-model:selected-child="selectedChild"
         v-model:selected-items="selectedItems"
+        v-model:selected-filter-values="selectedFilterValues"
         v-model:slider-items="sliderItems"
       />
     </div>
@@ -408,8 +438,11 @@ function handleDeepCompare() {
             v-else
             ref="mobileFilterRef"
             :api-data="responseData"
+            :selected-values-from-api="responseSelectedValues"
+            :loading="filterLoading"
             v-model:selected-child="selectedChild"
             v-model:selected-items="selectedItems"
+            v-model:selected-filter-values="selectedFilterValues"
             v-model:slider-items="sliderItems"
           />
         </div>
@@ -417,7 +450,11 @@ function handleDeepCompare() {
     </div>
     <div class="filerTableBox">
       <div class="searchNameBox">
-        <el-input v-model="searchName" style="width: 240px" placeholder="请输入ETF名称、代码" @keyup.enter="handleSearch" @clear="handleSearch" clearable />
+        <el-input v-model="searchName" style="width: 240px" placeholder="请输入ETF名称、代码" @keyup.enter="handleSearch" @clear="handleSearch" clearable>
+          <template #append>
+            <el-button @click="handleSearch" :icon="Search" />
+          </template>
+        </el-input>
         <div class="buttonBox">
           <el-button class="theme-button" @click="handleAnalysis">组合分析</el-button>
           <el-button class="theme-button" @click="handleCompare">ETF对比</el-button>
@@ -428,6 +465,7 @@ function handleDeepCompare() {
         class="table-area"
         :tableData="etfList"
         :hasTableFilter="true"
+        :loading="tableLoading"
         @tableSelect="handleTableSelect"
         @tableFilterTab="handleTableFilterTab"
       >
@@ -454,6 +492,7 @@ function handleDeepCompare() {
 }
 .filerTableBox {
   position: relative;
+  width: calc(100% - 310px);
   .searchNameBox {
     width: 100%;
     position: absolute;
@@ -474,7 +513,7 @@ function handleDeepCompare() {
   position: relative;
 }
 .filter-left {
-  width: 320px;
+  width: 310px;
   flex-shrink: 0;
 }
 .table-area {

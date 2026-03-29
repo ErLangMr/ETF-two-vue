@@ -46,7 +46,7 @@
         fontSize: '1rem',
       }"
     >
-      <el-table-column prop="stkCode" label="股票代码" min-width="120">
+      <el-table-column prop="stkCode" label="股票代码" min-width="100">
         <!-- <template #default="scope">
           <span class="tableLink" @click="toEtfLocator(scope.row)">{{
             scope.row.stkCode
@@ -56,10 +56,9 @@
       <el-table-column
         prop="stkName"
         label="股票名称"
-        min-width="150"
-        :show-overflow-tooltip="true"
+        min-width="110"
       ></el-table-column>
-      <el-table-column prop="etfCode" label="ETF代码" min-width="120">
+      <el-table-column prop="etfCode" label="ETF代码" min-width="110">
         <template #default="scope">
           <span class="tableLink" @click="toEtfDetails(scope.row)">{{
             scope.row.etfCode
@@ -69,51 +68,62 @@
       <el-table-column
         prop="etfName"
         label="ETF名称"
-        min-width="150"
-        :show-overflow-tooltip="true"
+        min-width="120"
       ></el-table-column>
       <el-table-column
         prop="holdMv"
-        label="持有股票市值"
-        min-width="130"
-        :show-overflow-tooltip="true"
-      />
+        label="持有股票市值(百万元)"
+        min-width="120">
+        <template #default="scope">
+          {{ (scope.row.holdMv).toFixed(2) }}
+        </template>
+      </el-table-column>
       <el-table-column
         prop="holdNum"
         label="持有股票数量"
-        min-width="130"
-        :show-overflow-tooltip="true"
-      />
+        min-width="110">
+        <template #default="scope">
+          {{ scope.row.holdNum?.toLocaleString() }}
+        </template>
+      </el-table-column>
       <el-table-column
         prop="port"
         label="占ETF净值比"
-        min-width="130"
-        :show-overflow-tooltip="true"
-      />
+        min-width="110">
+        <template #default="scope">
+          {{ (scope.row.port).toFixed(2) }}%
+        </template>
+      </el-table-column>
       <el-table-column
         prop="rank"
         label="占ETF净值比排序"
-        min-width="150"
-        :show-overflow-tooltip="true"
+        min-width="100"
       />
       <el-table-column
         prop="reportType"
         label="定期报告类型"
-        min-width="150"
-        :show-overflow-tooltip="true"
-      />
+        min-width="100"
+      >
+        <template #default="scope">
+          {{ typeFilter(scope.row.reportType) }}
+        </template>
+      </el-table-column>
       <el-table-column
         prop="w1"
         label="占股票总市值比"
-        min-width="150"
-        :show-overflow-tooltip="true"
-      />
+        min-width="100">
+        <template #default="scope">
+          {{ (scope.row.w1).toFixed(4) }}%
+        </template>
+      </el-table-column>
       <el-table-column
         prop="w2"
         label="占股票流通A股市值比"
-        min-width="180"
-        :show-overflow-tooltip="true"
-      />
+        min-width="100">
+        <template #default="scope">
+          {{ (scope.row.w2).toFixed(4) }}%
+        </template>
+      </el-table-column>
     </el-table>
     <el-pagination
       v-model:current-page="page"
@@ -192,6 +202,19 @@ const toEtfDetails = (row: any) => {
     path: "/details",
     query: { code: row.etfCode, name: row.etfName },
   });
+};
+const typeFilter = (type: string) => {
+  if (type === "1") {
+    return "一季报";
+  } else if (type === "3") {
+    return "三季报";
+  } else if (type === "5") {
+    return "半年报";
+  } else if (type === "6") {
+    return "年报";
+  } else {
+    return "未知";
+  }
 };
 </script>
 

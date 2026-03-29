@@ -279,7 +279,7 @@ function initHangyeChart(
     },
     series: [
       {
-        name: "2011",
+        name: "本期占比",
         type: "bar",
         barGap: 0,
         barWidth: 15,
@@ -291,7 +291,7 @@ function initHangyeChart(
         },
       },
       {
-        name: "2012",
+        name: "上期占比",
         type: "bar",
         barWidth: 15,
         data: seriesData2,

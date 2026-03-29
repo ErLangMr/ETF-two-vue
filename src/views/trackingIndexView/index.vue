@@ -90,6 +90,7 @@ interface TableColumn {
   unit?: string;
   width?: number;
   showTooltip?: boolean;
+  sortable?: boolean;
 }
 const trankingTabs = [
   { label: "概览", value: "overview" },
@@ -105,28 +106,28 @@ const trankingTabs = [
 const trankingColumnList: Record<string, TableColumn[]> = {
   overview: [
     { prop: "indexCode", label: "指数代码", type: "link", url: "/trackingIndexDetails", width: 110, showTooltip: false },
-    { prop: "fyIndexCode", label: "全收益指数代码", width: 140, showTooltip: true },
-    { prop: "indexName", label: "指数名称", type: "link", url: "/trackingIndexDetails", width: 120, showTooltip: true },
-    { prop: "consNum", label: "成份证券个数", width: 130, showTooltip: false },
+    // { prop: "fyIndexCode", label: "全收益指数代码", width: 140, showTooltip: true },
+    { prop: "indexName", label: "指数名称", type: "link", url: "/trackingIndexDetails", width: 110, showTooltip: true },
+    { prop: "consNum", label: "成份证券个数", width: 100, showTooltip: false },
     { prop: "launchDate", label: "发布日期", width: 110, showTooltip: false },
     { prop: "baseDate", label: "基日", width: 110, showTooltip: false },
-    { prop: "baseValue", label: "基点", width: 110, showTooltip: false },
-    { prop: "indexIssuer", label: "发布机构", width: 160, showTooltip: true },
-    { prop: "methodology", label: "加权方式", width: 170, showTooltip: true },
-    { prop: "nyIndexCode", label: "净收益指数代码", width: 140, showTooltip: false },
-    { prop: "returnType", label: "收益处理方式", width: 130, showTooltip: false },
-    { prop: "typeI", label: "一级分类", width: 110, showTooltip: false },
-    { prop: "typeII", label: "二级分类", width: 110, showTooltip: false },
+    { prop: "baseValue", label: "基点", width: 90, showTooltip: false },
+    { prop: "indexIssuer", label: "发布机构", width: 120, showTooltip: true },
+    { prop: "methodology", label: "加权方式", width: 120, showTooltip: true },
+    // { prop: "nyIndexCode", label: "净收益指数代码", width: 140, showTooltip: false },
+    { prop: "returnType", label: "收益处理方式", width: 120, showTooltip: false },
+    { prop: "typeI", label: "一级分类", width: 100, showTooltip: false },
+    { prop: "typeII", label: "二级分类", width: 100, showTooltip: false },
   ],
   returns: [
     { prop: "indexCode", label: "指数代码", type: "link", url: "/trackingIndexDetails", width: 110, showTooltip: false },
-    { prop: "indexName", label: "指数简称", type: "link", url: "/trackingIndexDetails", width: 120, showTooltip: true },
-    { prop: "ret1", label: "近1月涨跌（%）", width: 160 },
-    { prop: "ret3", label: "近3月涨跌（%）", width: 160 },
-    { prop: "ret12", label: "近1年涨跌（%）", width: 160 },
-    { prop: "ret36", label: "近3年涨跌（%）", width: 160 },
-    { prop: "ret60", label: "近5年涨跌（%）", width: 160 },
-    { prop: "retYTD", label: "今年以来涨跌（%）", width: 170 },
+    { prop: "indexName", label: "指数简称", type: "link", url: "/trackingIndexDetails", width: 110, showTooltip: true },
+    { prop: "ret1", label: "近1月涨跌（%）", width: 110, sortable: true },
+    { prop: "ret3", label: "近3月涨跌（%）", width: 110, sortable: true },
+    { prop: "ret12", label: "近1年涨跌（%）", width: 110, sortable: true },
+    { prop: "ret36", label: "近3年涨跌（%）", width: 110, sortable: true },
+    { prop: "ret60", label: "近5年涨跌（%）", width: 110, sortable: true },
+    { prop: "retYTD", label: "今年以来涨跌（%）", width: 110, sortable: true },
   ],
   fundFlows: [
     { prop: "code", label: "指数代码" },
@@ -141,48 +142,48 @@ const trankingColumnList: Record<string, TableColumn[]> = {
   dividends: [
     { prop: "indexCode", label: "指数代码", type: "link", url: "/trackingIndexDetails", width: 110, showTooltip: false },
     { prop: "indexName", label: "指数简称", type: "link", url: "/trackingIndexDetails", width: 120, showTooltip: true },
-    { prop: "annualDividend", label: "年度分红(元)", width: 160 },
-    { prop: "dividendYield", label: "股息率" },
+    { prop: "annualDividend", label: "年度分红(元)", width: 110, sortable: true },
+    { prop: "dividendYield", label: "股息率(%)", width: 110, sortable: true },
   ],
   risk: [
     { prop: "indexCode", label: "指数代码", type: "link", url: "/trackingIndexDetails", width: 110, showTooltip: false },
     { prop: "indexName", label: "指数简称", type: "link", url: "/trackingIndexDetails", width: 120, showTooltip: true },
-    { prop: "yvol1", label: "近1月波动率(%)", width: 160 },
-    { prop: "yvol3", label: "3月波动率(%)", width: 160 },
-    { prop: "yvol6", label: "今年以来波动率(%)", width: 170 },
-    { prop: "yvol12", label: "1年波动率(%)", width: 160 },
-    { prop: "yvol36", label: "3年波动率(%)", width: 160 },
-    { prop: "yvol60", label: "5年波动率(%)", width: 160 },
+    { prop: "yvol1", label: "近1月波动率(%)", width: 110, sortable: true },
+    { prop: "yvol3", label: "3月波动率(%)", width: 110, sortable: true },
+    { prop: "yvol6", label: "今年以来波动率(%)", width: 120, sortable: true },
+    { prop: "yvol12", label: "1年波动率(%)", width: 110, sortable: true },
+    { prop: "yvol36", label: "3年波动率(%)", width: 110, sortable: true },
+    { prop: "yvol60", label: "5年波动率(%)", width: 110, sortable: true },
   ],
   holdings: [
     { prop: "indexCode", label: "指数代码", type: "link", url: "/trackingIndexDetails", width: 110, showTooltip: false },
     { prop: "indexName", label: "指数简称", type: "link", url: "/trackingIndexDetails", width: 120, showTooltip: true },
-    { prop: "stkNum", label: "样本数量", width: 110 },
-    { prop: "tmv", label: "指数市值（亿元）", width: 160 },
-    { prop: "aamv", label: "指数平均流通A股市值（亿元）", width: 260 },
-    { prop: "mamv", label: "指数流通A股市值中位数（亿元）", width: 260 },
-    { prop: "tamv", label: "指数流通A股市值（亿元）", width: 260 },
-    { prop: "con5", label: "前五大权重之和(%)", width: 180 },
-    { prop: "con10", label: "前十大权重之和(%)", width: 180 },
-    { prop: "con20", label: "前二十大权重之和(%)", width: 180 },
+    { prop: "stkNum", label: "样本数量", width: 80, sortable: true },
+    { prop: "tmv", label: "指数市值（亿元）", width: 120, sortable: true },
+    { prop: "aamv", label: "指数平均流通A股市值（亿元）", width: 170, sortable: true },
+    { prop: "mamv", label: "指数流通A股市值中位数（亿元）", width: 160, sortable: true },
+    { prop: "tamv", label: "指数流通A股市值（亿元）", width: 160, sortable: true },
+    { prop: "con5", label: "前五大权重之和(%)", width: 130, sortable: true },
+    { prop: "con10", label: "前十大权重之和(%)", width: 130, sortable: true },
+    { prop: "con20", label: "前二十大权重之和(%)", width: 130, sortable: true },
   ],
   valuation: [
     { prop: "indexCode", label: "指数代码", type: "link", url: "/trackingIndexDetails", width: 110, showTooltip: false },
     { prop: "indexName", label: "指数简称", type: "link", url: "/trackingIndexDetails", width: 120, showTooltip: true },
-    { prop: "pb10", label: "PB分位值-10年（%）", width: 180 },
-    { prop: "pb3", label: "PB分位值-3年（%）", width: 180 },
-    { prop: "pb5", label: "PB分位值-5年（%）", width: 180 },
-    { prop: "pe10", label: "PE分位值-10年（%）", width: 180 },
-    { prop: "pe3", label: "PE分位值-3年（%）", width: 180 },
-    { prop: "pe5", label: "PE分位值-5年（%）", width: 180 },
-    { prop: "tpb", label: "PB", width: 180 },
-    { prop: "tpe", label: "PE", width: 180 },
+    { prop: "pb10", label: "PB分位值-10年（%）", width: 130, sortable: true },
+    { prop: "pb3", label: "PB分位值-3年（%）", width: 130, sortable: true },
+    { prop: "pb5", label: "PB分位值-5年（%）", width: 130, sortable: true },
+    { prop: "pe10", label: "PE分位值-10年（%）", width: 130, sortable: true },
+    { prop: "pe3", label: "PE分位值-3年（%）", width: 130, sortable: true },
+    { prop: "pe5", label: "PE分位值-5年（%）", width: 130, sortable: true },
+    { prop: "tpb", label: "PB", width: 80, sortable: true },
+    { prop: "tpe", label: "PE", width: 80, sortable: true },
   ],
   relatedETF: [
     { prop: "indexCode", label: "指数代码", type: "link", url: "/trackingIndexDetails", width: 110, showTooltip: false },
     { prop: "indexName", label: "指数简称", type: "link", url: "/trackingIndexDetails", width: 120, showTooltip: true },
-    { prop: "etfNum", label: "相关ETF只数", width: 110 },
-    { prop: "etfAUM", label: "相关ETF规模（亿元）", width: 160 }
+    { prop: "etfNum", label: "相关ETF只数", width: 110, type: "toList" },
+    { prop: "etfAUM", label: "相关ETF规模（亿元）", width: 160, sortable: true }
   ],
 }
 
@@ -416,6 +417,7 @@ onMounted(() => {
   }
   .filerTableBox {
     position: relative;
+    width: calc(100% - 310px);
     .searchNameBox {
       width: 100%;
       position: absolute;
@@ -427,7 +429,7 @@ onMounted(() => {
     }
   }
   .filter-left {
-    width: 320px;
+    width: 310px;
     flex-shrink: 0;
   }
   .table-area {

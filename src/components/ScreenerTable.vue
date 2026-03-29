@@ -25,16 +25,24 @@ const props = defineProps({
   tableColumnListProp: {
     type: Object as PropType<Record<string, any[]>>,
     required: false
+  },
+  loading: {
+    type: Boolean,
+    required: false,
+    default: undefined
   }
 })
 const emit = defineEmits(['tableSelect', 'tableFilterTab'])
 const route = useRoute()
 const router = useRouter()
-const isScreener = computed(() => route.path === '/screener') // 是否在筛选页面
-const tableLoading = ref(true)
+const isScreener = computed(() => route.path === '/screener')
+const internalLoading = ref(true)
+const tableLoading = computed(() => {
+  return props.loading !== undefined ? props.loading : internalLoading.value
+})
 const tablePropData = ref<any[]>([])
 watch(() => props.tableData, () => {
-  tableLoading.value = false
+  internalLoading.value = false
   tablePropData.value = props.tableData
 })
 const filterTabs = ref([
@@ -59,6 +67,8 @@ interface TableColumn {
   prop: string;
   label: string;
   width: number;
+  sortable?: boolean;
+  sortMethod?: (a: any, b: any) => number | undefined;
   showTooltip?: boolean;
   type?: string;
   url?: string | undefined;
@@ -68,66 +78,66 @@ interface TableColumn {
 const tableColumnList = ref<Record<string, TableColumn[]>>(
   {
     overview: [
-      { prop: "etfCode", label: "ETF代码", width: 110, showTooltip: false },
-      { prop: "etfName", label: "ETF简称", width: 150, showTooltip: true, type: "link", url: "/details" },
-      { prop: "etfFullname", label: "ETF全称", width: 160, showTooltip: true, type: "link", url: "/details" },
+      { prop: "etfCode", label: "ETF代码", width: 100, showTooltip: false },
+      { prop: "etfName", label: "ETF简称", width: 100, showTooltip: true, type: "link", url: "/details" },
+      { prop: "etfFullname", label: "ETF全称", width: 130, showTooltip: true, type: "link", url: "/details" },
       { prop: "typeI", label: "资产类型", width: 100, showTooltip: false },
-      { prop: "nav", label: "份额净值", width: 100, showTooltip: false },
+      { prop: "nav", label: "份额净值", width: 90, showTooltip: false },
       { prop: "shares", label: "份额(百万份)", width: 120, showTooltip: false },
       // { prop: "aum", label: "资产规模(百万元)", unit: "million" },
-      { prop: "aum", label: "资产规模(百万元)", width: 160, showTooltip: true },
-      { prop: "close", label: "最新收盘价(元)", width: 160, showTooltip: true },
-      { prop: "coverRatio", label: "折溢价率(%)", width: 130, showTooltip: true },
-      { prop: "ytdPrice", label: "今年以来价格变化(%)", width: 180, showTooltip: true }
+      { prop: "aum", label: "资产规模(百万元)", width: 120, showTooltip: true, sortable: true },
+      { prop: "close", label: "最新收盘价(元)", width: 120, showTooltip: true },
+      { prop: "coverRatio", label: "折溢价率(%)", width: 115, showTooltip: true },
+      { prop: "ytdPrice", label: "今年以来价格变化(%)", width: 130, showTooltip: true }
     ],
     returns: [
-      { prop: "etfCode", label: "ETF代码", width: 110, showTooltip: false },
-      { prop: "etfName", label: "ETF简称", width: 150, showTooltip: true, type: "link", url: "/details" },
-      { prop: "weeklyReturns", label: "近1周回报(%)", width: 120, showTooltip: false },
-      { prop: "ret1", label: "近1月回报(%)", width: 120, showTooltip: false },
-      { prop: "ret3", label: "近3月回报(%)", width: 130, showTooltip: false },
-      { prop: "ret6", label: "近6月回报(%)", width: 130, showTooltip: false },
-      { prop: "ytdNav", label: "今年以来回报(%)", width: 150, showTooltip: false },
-      { prop: "ret12", label: "近1年回报(%)", width: 120, showTooltip: true },
-      { prop: "ret36", label: "近3年回报(%)", width: 130, showTooltip: true },
-      { prop: "ret60", label: "近5年回报(%)", width: 130, showTooltip: true }
+      { prop: "etfCode", label: "ETF代码", width: 100, showTooltip: false },
+      { prop: "etfName", label: "ETF简称", width: 100, showTooltip: true, type: "link", url: "/details" },
+      // { prop: "weeklyReturns", label: "近1周回报(%)", width: 120, showTooltip: false },
+      { prop: "ret1", label: "近1月回报(%)", width: 110, showTooltip: false, sortable: true },
+      { prop: "ret3", label: "近3月回报(%)", width: 110, showTooltip: false, sortable: true },
+      { prop: "ret6", label: "近6月回报(%)", width: 110, showTooltip: false, sortable: true },
+      { prop: "ytdNav", label: "今年以来回报(%)", width: 110, showTooltip: false, sortable: true },
+      { prop: "ret12", label: "近1年回报(%)", width: 110, showTooltip: true, sortable: true },
+      { prop: "ret36", label: "近3年回报(%)", width: 110, showTooltip: true, sortable: true },
+      { prop: "ret60", label: "近5年回报(%)", width: 110, showTooltip: true, sortable: true }
     ],
     fundFlows: [
       { prop: "etfCode", label: "ETF代码", width: 110, showTooltip: false },
       { prop: "etfName", label: "ETF简称", width: 150, showTooltip: true, type: "link", url: "/details" },
-      { prop: "ff1", label: "近1月净流入额(百万元)", width: 130, showTooltip: false },
-      { prop: "ff3", label: "近3月净流入额(百万元)", width: 130, showTooltip: false },
-      { prop: "ff6", label: "近6月净流入额(百万元)", width: 130, showTooltip: false },
-      { prop: "ytdFf", label: "今年以来净流入额(百万元)", width: 130, showTooltip: false },
-      { prop: "ff12", label: "近1年净流入额(百万元)", width: 130, showTooltip: false },
-      { prop: "ff36", label: "近3年净流入额(百万元)", width: 130, showTooltip: false },
-      { prop: "ff60", label: "近5年净流入额(百万元)", width: 130, showTooltip: false },
+      { prop: "ff1", label: "近1月净流入额(百万元)", width: 130, showTooltip: false, sortable: true },
+      { prop: "ff3", label: "近3月净流入额(百万元)", width: 130, showTooltip: false, sortable: true },
+      { prop: "ff6", label: "近6月净流入额(百万元)", width: 130, showTooltip: false, sortable: true },
+      // { prop: "ytdFf", label: "今年以来净流入额(百万元)", width: 130, showTooltip: false, sortable: true },
+      { prop: "ff12", label: "近1年净流入额(百万元)", width: 130, showTooltip: false, sortable: true },
+      { prop: "ff36", label: "近3年净流入额(百万元)", width: 130, showTooltip: false, sortable: true },
+      { prop: "ff60", label: "近5年净流入额(百万元)", width: 130, showTooltip: false, sortable: true },
     ],
     expenses: [
       { prop: "etfCode", label: "ETF代码", width: 110, showTooltip: false },
       { prop: "etfName", label: "ETF简称", width: 150, showTooltip: true, type: "link", url: "/details" },
-      { prop: "managementFee", label: "管理费率(%)", width: 120, showTooltip: false },
-      { prop: "custodianFee", label: "托管费率(%)", width: 120, showTooltip: false },
-      { prop: "salesServiceFee", label: "销售服务费率(%)", width: 150, showTooltip: false },
-      { prop: "subscriptionFee", label: "最高申购费率(%)", width: 150, showTooltip: false },
-      { prop: "redemptionFee", label: "最高赎回费率(%)", width: 150, showTooltip: false },
-      { prop: "totalFee", label: "总费率(%)", width: 110, showTooltip: false },
+      { prop: "managementFee", label: "管理费率(%)", width: 120, showTooltip: false, sortable: true },
+      { prop: "custodianFee", label: "托管费率(%)", width: 120, showTooltip: false, sortable: true },
+      { prop: "salesServiceFee", label: "销售服务费率(%)", width: 150, showTooltip: false, sortable: true },
+      { prop: "subscriptionFee", label: "最高申购费率(%)", width: 150, showTooltip: false, sortable: true },
+      { prop: "redemptionFee", label: "最高赎回费率(%)", width: 150, showTooltip: false, sortable: true },
+      { prop: "totalFee", label: "总费率(%)", width: 110, showTooltip: false, sortable: true },
     ],
     efficiency: [
       { prop: "etfCode", label: "ETF代码", width: 110, showTooltip: false },
       { prop: "etfName", label: "ETF简称", width: 150, showTooltip: true, type: "link", url: "/details" },
-      { prop: "volume1", label: "近1月日均交易量(百万份)", width: 120, showTooltip: false },
-      { prop: "volume3", label: "近3月日均交易量(百万份)", width: 120, showTooltip: false },
-      { prop: "amount1", label: "近1月日均交易额(百万元)", width: 120, showTooltip: false },
-      { prop: "amount3", label: "近3月日均交易额(百万元)", width: 120, showTooltip: false },
-      { prop: "turnover1", label: "近1月换手率(%)", width: 150, showTooltip: false },
-      { prop: "turnover3", label: "近3月换手率(%)", width: 150, showTooltip: false },
-      { prop: "cover1", label: "近1月日均折溢价率(%)", width: 150, showTooltip: false },
-      { prop: "cover3", label: "近3月日均折溢价率(%)", width: 150, showTooltip: false },
-      { prop: "dev1", label: "近1月日均跟踪偏离度(%)", width: 150, showTooltip: false },
-      { prop: "dev3", label: "近3月日均跟踪偏离度(%)", width: 150, showTooltip: false },
-      { prop: "tr1", label: "近1月日均跟踪误差(%)", width: 150, showTooltip: false },
-      { prop: "tr3", label: "近3月日均跟踪误差(%)", width: 150, showTooltip: false },
+      { prop: "volume1", label: "近1月日均交易量(百万份)", width: 120, showTooltip: false, sortable: true },
+      { prop: "volume3", label: "近3月日均交易量(百万份)", width: 120, showTooltip: false, sortable: true },
+      { prop: "amount1", label: "近1月日均交易额(百万元)", width: 120, showTooltip: false, sortable: true },
+      { prop: "amount3", label: "近3月日均交易额(百万元)", width: 120, showTooltip: false, sortable: true },
+      { prop: "turnover1", label: "近1月换手率(%)", width: 150, showTooltip: false, sortable: true },
+      { prop: "turnover3", label: "近3月换手率(%)", width: 150, showTooltip: false, sortable: true },
+      { prop: "cover1", label: "近1月日均折溢价率(%)", width: 150, showTooltip: false, sortable: true },
+      { prop: "cover3", label: "近3月日均折溢价率(%)", width: 150, showTooltip: false, sortable: true },
+      { prop: "dev1", label: "近1月跟踪偏离度(%)", width: 150, showTooltip: false, sortable: true },
+      { prop: "dev3", label: "近3月跟踪偏离度(%)", width: 150, showTooltip: false, sortable: true },
+      { prop: "tr1", label: "近1月跟踪误差(%)", width: 150, showTooltip: false, sortable: true },
+      { prop: "tr3", label: "近3月跟踪误差(%)", width: 150, showTooltip: false, sortable: true },
     ],
     esg: [
       { prop: "etfCode", label: "ETF代码", width: 110, showTooltip: false },
@@ -155,34 +165,34 @@ const tableColumnList = ref<Record<string, TableColumn[]>>(
     risk: [
       { prop: "etfCode", label: "ETF代码", width: 110, showTooltip: false },
       { prop: "etfName", label: "ETF简称", width: 150, showTooltip: true, type: "link", url: "/details" },
-      { prop: "vol1", label: "近1月收益标准差", width: 150, showTooltip: false },
-      { prop: "vol3", label: "近3月收益标准差", width: 150, showTooltip: false },
-      { prop: "vol6", label: "近6月收益标准差", width: 150, showTooltip: false },
-      { prop: "vol12", label: "近1年收益标准差", width: 150, showTooltip: false },
-      { prop: "vol36", label: "近3年收益标准差", width: 150, showTooltip: false },
-      { prop: "beta1", label: "近1月Beta", width: 140, showTooltip: false },
-      { prop: "beta3", label: "近3月Beta", width: 140, showTooltip: false },
-      { prop: "beta12", label: "近1年Beta", width: 140, showTooltip: false },
-      { prop: "beta36", label: "近3年Beta", width: 140, showTooltip: false },
-      { prop: "maxD12", label: "近1年最大回撤", width: 140, showTooltip: false },
-      { prop: "maxD36", label: "近3年最大回撤", width: 140, showTooltip: false },
+      { prop: "vol1", label: "近1月收益标准差(%)", width: 120, showTooltip: false, sortable: true },
+      { prop: "vol3", label: "近3月收益标准差(%)", width: 120, showTooltip: false, sortable: true },
+      { prop: "vol6", label: "近6月收益标准差(%)", width: 120, showTooltip: false, sortable: true },
+      { prop: "vol12", label: "近1年收益标准差(%)", width: 120, showTooltip: false, sortable: true },
+      { prop: "vol36", label: "近3年收益标准差(%)", width: 120, showTooltip: false, sortable: true },
+      { prop: "beta1", label: "近1月Beta(%)", width: 110, showTooltip: false, sortable: true },
+      { prop: "beta3", label: "近3月Beta(%)", width: 110, showTooltip: false, sortable: true },
+      { prop: "beta12", label: "近1年Beta(%)", width: 110, showTooltip: false, sortable: true },
+      { prop: "beta36", label: "近3年Beta(%)", width: 110, showTooltip: false, sortable: true },
+      { prop: "maxD12", label: "近1年最大回撤", width: 110, showTooltip: false, sortable: true },
+      { prop: "maxD36", label: "近3年最大回撤", width: 110, showTooltip: false, sortable: true },
     ],
     holdings: [
       { prop: "etfCode", label: "ETF代码", width: 110, showTooltip: false },
       { prop: "etfName", label: "ETF简称", width: 150, showTooltip: true, type: "link", url: "/details" },
-      { prop: "etfFullname", label: "ETF全称", width: 150, showTooltip: true, type: "link", url: "/details" },
-      { prop: "stockNumber", label: "持有证券数量(只)", width: 100, showTooltip: false },
-      { prop: "weightedTotalMarketValue", label: "持仓证券平均市值(百万元)", width: 160, showTooltip: false },
-      { prop: "top5HoldingPercent", label: "前五大持仓占比(%)", width: 160, showTooltip: false },
-      { prop: "top10HoldingPercent", label: "前十大持仓占比(%)", width: 160, showTooltip: false },
-      { prop: "top20HoldingPercent", label: "前二十大持仓占比(%)", width: 160, showTooltip: false },
-      { prop: "bigCapPercent", label: "大盘股占比(%)", width: 140, showTooltip: false },
-      { prop: "midCapPercent", label: "中盘股占比(%)", width: 140, showTooltip: false },
-      { prop: "smallCapPercent", label: "小盘股占比(%)", width: 140, showTooltip: false },
-      { prop: "weightedPe", label: "加权平均PE", width: 120, showTooltip: false },
-      { prop: "weightedPb", label: "加权平均PB", width: 120, showTooltip: false },
-      { prop: "weightedPs", label: "加权平均PS", width: 120, showTooltip: false },
-      { prop: "weightedPcf", label: "加权平均PCF", width: 120, showTooltip: false }
+      // { prop: "etfFullname", label: "ETF全称", width: 150, showTooltip: true, type: "link", url: "/details" },
+      { prop: "stockNumber", label: "持有证券数量(只)", width: 120, showTooltip: false, sortable: true },
+      { prop: "weightedTotalMarketValue", label: "持仓证券平均市值(百万元)", width: 140, showTooltip: false, sortable: true },
+      { prop: "top5HoldingPercent", label: "前五大持仓占比(%)", width: 120, showTooltip: false, sortable: true },
+      { prop: "top10HoldingPercent", label: "前十大持仓占比(%)", width: 120, showTooltip: false, sortable: true },
+      { prop: "top20HoldingPercent", label: "前二十大持仓占比(%)", width: 130, showTooltip: false, sortable: true },
+      { prop: "bigCapPercent", label: "大盘股占比(%)", width: 100, showTooltip: false, sortable: true },
+      { prop: "midCapPercent", label: "中盘股占比(%)", width: 100, showTooltip: false, sortable: true },
+      { prop: "smallCapPercent", label: "小盘股占比(%)", width: 100, showTooltip: false, sortable: true },
+      { prop: "weightedPe", label: "加权平均PE", width: 100, showTooltip: false, sortable: true },
+      { prop: "weightedPb", label: "加权平均PB", width: 100, showTooltip: false, sortable: true },
+      { prop: "weightedPs", label: "加权平均PS", width: 100, showTooltip: false, sortable: true },
+      { prop: "weightedPcf", label: "加权平均PCF", width: 100, showTooltip: false, sortable: true },
     ],
     technicals: [
       { prop: "etfCode", label: "ETF代码", width: 100, showTooltip: false },
@@ -236,13 +246,21 @@ const activeTab = ref("overview");
 const handleTabClick = (tab: string) => {
   activeTab.value = tab
   tablePropData.value = []
-  tableLoading.value = true
+  internalLoading.value = true
   emit("tableFilterTab", tab)
 }
 
 // 处理跳转
 const handleJump = (url: string, code: string, name: string) => {
   router.push(`${url}?code=${code}&name=${name}`)
+}
+const handleJumpClick = (row: any) => {
+  router.push({
+      path: "/tool-etf-list",
+      query: {
+        index: JSON.stringify(row),
+      },
+    });
 }
 const expanded = ref<string | null>(null);
 const toggleExpand = (symbol: string) => {
@@ -299,6 +317,7 @@ const handleSelectionChange = (val: any[]) => {
       <el-table
         ref="tableRef"
         :data="tablePropData"
+        row-key="etfCode"
         v-loading="tableLoading"
         element-loading-text="加载中..."
         @selection-change="handleSelectionChange"
@@ -309,7 +328,7 @@ const handleSelectionChange = (val: any[]) => {
           type="selection"
           width="50"
           :selectable="handleSelectable"
-          :reserve-selection="false"
+          :reserve-selection="true"
         />
         <el-table-column
           v-for="column in tableColumns"
@@ -317,6 +336,8 @@ const handleSelectionChange = (val: any[]) => {
           :prop="column.prop"
           :label="column.label"
           :min-width="column.width"
+          :sortable="column.sortable"
+          :sort-method="column.sortMethod"
         >
           <template #default="scope">
             <template v-if="column.prop === 'category'">
@@ -329,6 +350,12 @@ const handleSelectionChange = (val: any[]) => {
                 @click="handleJump(column.url??'', scope.row.etfCode || scope.row.indexCode || '', scope.row.etfName || scope.row.indexName || '')"
               >
                 {{ scope.row[column.prop] }}
+              </span>
+              <span v-else-if="column.type === 'toList'"
+                class="link-cell"
+                @click="handleJumpClick(scope.row)"
+                >
+                  {{ scope.row[column.prop] }}
               </span>
               <span v-else>
                 {{ formatValue(scope.row[column.prop], column?.unit) }}

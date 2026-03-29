@@ -56,7 +56,7 @@ const router = createRouter({
       name: 'tool',
       component: () => import('../views/toolView/index.vue'),
       meta: {
-        title: 'ETF 特色榜单'
+        title: 'ETF 指数榜单'
       }
     },
     {

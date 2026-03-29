@@ -34,14 +34,22 @@
       <el-table-column prop="indexChange" label="涨跌幅(%)">
         <template #default="{ row }">
           <span :style="{ color: row.indexChange >= 0 ? 'red' : 'green' }">
-            {{ (row.indexChange).toFixed(4) }}
+            {{ formatValue(row.indexChange) }}
           </span>
         </template>
       </el-table-column>
       <!-- <el-table-column prop="openDateChange" label="开始日累计涨跌" />
       <el-table-column prop="openDateChangePercent" label="开始日累计涨跌幅" /> -->
-      <el-table-column prop="indexVolume" label="成交量(万股)" />
-      <el-table-column prop="indexAmount" label="成交额(万元)" />
+      <el-table-column prop="indexVolume" label="成交量(万股)">
+        <template #default="{ row }">
+          {{ formatValue(row.indexVolume) }}
+        </template>
+      </el-table-column>
+      <el-table-column prop="indexAmount" label="成交额(万元)">
+        <template #default="{ row }">
+          {{ formatValue(row.indexAmount) }}
+        </template>
+      </el-table-column>
     </el-table>
     <div style="display: flex;justify-content: flex-end;margin-top: 20px;">
       <el-pagination
@@ -60,6 +68,7 @@
 <script setup lang="ts">
 import { ref, watch } from "vue";
 import { getIndexTransactionApi } from "@/api/trackingIndex";
+import { formatValue } from "@/utils/formatValue";
 
 const props = defineProps<{
   tabActiveName: string

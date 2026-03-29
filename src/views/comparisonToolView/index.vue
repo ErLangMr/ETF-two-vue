@@ -6,6 +6,12 @@
         下表比较了多项ETF指标。对比费用、业绩、股息收益率、持仓、技术指标以及许多其他指标，以便做出更明智的投资决策。
       </p>
     </div>
+    <div style="padding: 0 20px; font-size: 18px;display:flex;justify-content: flex-end;" v-if="ETFCodes">
+      <el-checkbox-group v-model="etfCodeSelected">
+        <el-checkbox v-for="(code, index) in (ETFCodes as string).split(',')" :key="index" :label="code || ''" :value="code || ''" />
+      </el-checkbox-group>
+      <el-button class="theme-button" style="margin-left: 10px;" @click="handleDeepCompare">ETF深度对比</el-button>
+    </div>
     <div class="table_area">
       <div class="filter-tabs-wrapper">
         <div class="filter-tabs">
@@ -41,7 +47,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, markRaw, onMounted } from "vue";
+import { ref, markRaw, onMounted, nextTick } from "vue";
 import TableComp from "./components/tableComp.vue";
 import performanceAndRisk from "./components/performanceAndRisk.vue";
 import fundFlows from "./components/fundFlows.vue";
@@ -64,6 +70,7 @@ import {
 const router = useRouter();
 const route = useRoute();
 const ETFCodes = route.query.ETFCodes;
+const etfCodeSelected = ref<string[]>([]);
 
 const componentTab = ref(markRaw(TableComp));
 const activeTab = ref("basicInformation");
@@ -131,7 +138,33 @@ const filterTabs = [
 ];
 onMounted(() => {
   getCompareOverview();
+  if (ETFCodes) {
+    etfCodeSelected.value = (ETFCodes as string).split(',');
+  }
 });
+function handleDeepCompare() {
+  if(etfCodeSelected.value.length === 0) {
+    ElMessage({
+      message: '请先选择需要对比的ETF',
+      type: 'warning',
+    })
+    return
+  }else if(etfCodeSelected.value.length === 1 || etfCodeSelected.value.length > 2){
+    ElMessage({
+      message: '请选择两个需要深度对比的ETF',
+      type: 'warning',
+    })
+    return
+  }
+  nextTick(() => {
+    router.push({
+      name: "DeepCompare",
+      query: {
+        codes: etfCodeSelected.value.join(",")
+      }
+    })
+  })
+}
 const handleTabClick = (tab: string) => {
   activeTab.value = tab;
   switch (tab) {

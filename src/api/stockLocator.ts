@@ -16,3 +16,11 @@ export const getStockList1Api = (data: any) => {
 export const getStockList2Api = (data: any) => {
   return post('/api/stock/list2', data)
 }
+
+/**
+ * 定位器查询name与code
+ * @param data
+ */
+export const locateStockApi = (params: any) => {
+  return get('/api/stock/locate', params)
+}

@@ -47,7 +47,7 @@ const handlePageChange = (newPage: number) => {
 
 const etfList = ref<any[]>([])
 let paramsObj: Record<string, any> = {
-  codes: index.codes,
+  codes: index.codes || index.etfCodes,
 }
 // 顶部筛选Tab变化，获取表格数据
 const tableFilterTabVal = ref("overview");

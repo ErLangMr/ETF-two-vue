@@ -7,7 +7,7 @@
       </p>
     </div>
     <div class="search-box">
-      <!-- <el-select
+      <el-select
         v-model="ETFSearch"
         filterable
         remote
@@ -21,11 +21,11 @@
         <el-option
           v-for="item in options"
           :key="item.value"
-          :label="item.label"
+          :label="item.label + '(' + item.value + ')'"
           :value="item.value"
         />
-      </el-select> -->
-      <el-input
+      </el-select>
+      <!-- <el-input
         v-model="ETFSearch"
         style="width: 300px"
         placeholder="请输入股票代码或名称"
@@ -36,7 +36,7 @@
         <template #append>
           <el-button @click="searchChange(ETFSearch)" :icon="Search" />
         </template>
-      </el-input>
+      </el-input> -->
     </div>
     <div class="divider"></div>
     <div style="display: flex; align-items: center;justify-content: space-between">
@@ -71,7 +71,7 @@
           fontSize: '1rem',
         }"
       >
-        <el-table-column prop="stkCode" label="股票代码" min-width="120">
+        <el-table-column prop="stkCode" label="股票代码" min-width="100">
           <!-- <template #default="scope">
             <span class="tableLink" @click="toEtfDetail(scope.row)">{{
               scope.row.stkCode
@@ -81,7 +81,7 @@
         <el-table-column
           prop="stkName"
           label="股票名称"
-          min-width="150"
+          min-width="110"
           show-overflow-tooltip
         ></el-table-column>
         <el-table-column
@@ -92,27 +92,47 @@
         <el-table-column
           prop="stkHn"
           label="ETF持有数量（万）"
-          width="180"
-        ></el-table-column>
+          min-width="100"
+          sortable
+        >
+          <template #default="scope">
+            {{ formatValue(scope.row.stkHn) }}
+          </template>
+        </el-table-column>
         <el-table-column
           prop="stkHv"
           label="ETF持有市值（亿元）"
-          min-width="190"
-        ></el-table-column>
+          min-width="110"
+          sortable
+        >
+          <template #default="scope">
+            {{ formatValue(scope.row.stkHv) }}
+          </template>
+        </el-table-column>
         <el-table-column
           prop="stkHvAmv"
           label="ETF持有市值占股票流通A股市值比（%）"
-          min-width="330"
-        ></el-table-column>
+          min-width="140"
+          sortable
+        >
+          <template #default="scope">
+            {{ formatValue(scope.row.stkHvAmv) }}
+          </template>
+        </el-table-column>
         <el-table-column
           prop="stkHvTmv"
           label="ETF持有市值占股票总市值比（%）"
-          min-width="300"
-        ></el-table-column>
+          min-width="130"
+          sortable
+        >
+          <template #default="scope">
+            {{ formatValue(scope.row.stkHvTmv) }}
+          </template>
+        </el-table-column>
         <el-table-column
           prop="rank"
           label="ETF持有市值排序"
-          min-width="200"
+          min-width="110"
           sortable
         ></el-table-column>
       </el-table>
@@ -132,9 +152,10 @@
 import { onMounted } from "vue";
 import { ref } from "vue";
 import { useRouter } from "vue-router";
-import { getStockList1Api, getStockList2Api } from "@/api/stockLocator";
+import { getStockList1Api, getStockList2Api, locateStockApi } from "@/api/stockLocator";
 import PeriodSelector from "@/components/PeriodSelector.vue";
 import { Search } from "@element-plus/icons-vue";
+import { formatValue } from "@/utils/formatValue";
 
 const router = useRouter();
 const ETFSearch = ref("");
@@ -164,18 +185,25 @@ const periodChange = (value: string) => {
   getStockList2();
 };
 
-// const loading = ref(false);
+const loading = ref(false);
 const tableLoading = ref(false);
-// const options = ref<{ value: string; label: string }[]>([]);
+const options = ref<{ value: string; label: string }[]>([]);
 
-// function remoteMethod(query: string) {
-//   if (query) {
-//     loading.value = true;
-//     getStockSelect(query);
-//   } else {
-//     options.value = [];
-//   }
-// }
+function remoteMethod(query: string) {
+  if (query) {
+    loading.value = true;
+    locateStockApi({ name: query }).then((res: any) => {
+      options.value = res.map((item: any) => ({
+        value: item.code,
+        label: item.name,
+      }));
+    }).finally(() => {
+      loading.value = false;
+    });
+  } else {
+    options.value = [];
+  }
+}
 
 function searchChange(value: string) {
     router.push({

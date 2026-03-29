@@ -6,13 +6,13 @@
         v-for="item in items"
         :key="item.value"
         :name="item.value"
-        :is-link="false"
+        :is-link="item.children && item.children.length > 0"
       >
         <template #title>
-          <van-radio-group :model-value="selectedChild">
+          <van-radio-group :model-value="selectedChild" class="radio-title-wrapper">
             <van-radio
               :name="item.value"
-              @click.prevent="$emit('radioChange', item)"
+              @click.stop="$emit('radioChange', item)"
             >
               {{ item.label }}
             </van-radio>
@@ -26,6 +26,7 @@
           :parent-value="item.value"
           :selected-child="selectedChild"
           :selected-codes="selectedCodes"
+          :selected-values-from-api="selectedValuesFromApi"
           @radio-change="(value) => $emit('radioChange', value)"
           @checkbox-change="(item, checked) => $emit('checkboxChange', item, checked)"
         />
@@ -53,6 +54,7 @@
             :parent-value="item.value"
             :selected-child="selectedChild"
             :selected-codes="selectedCodes"
+            :selected-values-from-api="selectedValuesFromApi"
             @checkbox-change="(item, checked) => $emit('checkboxChange', item, checked)"
             class="nested-children"
           />
@@ -90,6 +92,7 @@
             :parent-value="item.value"
             :selected-child="selectedChild"
             :selected-codes="selectedCodes"
+            :selected-values-from-api="selectedValuesFromApi"
             @checkbox-change="(item, checked) => $emit('checkboxChange', item, checked)"
             class="nested-children"
           />
@@ -139,6 +142,7 @@ const props = defineProps<{
   parentValue?: string;
   selectedChild?: string;
   selectedCodes: string[];
+  selectedValuesFromApi?: string[];
 }>();
 
 const emit = defineEmits(['radioChange', 'checkboxChange']);
@@ -150,6 +154,7 @@ const childActiveName = ref<string>('');
 const collapseActiveNames = ref<string>('');
 
 const isChecked = (item: any) => {
+  if (props.selectedValuesFromApi && props.selectedValuesFromApi.includes(item.value)) return true;
   if (!item.codes || item.codes.length === 0) return false;
   return item.codes.every((code: string) => props.selectedCodes.includes(code));
 };
@@ -157,6 +162,22 @@ const isChecked = (item: any) => {
 
 <style lang="scss" scoped>
 .recursive-filter-item {
+  .radio-title-wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+
+    :deep(.van-radio) {
+      flex: 1;
+      pointer-events: none;
+    }
+
+    :deep(.van-radio__icon) {
+      pointer-events: auto;
+      cursor: pointer;
+    }
+  }
+
   .children-list {
     // 标题样式
     .group-title {
@@ -176,7 +197,7 @@ const isChecked = (item: any) => {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0;
+      padding: 0 10px;
     }
 
     // 折叠面板样式
@@ -188,7 +209,7 @@ const isChecked = (item: any) => {
       }
 
       :deep(.van-cell__title){
-        padding-left: 10px;
+        // padding-left: 10px;
       }
 
       :deep(.van-cell) {

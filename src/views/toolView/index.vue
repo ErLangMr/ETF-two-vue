@@ -126,7 +126,7 @@ onMounted(() => {
               >
                 <div class="index-card-title-row">
                   <span class="index-card-title">{{ item.trackIndexName }}</span>
-                  <span class="index-card-value">{{ item.currentClose }}</span>
+                  <span class="index-card-value">{{ formatValue(item.currentClose) }}</span>
                 </div>
                 <div class="index-card-info-row" v-if="activeTab === 'day'">
                   <span class="index-card-period">日涨幅</span>

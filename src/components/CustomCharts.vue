@@ -15,7 +15,7 @@
             class="legend-color"
             :style="{ background: colors[idx] }"
           ></span>
-          <span class="legend-value">{{ item.value }}%</span>
+          <span class="legend-value">{{ item.value }}</span>
         </div>
       </div>
     </div>
@@ -89,7 +89,7 @@ function updateChart() {
     if (!legendSelected.value[idx]) {
       return {
         id: idx,
-        name: `${item.name}： ${item.value}%`,
+        name: `${item.name}： ${item.value}`,
         type: "custom",
         data: [],
         itemStyle: { color: colors[idx] },
@@ -99,7 +99,7 @@ function updateChart() {
     const { start, end } = percentMap[idx];
     return {
       id: idx,
-      name: `${item.name}： ${item.value}%`,
+      name: `${item.name}： ${item.value}`,
       type: "custom",
       universalTransition: true,
       animationDurationUpdate: 500,

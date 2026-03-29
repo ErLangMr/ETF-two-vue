@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, onMounted, computed } from "vue";
+import { ref, onMounted, computed, watch } from "vue";
 import RecursiveFilterItem from "./RecursiveFilterItem.vue";
 
 // 定义组件事件
@@ -7,20 +7,24 @@ const emit = defineEmits([
   "update:selectedItems",
   "update:selectedChild",
   "update:sliderItems",
+  "update:selectedFilterValues",
 ]);
 
 // Props定义
 const props = defineProps<{
-  // 从JSON加载的动态数据
   apiData?: any[];
+  selectedValuesFromApi?: string[];
+  loading?: boolean;
 }>();
 
 // 当前激活的折叠面板
-const activeNames = ref("");
+const activeNames = ref([""]);
 // 选中的第一层子项（单选）
 const selectedChild = ref("");
 // 选中的codes数组
 const selectedCodes = ref<string[]>([]);
+// 选中的树节点value数组
+const selectedFilterValues = ref<string[]>([]);
 // 滑块值
 const sliderValues = ref<Record<string, [number, number]>>({});
 const dateValues = ref<Record<string, [string, string]>>({});
@@ -137,19 +141,19 @@ const sliderConfig = [
       },
     ],
   },
-  {
-    label: "ESG",
-    value: "esg",
-    type: "slider",
-    children: [
-      {
-        label: "基金Wind ESG综合得分",
-        type: "slider",
-        paramKeys: ["esgScoreStart", "esgScoreEnd"],
-        range: [0, 100],
-      },
-    ],
-  },
+  // {
+  //   label: "ESG",
+  //   value: "esg",
+  //   type: "slider",
+  //   children: [
+  //     {
+  //       label: "基金Wind ESG综合得分",
+  //       type: "slider",
+  //       paramKeys: ["esgScoreStart", "esgScoreEnd"],
+  //       range: [0, 100],
+  //     },
+  //   ],
+  // },
   {
     label: "资金流",
     value: "FundFlows",
@@ -312,27 +316,55 @@ function initSliderValues() {
 
 // 重置所有筛选条件
 function resetFilters() {
-  activeNames.value = "";
+  activeNames.value = [""];
   selectedChild.value = "";
   selectedCodes.value = [];
+  selectedFilterValues.value = [];
   sliderValues.value = {};
   dateValues.value = {};
 
   emit("update:selectedItems", []);
   emit("update:selectedChild", "");
   emit("update:sliderItems", {});
+  emit("update:selectedFilterValues", []);
 
   initSliderValues();
 }
 
+watch(
+  () => props.selectedValuesFromApi,
+  (newValues) => {
+    if (!newValues || newValues.length === 0) {
+      selectedChild.value = ""
+      selectedCodes.value = []
+      return
+    }
+    const flatValues = flattenTreeValues(filterData.value || [])
+    const childMatch = newValues.find((v) => flatValues.level0Values.includes(v))
+    if (childMatch) {
+      selectedChild.value = childMatch
+    }
+    selectedCodes.value = newValues.filter((v) => !childMatch || v !== childMatch)
+  },
+  { deep: true }
+)
+
+function flattenTreeValues(data: any[]): { level0Values: string[] } {
+  const level0Values: string[] = []
+  data.forEach((item) => {
+    level0Values.push(item.value)
+  })
+  return { level0Values }
+}
+
 // 处理复选框变化（用于多选和单选）
 function handleCheckboxChange(item: any, checked: boolean, isRadio: boolean = false) {
+  console.log(item, checked, isRadio);
   if (isRadio) {
-    // 第一层单选逻辑
     selectedChild.value = item.value;
     selectedCodes.value = [];
+    selectedFilterValues.value = [item.value];
 
-    // 如果单选项有codes，也应该传递
     if (item.codes && item.codes.length > 0) {
       emit("update:selectedChild", item.value);
       emit("update:selectedItems", item.codes);
@@ -340,11 +372,10 @@ function handleCheckboxChange(item: any, checked: boolean, isRadio: boolean = fa
       emit("update:selectedChild", item.value);
       emit("update:selectedItems", []);
     }
+    emit("update:selectedFilterValues", selectedFilterValues.value);
   } else {
-    // 其他层级多选逻辑
     if (item.codes && item.codes.length > 0) {
       if (checked) {
-        // 添加codes
         const newCodes = [...selectedCodes.value];
         item.codes.forEach((code: string) => {
           if (!newCodes.includes(code)) {
@@ -352,13 +383,19 @@ function handleCheckboxChange(item: any, checked: boolean, isRadio: boolean = fa
           }
         });
         selectedCodes.value = newCodes;
+        if (!selectedFilterValues.value.includes(item.value)) {
+          selectedFilterValues.value = [...selectedFilterValues.value, item.value];
+        }
       } else {
-        // 移除codes
         selectedCodes.value = selectedCodes.value.filter(
           (code) => !item.codes.includes(code)
         );
+        selectedFilterValues.value = selectedFilterValues.value.filter(
+          (v) => v !== item.value
+        );
       }
       emit("update:selectedItems", selectedCodes.value);
+      emit("update:selectedFilterValues", selectedFilterValues.value);
     }
   }
 }
@@ -445,7 +482,7 @@ defineExpose({ resetFilters });
 </script>
 
 <template>
-  <div class="filters">
+  <div class="filters" v-loading="loading" element-loading-text="加载中...">
     <!-- 筛选器头部 -->
     <div class="filters-header">
       <h2>过滤器</h2>
@@ -453,7 +490,7 @@ defineExpose({ resetFilters });
     </div>
 
     <!-- 主折叠面板 -->
-    <van-collapse v-model="activeNames" accordion class="main-collapse">
+    <van-collapse v-model="activeNames" class="main-collapse">
       <!-- 动态数据部分 -->
       <van-collapse-item
         v-for="filter in filterData"
@@ -469,6 +506,7 @@ defineExpose({ resetFilters });
             :parent-value="filter.value"
             :selected-child="selectedChild"
             :selected-codes="selectedCodes"
+            :selected-values-from-api="selectedValuesFromApi"
             @radio-change="(value) => handleCheckboxChange(value, true, true)"
             @checkbox-change="handleCheckboxChange"
           />

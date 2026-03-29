@@ -87,7 +87,7 @@ const etfChannel = [
     path: "/issuers",
   },
   {
-    title: "ETF 特色榜单",
+    title: "ETF 指数榜单",
     desc: "想要拥有特定指数的投资组合吗?关注ETF追踪指数。",
     icon: Edit,
     path: "/tool",

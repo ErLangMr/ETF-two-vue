@@ -208,7 +208,7 @@ onMounted(() => {
   right: 0;
   z-index: 100;
   .el-menu-demo {
-    width: 800px;
+    width: 650px;
     .el-menu-item {
       font-size: 18px;
     }
@@ -307,7 +307,7 @@ onMounted(() => {
 
 .main {
   flex: 1;
-  width: 85%;
+  width: 95%;
   max-width: 1750px;
   margin: 0 auto;
   margin-top: $header-height;
