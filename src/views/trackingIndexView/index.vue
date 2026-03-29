@@ -18,8 +18,11 @@
       <div class="filter-left pc-filter" v-show="!isMobile()">
         <ScreenerFilter
           :api-data="responseData"
+          :selected-values-from-api="responseSelectedValues"
+          :loading="filterLoading"
           v-model:selected-child="selectedChild"
           v-model:selected-items="selectedItems"
+          v-model:selected-filter-values="selectedFilterValues"
           v-model:slider-items="sliderItems"
         />
       </div>
@@ -36,8 +39,12 @@
           <div class="mobile-filter-content">
             <ScreenerFilter
               ref="mobileFilterRef"
+              :api-data="responseData"
+              :selected-values-from-api="responseSelectedValues"
+              :loading="filterLoading"
               v-model:selected-child="selectedChild"
               v-model:selected-items="selectedItems"
+              v-model:selected-filter-values="selectedFilterValues"
               v-model:slider-items="sliderItems"
             />
           </div>
@@ -51,6 +58,7 @@
           class="table-area"
           :tableData="etfList"
           :hasTableFilter="true"
+          :loading="tableLoading"
           :filterTabsProp="trankingTabs"
           :tableColumnListProp="trankingColumnList"
           @tableFilterTab="handleTableFilterTab"
@@ -189,9 +197,18 @@ const trankingColumnList: Record<string, TableColumn[]> = {
 
 // 获取筛选数据
 const responseData = ref<any>([]);
-function getFilterData() {
-  getEtfTreeApi().then((res: any) => {
-    responseData.value = res
+const responseSelectedValues = ref<string[]>([]);
+const filterLoading = ref(false)
+const tableLoading = ref(false)
+const selectedFilterValues = ref<string[]>([]);
+let isProgrammaticUpdate = false
+function getFilterData(labels?: string[]) {
+  filterLoading.value = true
+  getEtfTreeApi(labels).then((res: any) => {
+    responseData.value = res.result
+    responseSelectedValues.value = res.labels || []
+  }).finally(() => {
+    filterLoading.value = false
   });
 }
 
@@ -227,14 +244,13 @@ const debouncedGetFilterTableData = debounce((params?: Record<string, any>) => {
 }, 300);
 
 watch(selectedChild, (newVal) => {
+  if (isProgrammaticUpdate) return
   if(newVal) {
-    // 单选时，如果 selectedItems 为空或者是刚刚被清空，才调用接口
-    // 避免与 selectedItems 的 watch 重复调用
+    getFilterData(selectedFilterValues.value.length > 0 ? selectedFilterValues.value : [newVal])
     if (!selectedItems.value.length) {
       paramsObj.category = newVal
       paramsObj.codes = null
       page.value = 1
-      // 使用 nextTick 确保 selectedItems 的 watch 先执行
       nextTick(() => {
         if (!selectedItems.value.length) {
           getTrackingIndexTableData(paramsObj)
@@ -247,8 +263,9 @@ watch(selectedChild, (newVal) => {
 watch(
   selectedItems,
   (newVal) => {
-    // 如果是重置操作，直接清空参数并请求
+    if (isProgrammaticUpdate) return
     if (newVal.length === 0 && !selectedChild.value) {
+      getFilterData([])
       paramsObj.codes = null;
       paramsObj.category = null;
       page.value = 1;
@@ -256,14 +273,13 @@ watch(
       return;
     }
 
-    // 正常筛选逻辑
     if (newVal.length > 0) {
+      getFilterData(selectedFilterValues.value)
       paramsObj.codes = newVal;
       paramsObj.category = null;
       page.value = 1;
       getTrackingIndexTableData(paramsObj);
     }
-    // 删除 else if 分支，避免重复调用
   },
   { deep: true }
 );
@@ -319,6 +335,7 @@ function handleTableFilterTab(tab: string) {
   getTrackingIndexTableData(paramsObj)
 }
 function getTrackingIndexTableData(params?: Record<string, any>) {
+  tableLoading.value = true
   const obj = {
     page: page.value,
     size: pageSize.value,
@@ -329,43 +346,51 @@ function getTrackingIndexTableData(params?: Record<string, any>) {
     getOverviewPageApi(obj).then((res: any) => {
       etfList.value = res.content;
       total.value = res.totalElements;
+    }).finally(() => {
+      tableLoading.value = false
     });
   } else if (tableFilterTab.value === "returns") {
     getNetValuePageApi(obj).then((res: any) => {
       etfList.value = res.content;
       total.value = res.totalElements;
+    }).finally(() => {
+      tableLoading.value = false
     });
   }
-  // else if (tableFilterTab.value === "fundFlows") {
-  //   getFundFlowPageApi(obj).then((res: any) => {
-  //     etfList.value = res.content;
-  //     total.value = res.totalElements;
-  //   });
-  // }
   else if (tableFilterTab.value === "dividends") {
     getDividendPageApi(obj).then((res: any) => {
       etfList.value = res.content;
       total.value = res.totalElements;
+    }).finally(() => {
+      tableLoading.value = false
     });
   } else if (tableFilterTab.value === "risk") {
     getRiskPageApi(obj).then((res: any) => {
       etfList.value = res.content;
       total.value = res.totalElements;
+    }).finally(() => {
+      tableLoading.value = false
     });
   } else if (tableFilterTab.value === "holdings") {
     getHoldingFeaturePageApi(obj).then((res: any) => {
       etfList.value = res.content;
       total.value = res.totalElements;
+    }).finally(() => {
+      tableLoading.value = false
     });
   } else if (tableFilterTab.value === "valuation") {
     getValuationPageApi(obj).then((res: any) => {
       etfList.value = res.content;
       total.value = res.totalElements;
+    }).finally(() => {
+      tableLoading.value = false
     });
   } else if (tableFilterTab.value === "relatedETF") {
     getRelatedPageApi(obj).then((res: any) => {
       etfList.value = res.content;
       total.value = res.totalElements;
+    }).finally(() => {
+      tableLoading.value = false
     });
   }
 }
@@ -393,7 +418,7 @@ function closeMobileFilter() {
 
 onMounted(() => {
   getOverviewPage();
-  getFilterData();
+  getFilterData([]);
 });
 </script>
 

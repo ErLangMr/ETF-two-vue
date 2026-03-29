@@ -6,8 +6,8 @@ import { get, post } from '@/utils/request'
  * @param data
  * @returns
  */
-export const getEtfTreeApi = () => {
-  return get<Record<string, any>>(`/api/index/etfTree`);
+export const getEtfTreeApi = (labels?: string[]) => {
+  return post<Record<string, any>>(`/api/index/etfTree`, labels);
 };
 
 /**
