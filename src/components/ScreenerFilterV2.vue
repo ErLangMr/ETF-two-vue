@@ -339,12 +339,22 @@ watch(
       selectedCodes.value = []
       return
     }
-    const flatValues = flattenTreeValues(filterData.value || [])
+    const tree = filterData.value || []
+    const flatValues = flattenTreeValues(tree)
     const childMatch = newValues.find((v) => flatValues.level0Values.includes(v))
     if (childMatch) {
       selectedChild.value = childMatch
     }
-    selectedCodes.value = newValues.filter((v) => !childMatch || v !== childMatch)
+    const codesValues = newValues.filter((v) => !childMatch || v !== childMatch)
+    const allNodes = flattenAllNodes(tree)
+    const resolvedCodes: string[] = []
+    codesValues.forEach((v) => {
+      const node = allNodes.find((n) => n.value === v)
+      if (node && node.codes && node.codes.length > 0) {
+        resolvedCodes.push(...node.codes)
+      }
+    })
+    selectedCodes.value = resolvedCodes
   },
   { deep: true }
 )
@@ -355,6 +365,20 @@ function flattenTreeValues(data: any[]): { level0Values: string[] } {
     level0Values.push(item.value)
   })
   return { level0Values }
+}
+
+function flattenAllNodes(data: any[]): any[] {
+  const result: any[] = []
+  const walk = (nodes: any[]) => {
+    nodes.forEach((node) => {
+      result.push(node)
+      if (node.children && node.children.length > 0) {
+        walk(node.children)
+      }
+    })
+  }
+  walk(data)
+  return result
 }
 
 // 处理复选框变化（用于多选和单选）
