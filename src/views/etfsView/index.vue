@@ -15,7 +15,7 @@ interface TableColumn {
 const tableList = ref([
   {
     title: "资产类别",
-    value: "category",
+    value: "category1",
     data: [],
     originalColumns: [
       { prop: "category", label: "资产类型", minWidth: "120" },
@@ -23,7 +23,34 @@ const tableList = ref([
     currentColumns: [] as TableColumn[]
   },
   {
-    title: "行业",
+    title: "SI_ICB3",
+    value: "sector",
+    data: [],
+    originalColumns: [
+      { prop: "category", label: "行业名称", minWidth: "120" },
+    ],
+    currentColumns: [] as TableColumn[]
+  },
+  {
+    title: "GICS部门",
+    value: "sector",
+    data: [],
+    originalColumns: [
+      { prop: "category", label: "行业名称", minWidth: "120" },
+    ],
+    currentColumns: [] as TableColumn[]
+  },
+  {
+    title: "SI_GICS3",
+    value: "sector",
+    data: [],
+    originalColumns: [
+      { prop: "category", label: "行业名称", minWidth: "120" },
+    ],
+    currentColumns: [] as TableColumn[]
+  },
+  {
+    title: "ICB部门",
     value: "sector",
     data: [],
     originalColumns: [
@@ -40,7 +67,7 @@ const tableList = ref([
   //   ],
   // },
   {
-    title: "投资区域",
+    title: "投资地区",
     value: "investmentRegion",
     data: [],
     originalColumns: [
@@ -56,7 +83,7 @@ const tableList = ref([
     ],
   },
   {
-    title: "债券期限",
+    title: "债券久期",
     value: "category=BOND:bondDuration",
     data: [],
     originalColumns: [
@@ -64,19 +91,19 @@ const tableList = ref([
     ],
   },
   {
-    title: "商品",
+    title: "细分类型",
     value: "category=GOODS:commodityType",
     data: [],
     originalColumns: [
-      { prop: "category", label: "商品类型", minWidth: "120" },
+      { prop: "category", label: "类型名称", minWidth: "120" },
     ],
   },
   {
-    title: "商品敞口",
+    title: "特征标签",
     value: "category=GOODS:commodityExposure",
     data: [],
     originalColumns: [
-      { prop: "category", label: "商品敞口", minWidth: "120" },
+      { prop: "category", label: "特征值", minWidth: "120" },
     ],
   },
   // {
@@ -95,14 +122,14 @@ const tableList = ref([
   //     { prop: "category", label: "货币", minWidth: "120" },
   //   ],
   // },
-  {
-    title: "投资风格",
-    value: "category=EQUITY:styleAttribute",
-    data: [],
-    originalColumns: [
-      { prop: "category", label: "投资风格", minWidth: "120" },
-    ],
-  },
+  // {
+  //   title: "投资风格",
+  //   value: "category=EQUITY:styleAttribute",
+  //   data: [],
+  //   originalColumns: [
+  //     { prop: "category", label: "投资风格", minWidth: "120" },
+  //   ],
+  // },
   {
     title: "市值属性",
     value: "category=EQUITY:compMarketCap",
@@ -140,34 +167,41 @@ const tableList = ref([
 const tabs = [
   { label: "A to Z", value: "A to Z",columns: [
       { prop: "totalCount", label: "ETF 数量", minWidth: "120" },
+      { prop: "bestNum", label: "产品数量", minWidth: "180" },
       { prop: "topFundMgr", label: "数量最多发行人", minWidth: "180" },
     ], },
   { label: "资产规模", value: "AUM",columns: [
     { prop: "fundFlowRank", label: "资产规模排名", minWidth: "120" },
     { prop: "dataValue", label: "资产规模(百万元)", minWidth: "120", unit: "million" },
+    { prop: "bestAum", label: "产品规模(百万元)", minWidth: "180" },
     { prop: "topFundMgr", label: "发行人", minWidth: "180" },
   ], },
   { label: "资金流动", value: "Fund Flow",columns: [
       { prop: "fundFlowRank", label: "资金流动排名", minWidth: "120" },
       { prop: "dataValue", label: "过去三个月的资金净流入额(百万元)", minWidth: "120", unit: "million" },
+      { prop: "bestFf", label: "资金流动规模(百万元)", minWidth: "180" },
       { prop: "topFundMgr", label: "发行人", minWidth: "180" },
     ], },
   { label: "收益", value: "Return",columns: [
       { prop: "fundFlowRank", label: "收益排名", minWidth: "120" },
-      { prop: "dataValue", label: "过去三个月的平均收益(%)", minWidth: "120" },
+      { prop: "dataValue", label: "过去三个月的平均收益(百万元)", minWidth: "120" },
+      { prop: "bestR3", label: "产品收益(%)", minWidth: "180" },
       { prop: "topFundMgr", label: "发行人", minWidth: "180" },
     ], },
   { label: "费用", value: "Expense",columns: [
       { prop: "fundFlowRank", label: "费用排名", minWidth: "120" },
       { prop: "dataValue", label: "平均费率(%)", minWidth: "120" },
+      { prop: "bestFee", label: "产品费率(%)", minWidth: "180" },
       { prop: "topFundMgr", label: "发行人", minWidth: "180" },
     ], },
   { label: "分红", value: "Dividend",columns: [
       { prop: "fundFlowRank", label: "分红排名", minWidth: "120" },
       { prop: "dataValue", label: "平均分红率(%)", minWidth: "120" },
+      { prop: "bestDp", label: "分红比率(%)", minWidth: "180" },
       { prop: "topFundMgr", label: "发行人", minWidth: "180" },
     ], },
   { label: "发行人收入", value: "Issuer Revenue",columns: [
+      { prop: "bestIr", label: "收入规模(百万元)", minWidth: "120" },
       { prop: "topFundMgr", label: "收入最高的发行人", minWidth: "120" }
     ], },
 ];
@@ -194,7 +228,7 @@ updateColumns()
     })
     const setTableData = (data: any) => {
       tableList.value.map(table => {
-        const arr = data.filter((item: any) => item.typeName === table.value)
+        const arr = data.filter((item: any) => item.typeName === table.title)
         table.data = arr[0]?.data || []
       })
     }
