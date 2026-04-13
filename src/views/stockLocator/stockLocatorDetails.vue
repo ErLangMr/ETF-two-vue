@@ -2,19 +2,17 @@
   <div class="stock-locator-details">
     <div class="page-header">
       <h1>
-        包含{{ etfData }}持仓的交易所交易基金ETF
+        包含{{ etfData }}的ETF
       </h1>
       <p style="margin-top: 10px">
-        以下交易所交易基金（ETF）保持对{{ etfData }}的持仓。ETF持仓数据每日更新一次，且可能发生变化。
+        以下 ETF 持有{{etfName}}({{ etfData }})。若要查看表中任一ETF的完整持仓分布（包括行业、市值和地区配置），请点击其代码。
       </p>
-      <p class="page-desc">
+      <!-- <p class="page-desc">
         若要查看下表中任何ETF的完整明细（包括行业、市值和国家配置），请点击其股票代码。
-      </p>
+      </p> -->
       <div style="display: flex; align-items: center;justify-content: space-between;">
         <h4>
-          如下所示，有{{total}}只交易所交易基金（ETF）将{{
-            etfData
-          }}纳入其前15大持仓。
+          如下表所示，有{{total}}只ETF将{{etfName}}({{ etfData }})纳入持仓。
         </h4>
         <div style="display: flex; align-items: center">
           <el-date-picker
@@ -143,7 +141,10 @@ import { getStockList1Api } from "@/api/stockLocator";
 import PeriodSelector from "@/components/PeriodSelector.vue";
 
 const route = useRoute();
-const etfData = route.query.etf || null;
+const etfData = (route.query.etf as string)?.split("/")[1] || null;
+const etfName = (route.query.etf as string)?.split("/")[0] || null;
+
+
 
 const tableLoading = ref(false);
 const router = useRouter();

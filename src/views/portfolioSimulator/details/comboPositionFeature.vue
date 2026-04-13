@@ -1,6 +1,6 @@
 <template>
   <div class="combo-position-feature">
-    <h3>组合持股明细</h3>
+    <div class="section-title" style="margin-bottom: 10px;">组合持股明细</div>
     <el-table
       v-loading="tableLoading"
       :data="tableData"
@@ -17,7 +17,7 @@
       <el-table-column prop="stkCode" label="股票代码" />
       <el-table-column prop="stkName" label="股票名称" />
       <el-table-column prop="pport" label="组合权重（%）" />
-      <el-table-column prop="pholdNumRatio" label="组合持股数量占比（%）" />
+      <!-- <el-table-column prop="pholdNumRatio" label="组合持股数量占比（%）" /> -->
     </el-table>
     <div style="display: flex; justify-content: flex-end; margin-top: 20px">
       <el-pagination
@@ -31,12 +31,12 @@
       />
     </div>
     <div style="height: 30px"></div>
-    <h3>市值分布</h3>
+    <div class="section-title">市值分布</div>
     <div v-if="shizhiShow" id="shizhi" v-loading="shizhiChartLoading"></div>
     <el-empty v-else description="description" />
     <div style="height: 30px"></div>
     <div style="position: relative">
-      <h3>行业分布</h3>
+      <div class="section-title">行业分布</div>
       <div v-if="hangyeShow" id="hangye" style="width: 100%" v-loading="hangyeChartLoading"></div>
       <el-empty v-else description="description" />
       <div
@@ -57,7 +57,7 @@
         </el-select>
       </div>
       <div id="diqu" style="width: 100%">
-        <h3>地区分布</h3>
+        <div class="section-title" style="margin-bottom: 10px;">地区分布</div>
         <CustomCharts v-show="sectorData.length > 0" :sectorData="sectorData" />
         <el-empty v-show="sectorData.length === 0" description="description" />
       </div>
@@ -253,6 +253,13 @@ function initHangyeChart(
       axisPointer: {
         type: "shadow",
       },
+      formatter: (params: any) => {
+        let html = `${params[0].name}`
+        params.forEach((item: any) => {
+          html += `<br/>${item.marker}${item.seriesName}: ${item.value}%`
+        })
+        return html
+      },
     },
     // legend: {},
     grid: {
@@ -270,6 +277,9 @@ function initHangyeChart(
     yAxis: {
       type: "category",
       data: yAxis,
+      axisLabel: {
+        fontSize: 12,
+      },
       axisLine: {
         show: false,
       },
@@ -282,7 +292,7 @@ function initHangyeChart(
         name: "本期占比",
         type: "bar",
         barGap: 0,
-        barWidth: 15,
+        barWidth: 25,
         data: seriesData1,
         label: {
           show: true,
@@ -293,7 +303,7 @@ function initHangyeChart(
       {
         name: "上期占比",
         type: "bar",
-        barWidth: 15,
+        barWidth: 25,
         data: seriesData2,
         label: {
           show: true,
@@ -317,6 +327,10 @@ function initShizhiChart(yAxis: string[], seriesData: number[]) {
       trigger: "axis",
       axisPointer: {
         type: "shadow",
+      },
+      formatter: (params: any) => {
+        const item = params[0]
+        return `${item.name}: ${item.value}%`
       },
     },
     // legend: {},
@@ -379,6 +393,10 @@ function disposeCharts() {
 <style lang="scss" scoped>
 .combo-position-feature {
   width: 100%;
+  .section-title {
+    font-weight: 600;
+    font-size: var(--font-size-extra-large);
+  }
   #shizhi,
   #hangye,
   #diqu {
@@ -386,7 +404,7 @@ function disposeCharts() {
     height: 400px;
   }
   #hangye {
-    height: 600px;
+    height: 800px;
   }
 }
 </style>

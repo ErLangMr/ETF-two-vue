@@ -58,8 +58,8 @@ const props = defineProps({
 
 const tableData = ref();
 const tableColumn = [
-  { prop: "label", label: "数据标签" },
-  { prop: "type", label: "数据类型" },
+  { prop: "label", label: "收益指标" },
+  // { prop: "type", label: "数据类型" },
   { prop: "data1", label: "近一月" },
   { prop: "data3", label: "近三月" },
   { prop: "data6", label: "近六个月" },

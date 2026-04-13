@@ -1,8 +1,13 @@
 <template>
   <div class="trackingIndexDetails">
     <div class="details-header">
-      <span class="details-symbol">{{ route.query.code }}</span>
-      <span class="details-title">{{ route.query.name }}</span>
+      <div>
+        <span class="details-symbol">{{ route.query?.code }}</span>
+        <span class="details-title">{{ route.query?.name }}</span>
+      </div>
+      <div style="float: right;">
+        数据日期：2026-03-31
+      </div>
     </div>
     <!-- <div class="details-info">
       <div>
@@ -197,7 +202,8 @@ const tabList = ref([
   padding: 20px;
   .details-header {
     display: flex;
-    align-items: flex-end;
+    align-items: center;
+    justify-content: space-between;
     gap: 18px;
     .details-symbol {
       background: var(--theme-purple);

@@ -22,8 +22,16 @@ const tableList = ref([
     ],
     currentColumns: [] as TableColumn[]
   },
+   {
+    title: "细分类型",
+    value: "category=GOODS:commodityType",
+    data: [],
+    originalColumns: [
+      { prop: "category", label: "类型名称", minWidth: "120" },
+    ],
+  },
   {
-    title: "SI_ICB3",
+    title: "GICS部门",
     value: "sector",
     data: [],
     originalColumns: [
@@ -32,7 +40,7 @@ const tableList = ref([
     currentColumns: [] as TableColumn[]
   },
   {
-    title: "GICS部门",
+    title: "ICB部门",
     value: "sector",
     data: [],
     originalColumns: [
@@ -50,7 +58,7 @@ const tableList = ref([
     currentColumns: [] as TableColumn[]
   },
   {
-    title: "ICB部门",
+    title: "SI_ICB3",
     value: "sector",
     data: [],
     originalColumns: [
@@ -91,11 +99,27 @@ const tableList = ref([
     ],
   },
   {
-    title: "细分类型",
-    value: "category=GOODS:commodityType",
+    title: "市值属性",
+    value: "category=EQUITY:compMarketCap",
     data: [],
     originalColumns: [
-      { prop: "category", label: "类型名称", minWidth: "120" },
+      { prop: "category", label: "投资风格", minWidth: "120" },
+    ],
+  },
+  {
+    title: "风格属性",
+    value: "category=EQUITY:styleAttribute",
+    data: [],
+    originalColumns: [
+      { prop: "category", label: "风格属性", minWidth: "120" },
+    ],
+  },
+  {
+    title: "市值-风格属性",
+    value: "category=EQUITY:investStrategy",
+    data: [],
+    originalColumns: [
+      { prop: "category", label: "市值-风格属性", minWidth: "120" },
     ],
   },
   {
@@ -131,78 +155,52 @@ const tableList = ref([
   //   ],
   // },
   {
-    title: "市值属性",
-    value: "category=EQUITY:compMarketCap",
-    data: [],
-    originalColumns: [
-      { prop: "category", label: "投资风格", minWidth: "120" },
-    ],
-  },
-  {
-    title: "风格属性",
-    value: "category=EQUITY:styleAttribute",
-    data: [],
-    originalColumns: [
-      { prop: "category", label: "风格属性", minWidth: "120" },
-    ],
-  },
-  {
-    title: "市值-风格属性",
-    value: "category=EQUITY:investStrategy",
-    data: [],
-    originalColumns: [
-      { prop: "category", label: "市值-风格属性", minWidth: "120" },
-    ],
-  },
-  {
     title: "发行人",
     value: "fundMgrs",
     data: [],
-    originalColumns: [
-      { prop: "category", label: "发行人", minWidth: "120" },
-    ],
+    originalColumns: [],
   },
 ]);
 
 const tabs = [
   { label: "A to Z", value: "A to Z",columns: [
       { prop: "totalCount", label: "ETF 数量", minWidth: "120" },
-      { prop: "bestNum", label: "产品数量", minWidth: "180" },
       { prop: "topFundMgr", label: "数量最多发行人", minWidth: "180" },
+      { prop: "bestNum", label: "产品数量", minWidth: "180" },
     ], },
   { label: "资产规模", value: "AUM",columns: [
     { prop: "fundFlowRank", label: "资产规模排名", minWidth: "120" },
     { prop: "dataValue", label: "资产规模(百万元)", minWidth: "120", unit: "million" },
-    { prop: "bestAum", label: "产品规模(百万元)", minWidth: "180" },
     { prop: "topFundMgr", label: "发行人", minWidth: "180" },
+    { prop: "bestAum", label: "产品规模(百万元)", minWidth: "180" },
   ], },
   { label: "资金流动", value: "Fund Flow",columns: [
       { prop: "fundFlowRank", label: "资金流动排名", minWidth: "120" },
       { prop: "dataValue", label: "过去三个月的资金净流入额(百万元)", minWidth: "120", unit: "million" },
-      { prop: "bestFf", label: "资金流动规模(百万元)", minWidth: "180" },
       { prop: "topFundMgr", label: "发行人", minWidth: "180" },
+      { prop: "bestFf", label: "资金流动规模(百万元)", minWidth: "180" },
     ], },
   { label: "收益", value: "Return",columns: [
       { prop: "fundFlowRank", label: "收益排名", minWidth: "120" },
-      { prop: "dataValue", label: "过去三个月的平均收益(百万元)", minWidth: "120" },
-      { prop: "bestR3", label: "产品收益(%)", minWidth: "180" },
+      { prop: "dataValue", label: "过去三个月的平均收益(%)", minWidth: "120" },
       { prop: "topFundMgr", label: "发行人", minWidth: "180" },
+      { prop: "bestR3", label: "产品收益(%)", minWidth: "180" },
     ], },
   { label: "费用", value: "Expense",columns: [
       { prop: "fundFlowRank", label: "费用排名", minWidth: "120" },
       { prop: "dataValue", label: "平均费率(%)", minWidth: "120" },
-      { prop: "bestFee", label: "产品费率(%)", minWidth: "180" },
       { prop: "topFundMgr", label: "发行人", minWidth: "180" },
+      { prop: "bestFee", label: "产品费率(%)", minWidth: "180" },
     ], },
   { label: "分红", value: "Dividend",columns: [
       { prop: "fundFlowRank", label: "分红排名", minWidth: "120" },
       { prop: "dataValue", label: "平均分红率(%)", minWidth: "120" },
-      { prop: "bestDp", label: "分红比率(%)", minWidth: "180" },
       { prop: "topFundMgr", label: "发行人", minWidth: "180" },
+      { prop: "bestDp", label: "分红比率(%)", minWidth: "180" },
     ], },
   { label: "发行人收入", value: "Issuer Revenue",columns: [
-      { prop: "bestIr", label: "收入规模(百万元)", minWidth: "120" },
-      { prop: "topFundMgr", label: "收入最高的发行人", minWidth: "120" }
+      { prop: "topFundMgr", label: "收入最高的发行人", minWidth: "120" },
+      { prop: "dataValue", label: "发行人收入(百万元)", unit: "million", minWidth: "120" }
     ], },
 ];
 const activeTab = ref("A to Z");
@@ -218,12 +216,24 @@ updateColumns()
         ...selectedTab.columns   // 当前 tab 的列
       ]
       if(table.value === "fundMgrs") {
-        table.currentColumns.pop()
+        table.currentColumns.splice(-2, 1)
         if(selectedTab.value === "Issuer Revenue") {
-          table.currentColumns.push({ prop: "fundFlowRank", label: "发行人收入排名", minWidth: "120" })
-          table.currentColumns.push({ prop: "dataValue", label: "发行人收入(百万元)", unit: "million", minWidth: "120" })
+          table.currentColumns.splice(-1, 0, { prop: "fundFlowRank", label: "发行人收入排名", minWidth: "120" })
         }
 
+      }
+      if(selectedTab.value === "AUM") {
+        table.currentColumns.unshift({ prop: "category", label: "规模最大发行人", minWidth: "120" })
+      } else if(selectedTab.value === "Fund Flow") {
+        table.currentColumns.unshift({ prop: "category", label: "资金流入最多发行人", minWidth: "120" })
+      } else if(selectedTab.value === "Return") {
+        table.currentColumns.unshift({ prop: "category", label: "收益最高发行人", minWidth: "120" })
+      } else if(selectedTab.value === "Expense") {
+        table.currentColumns.unshift({ prop: "category", label: "费率最低发行人", minWidth: "120" })
+      } else if(selectedTab.value === "Dividend") {
+        table.currentColumns.unshift({ prop: "category", label: "分红率最高发行人", minWidth: "120" })
+      } else {
+        table.currentColumns.unshift({ prop: "category", label: "发行人", minWidth: "120" })
       }
     })
     const setTableData = (data: any) => {
@@ -311,11 +321,7 @@ const categoryList = ref([
   <div class="etf-directory-container">
     <h1>ETF 类型</h1>
     <p class="etf-desc">
-      随着 ETF 领域的持续拓展，可利用下方表格筛选感兴趣的 ETF类型。ETF
-      产品涵盖广泛的资产类别、行业领域、发行人及投资风格。一只ETF产品根据不同维度可同时归属于多种类型；例如，一只名称为 “嘉实中证机器人
-      ETF”（产品代码：159526）的主题类 ETF 产品，
-      可同时归类为：资产类型为“股票”，行业类型为“工业”，市值风格为
-      “小盘”且投资风格属于“成长”。
+      随着ETF领域的持续拓展，可利用下方表格筛选感兴趣的ETF类型。ETF产品涵盖广泛的资产类别、行业领域、发行人及投资风格，一只ETF产品根据不同维度可同时归属于多种类型。例如，一只名称为“易方达中证人工智能ETF”（产品代码：159819）的ETF产品，可同时归类为：资产类型为“股票”，行业类型为“信息技术”，市值属性为 “大市值”且风格属性为“成长型”。
     </p>
     <div class="etf-tabs">
       <button

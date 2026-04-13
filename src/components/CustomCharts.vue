@@ -179,7 +179,7 @@ const initChart = async () => {
     },
     tooltip: {
       trigger: "item",
-      formatter: (params: any) => `${params.seriesName}`,
+      formatter: (params: any) => `${params.seriesName}%`,
     },
     grid: { left: props.title ? 120 : 10, right: 0, top: 0, bottom: 0 },
     xAxis: { show: false, min: 0, max: 100 },

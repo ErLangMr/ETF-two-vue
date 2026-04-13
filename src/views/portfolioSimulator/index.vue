@@ -5,7 +5,7 @@
     </div>
     <div v-if="etfCodes">
       <div class="config-ratio-box">
-        <h3>配置比例</h3>
+        <div class="section-title">配置比例</div>
         <p style="display: flex; justify-content: space-between">
           <span>配置比例不得低于或高于100%。</span>
           <el-date-picker
@@ -335,16 +335,17 @@ function getPortfolioSimulatorReturnVol() {
   .config-ratio-box {
     padding: 20px;
 
-    h3 {
-      font-size: 18px;
+    .section-title {
       font-weight: 600;
-      margin-bottom: 8px;
+      font-size: var(--font-size-extra-large);
+      padding-left: 20px;
     }
 
     p {
       color: #666;
       font-size: 14px;
       margin-bottom: 20px;
+      padding-left: 20px;
     }
 
     .ratio-container {
@@ -524,7 +525,7 @@ function getPortfolioSimulatorReturnVol() {
     max-width: 70%;
     .section-title {
       font-weight: 600;
-      font-size: var(--font-size-base);
+      font-size: var(--font-size-extra-large);
       margin-bottom: 10px;
       color: #222;
       display: flex;

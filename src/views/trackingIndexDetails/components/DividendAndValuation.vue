@@ -28,38 +28,38 @@
     >
       <el-table-column prop="indexCode" label="指数代码" min-width="100" />
       <el-table-column prop="indexName" label="指数名称" min-width="100" />
-      <el-table-column prop="tys" label="营业收入(单位：亿元)" min-width="180">
+      <el-table-column prop="tys" label="营业收入(亿元)" min-width="180">
         <template #default="{ row }">
           <span>
-            {{ (row.tys/100000000).toFixed(4) }}
+            {{ (row.tys/100000000).toFixed(2) }}
           </span>
         </template>
       </el-table-column>
-      <el-table-column prop="ysZS" label="营业收入增幅" min-width="150">
+      <el-table-column prop="ysZS" label="营业收入增幅(%)" min-width="150">
         <template #default="{ row }">
           <span :style="{ color: row.ysZS >= 0 ? 'red' : 'green' }">
-            {{ row.ysZS.toFixed(4) }}
+            {{ row.ysZS.toFixed(2) }}
           </span>
         </template>
       </el-table-column>
-      <el-table-column prop="tnp" label="净利润(单位：亿元)" min-width="180">
+      <el-table-column prop="tnp" label="净利润(亿元)" min-width="180">
         <template #default="{ row }">
           <span :style="{ color: row.tnp >= 0 ? 'red' : 'green' }">
-            {{ (row.tnp/100000000).toFixed(4) }}
+            {{ (row.tnp/100000000).toFixed(2) }}
           </span>
         </template>
       </el-table-column>
-      <el-table-column prop="npZS" label="净利润增速" min-width="150">
+      <el-table-column prop="npZS" label="净利润增速(%)" min-width="150">
         <template #default="{ row }">
           <span :style="{ color: row.npZS >= 0 ? 'red' : 'green' }">
-            {{ row.npZS.toFixed(4) }}
+            {{ row.npZS.toFixed(2) }}
           </span>
         </template>
       </el-table-column>
       <el-table-column prop="troe" label="加权平均ROE" min-width="150">
         <template #default="{ row }">
           <span>
-            {{ row.troe.toFixed(4) }}
+            {{ row.troe.toFixed(2) }}
           </span>
         </template>
       </el-table-column>

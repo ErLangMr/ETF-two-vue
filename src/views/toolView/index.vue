@@ -130,27 +130,27 @@ onMounted(() => {
                 </div>
                 <div class="index-card-info-row" v-if="activeTab === 'day'">
                   <span class="index-card-period">日涨幅</span>
-                  <span class="index-card-rate">{{ formatValue(item.change) }}<span class="index-card-rate-percent">%</span></span>
+                  <span :style="{ color: item.change < 0 ? 'green' : 'red' }" class="index-card-rate">{{ formatValue(item.change) }}<span class="index-card-rate-percent">%</span></span>
                 </div>
                 <div class="index-card-info-row" v-if="activeTab === 'weekly'">
                   <span class="index-card-period">近1周</span>
-                  <span class="index-card-rate">{{ formatValue(item.weeklyChange) }}<span class="index-card-rate-percent">%</span></span>
+                  <span :style="{ color: item.weeklyChange < 0 ? 'green' : 'red' }" class="index-card-rate">{{ formatValue(item.weeklyChange) }}<span class="index-card-rate-percent">%</span></span>
                 </div>
                 <div class="index-card-info-row" v-if="activeTab === 'monthly'">
                   <span class="index-card-period">近1月</span>
-                  <span class="index-card-rate">{{ formatValue(item.monthlyChange) }}<span class="index-card-rate-percent">%</span></span>
+                  <span :style="{ color: item.monthlyChange < 0 ? 'green' : 'red' }" class="index-card-rate">{{ formatValue(item.monthlyChange) }}<span class="index-card-rate-percent">%</span></span>
                 </div>
                 <div class="index-card-info-row" v-if="activeTab === 'threeMonth'">
                   <span class="index-card-period">近3月</span>
-                  <span class="index-card-rate">{{ formatValue(item.threeMonthChange) }}<span class="index-card-rate-percent">%</span></span>
+                  <span :style="{ color: item.threeMonthChange < 0 ? 'green' : 'red' }" class="index-card-rate">{{ formatValue(item.threeMonthChange) }}<span class="index-card-rate-percent">%</span></span>
                 </div>
                 <div class="index-card-info-row" v-if="activeTab === 'sixMonth'">
                   <span class="index-card-period">近6月</span>
-                  <span class="index-card-rate">{{ formatValue(item.sixMonthChange) }}<span class="index-card-rate-percent">%</span></span>
+                  <span :style="{ color: item.sixMonthChange < 0 ? 'green' : 'red' }" class="index-card-rate">{{ formatValue(item.sixMonthChange) }}<span class="index-card-rate-percent">%</span></span>
                 </div>
                 <div class="index-card-info-row" v-if="activeTab === 'yearly'">
                   <span class="index-card-period">近1年</span>
-                  <span class="index-card-rate">{{ formatValue(item.yearlyChange) }}<span class="index-card-rate-percent">%</span></span>
+                  <span :style="{ color: item.yearlyChange < 0 ? 'green' : 'red' }" class="index-card-rate">{{ formatValue(item.yearlyChange) }}<span class="index-card-rate-percent">%</span></span>
                 </div>
                 <div class="index-card-link-row">
                   <span class="index-card-link">
@@ -268,7 +268,6 @@ onMounted(() => {
 }
 .index-card-rate {
   font-size: 1.35rem;
-  color: #e53935;
   font-weight: 700;
 }
 .index-card-rate-percent {

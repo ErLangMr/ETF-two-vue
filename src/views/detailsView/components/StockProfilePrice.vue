@@ -8,7 +8,7 @@
           <div class="info-list">
             <div class="info-row">
               <span>成立日期</span
-              ><span>{{ formatDate(detailsData?.inceptionDate) }}</span>
+              ><span>{{ formatDate(detailsData?.inceptionDate)?.slice(0, 10) }}</span>
             </div>
             <div class="info-row">
               <span>基金公司</span

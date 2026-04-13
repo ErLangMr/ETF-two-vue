@@ -1,8 +1,13 @@
 <template>
   <div class="details-view">
     <div class="details-header">
-      <span class="details-symbol">{{ route.query?.code }}</span>
-      <span class="details-title">{{ route.query?.name }}</span>
+      <div>
+        <span class="details-symbol">{{ route.query?.code }}</span>
+        <span class="details-title">{{ route.query?.name }}</span>
+      </div>
+      <div style="float: right;">
+        数据日期：2026-03-31
+      </div>
     </div>
     <!-- <div class="details-info">
       <div>
@@ -40,7 +45,7 @@
               <component
                 :is="item.component"
                 :tabActiveName="activeName"
-                :code="route.query?.code"
+                :code="(route.query?.code as string) || ''"
               />
             </div>
           </el-tab-pane>
@@ -67,7 +72,7 @@
               StockProfilePrice
             "
             :tabActiveName="componentName"
-            :code="route.query?.code"
+            :code="(route.query?.code as string) || ''"
           />
         </div>
       </div>
@@ -152,11 +157,11 @@ const tabList = ref([
     value: "RiskMeasurement",
     component: markRaw(RiskMeasurement),
   },
-  {
-    label: "归因分析",
-    value: "AttributionAnalysis",
-    component: markRaw(AttributionAnalysis),
-  },
+  // {
+  //   label: "归因分析",
+  //   value: "AttributionAnalysis",
+  //   component: markRaw(AttributionAnalysis),
+  // },
    {
     label: "资金流动图表",
     value: "FundFlowChart",
@@ -222,7 +227,8 @@ const tabList = ref([
   padding: 20px;
   .details-header {
     display: flex;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: space-between;
     gap: 18px;
     .details-symbol {
       background: var(--theme-purple);
@@ -236,7 +242,7 @@ const tabList = ref([
       font-size: 1.5rem;
       font-weight: bold;
       color: #23272b;
-      margin-right: 24px;
+      margin-left: 10px;
       margin-top: 2px;
     }
   }

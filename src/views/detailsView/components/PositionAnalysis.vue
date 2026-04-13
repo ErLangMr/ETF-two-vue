@@ -31,10 +31,14 @@
     </el-table>
     <div style="display: flex; width: 100%; justify-content: space-between">
       <div id="hangye1" v-loading="hangye1Loading"></div>
+    </div>
+    <div style="display: flex; width: 100%; justify-content: space-between">
       <div id="hangye2" v-loading="hangye2Loading"></div>
     </div>
     <div style="display: flex; width: 100%; justify-content: space-between">
       <div id="hangye3" v-loading="hangye3Loading"></div>
+    </div>
+    <div style="display: flex; width: 100%; justify-content: space-between">
       <div id="hangye4" v-loading="hangye4Loading"></div>
     </div>
     <div style="display: flex; width: 100%; justify-content: space-between">
@@ -212,11 +216,21 @@ function initCharts(
     chart.setOption({
       title: {
         text: title,
+        textStyle: {
+          fontSize: 24,
+        },
       },
       tooltip: {
         trigger: "axis",
         axisPointer: {
           type: "shadow",
+        },
+        formatter: (params: any) => {
+          let html = `${params[0].name}`
+          params.forEach((item: any) => {
+            html += `<br/>${item.marker}${item.seriesName}: ${item.value ? item.value : 0}%`
+          })
+          return html
         },
       },
       // legend: {},
@@ -334,11 +348,14 @@ onUnmounted(() => {
 .position-analysis {
   width: 100%;
   #hangye1,
-  #hangye2,
-  #hangye3,
-  #hangye4 {
-    width: 50%;
+  #hangye3 {
+    width: 100%;
     height: 600px;
+  }
+  #hangye2,
+  #hangye4 {
+    width: 100%;
+    height: 1500px;
   }
   #diqu {
     width: 100%;

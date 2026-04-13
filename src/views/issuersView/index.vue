@@ -34,20 +34,6 @@ const filterTabs = [
     },
   },
   {
-    label: "发行人收入",
-    value: "Revenue",
-    columns: [
-      { prop: "issuer", label: "发行人", type: "link", url: "/proshares" },
-      { prop: "fundRank", label: "收入排名" },
-      { prop: "dataValue", label: "发行人收入（百万元）", unit: "million" },
-      { prop: "eftSize", label: "ETF数量", type: "link", url: "/proshares" },
-    ],
-    description: {
-      title: "ETF发行人收入排行榜",
-      desc: "ETF发行人的排名基于其ETF业务的预估收入。ETF 发行人的预估收入是通过汇总所有该发行人旗下ETF产品的费用收入计算得出的。要计算单个ETF产品为发行人带来的预估收入，需要将该ETF产品的规模乘以该 ETF 的费用率。",
-    },
-  },
-  {
     label: "资金流入",
     value: "Fund Flows",
     columns: [
@@ -107,6 +93,20 @@ const filterTabs = [
       desc: "ETF发行人根据其ETF产品的加权平均分红率进行排名，权重为每只ETF的规模",
     },
   },
+  {
+    label: "发行人收入",
+    value: "Revenue",
+    columns: [
+      { prop: "issuer", label: "发行人", type: "link", url: "/proshares" },
+      { prop: "fundRank", label: "收入排名" },
+      { prop: "dataValue", label: "发行人收入（百万元）", unit: "million" },
+      { prop: "eftSize", label: "ETF数量", type: "link", url: "/proshares" },
+    ],
+    description: {
+      title: "ETF发行人收入排行榜",
+      desc: "基于ETF业务的收入对发行人排名。发行人的ETF业务收入通过汇总所有该发行人旗下ETF产品的费用收入计算得出。要计算单个ETF产品为发行人带来的收入，需要将该ETF产品的规模乘以该 ETF 的管理费率。",
+    },
+  },
 ];
 const activeTab = ref("AUM");
 const activeTabChange = (value: string) => {
@@ -153,12 +153,12 @@ function updateColumns() {
 }
 const columnClick = (row: any, prop: string) => {
   console.log(row, prop);
-  router.push({
-    path: "/proshares",
-    query: {
-      issuer: JSON.stringify(row),
-    },
-  });
+  // router.push({
+  //   path: "/proshares",
+  //   query: {
+  //     issuer: JSON.stringify(row),
+  //   },
+  // });
 };
 </script>
 
@@ -171,8 +171,7 @@ const columnClick = (row: any, prop: string) => {
     <div class="issuers-header">
       <h1 class="issuers-title" style="margin-top: 3rem">ETF发行人排行榜</h1>
       <p class="issuers-desc">
-        发行人排行榜是根据某些投资相关指标对ETF发行人进行排名，这些指标包括预计收入、3个月资金流量、3个月回报率、资产管理规模
-        (AUM)、平均ETF费用和平均分红率。
+        发行人排行榜是根据某些相关指标对ETF发行人进行排名，这些指标包括发行人旗下ETF产品的规模（AUM）、资金流入、收益表现、平均费用、分红率和发行人收入。
       </p>
     </div>
     <div class="list-container">

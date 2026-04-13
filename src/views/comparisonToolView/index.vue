@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1>ETF对比工具</h1>
       <p class="page-desc">
-        下表比较了多项ETF指标。对比费用、业绩、股息收益率、持仓、技术指标以及许多其他指标，以便做出更明智的投资决策。
+        下表对比了规模、费用、收益、风险、资金流动等多项ETF指标，以便做出更明智的投资决策。
       </p>
     </div>
     <div style="padding: 0 20px; font-size: 18px;display:flex;justify-content: flex-end;" v-if="ETFCodes">
@@ -28,9 +28,9 @@
       <h2 style="margin: 2rem 0">
         {{ filterTabs.find((tab) => tab.value === activeTab)?.descTitle }}
       </h2>
-      <p style="margin-bottom: 2rem; font-size: 1rem">
+      <!-- <p style="margin-bottom: 2rem; font-size: 1rem">
         {{ filterTabs.find((tab) => tab.value === activeTab)?.desc || "" }}
-      </p>
+      </p> -->
       <component
         v-if="ETFCodes"
         v-loading="tableLoading"
@@ -82,9 +82,9 @@ const filterTabs = [
     desc: "基础信息的一些描述",
   },
   {
-    label: "收益和成本",
+    label: "收益",
     value: "returnsAndCosts",
-    descTitle: "收益和成本",
+    descTitle: "收益",
     desc: "收益和成本的一些描述",
   },
   {
@@ -112,9 +112,9 @@ const filterTabs = [
     desc: "分红和估值的一些描述",
   },
   {
-    label: "业绩和风险",
+    label: "风险",
     value: "performanceAndRisk",
-    descTitle: "业绩和风险",
+    descTitle: "风险",
     desc: "业绩和风险的一些描述",
   },
   {
@@ -279,14 +279,14 @@ function getCompareOverview() {
     .then((res) => {
       if (res && res.length > 0) {
         const enumData = {
-          etfName: "etf名称",
-          etfFullname: "etf全称",
+          etfName: "ETF简称",
+          etfFullname: "ETF全称",
           typeI: "资产类型",
           nav: "份额净值",
           shares: "份额(百万份)",
           aum: "资产规模(百万元)",
           close: "最新收盘价(元)",
-          coverRatio: "折溢价率",
+          coverRatio: "折溢价率(%)",
           ytdPrice: "今年以来价格变化(%)",
         };
         tableData.value.data = processData(res, enumData);
@@ -305,7 +305,7 @@ function getCompareNetValue() {
       if (res && res.length > 0) {
         const enumData = {
           etfName: "ETF简称",
-          weeklyReturns: "近1周回报(%)",
+          // weeklyReturns: "近1周回报(%)",
           ret1: "近1月回报(%)",
           ret3: "近3月回报(%)",
           ret6: "近6月回报(%)",
@@ -333,7 +333,7 @@ function getCompareFundFlow() {
           ff1: "近1月净流入额(百万元)",
           ff3: "近3月净流入额(百万元)",
           ff6: "近6月净流入额(百万元)",
-          ytdFf: "今年以来净流入额(百万元)",
+          // ytdFf: "今年以来净流入额(百万元)",
           ff12: "近1年净流入额(百万元)",
           ff36: "近3年净流入额(百万元)",
           ff60: "近5年净流入额(百万元)",
@@ -382,14 +382,14 @@ function getCompareTradingEfficiency() {
           volume3: "近3月日均交易量(百万份)",
           amount1: "近1月日均交易额(百万元)",
           amount3: "近3月日均交易额(百万元)",
-          turnover1: "近1月换手率",
-          turnover3: "近3月换手率",
-          cover1: "近1月日均折溢价率",
-          cover3: "近3月日均折溢价率",
-          dev1: "近1月日均跟踪偏离度",
-          dev3: "近3月日均跟踪偏离度",
-          tr1: "近1月日均跟踪误差",
-          tr3: "近3月日均跟踪误差",
+          turnover1: "近1月换手率(%))",
+          turnover3: "近3月换手率(%))",
+          cover1: "近1月日均折溢价率(%)",
+          cover3: "近3月日均折溢价率(%)",
+          dev1: "近1月日均跟踪偏离度(%)",
+          dev3: "近3月日均跟踪偏离度(%)",
+          tr1: "近1月跟踪误差(%)",
+          tr3: "近3月跟踪误差(%)",
         };
         tableData.value.data = processData(res, enumData);
       } else {
@@ -430,17 +430,18 @@ function getCompareRisk() {
       if (res && res.length > 0) {
         const enumData = {
           etfName: "ETF简称",
-          vol1: "近1月收益标准差",
-          vol3: "近3月收益标准差",
-          vol6: "近6月收益标准差",
-          vol12: "近1年收益标准差",
-          vol36: "近3年收益标准差",
+          vol1: "近1月收益标准差(%)",
+          vol3: "近3月收益标准差(%)",
+          vol6: "近6月收益标准差(%)",
+          vol12: "近1年收益标准差(%)",
+          vol36: "近3年收益标准差(%)",
           beta1: "近1月Beta",
           beta3: "近3月Beta",
           beta12: "近1年Beta",
           beta36: "近3年Beta",
-          maxD12: "近1年最大回撤",
-          maxD36: "近3年最大回撤",
+          maxD12: "近1年最大回撤(%)",
+          maxD36: "近3年最大回撤(%)",
+          maxD60: "近5年最大回撤(%)",
         };
         tableData.value.data = processData(res, enumData);
       } else {
@@ -458,7 +459,7 @@ function getCompareHoldingFeature() {
       if (res && res.length > 0) {
         const enumData = {
           etfName: "ETF简称",
-          etfFullname: "ETF全称",
+          // etfFullname: "ETF全称",
           stockNumber: "持有证券数量(只)",
           weightedTotalMarketValue: "持仓证券平均市值(百万元)",
           top5HoldingPercent: "前五大持仓占比(%)",

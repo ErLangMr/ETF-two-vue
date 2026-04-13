@@ -14,40 +14,40 @@
       <!-- <div class="section-title">所属类型</div> -->
       <div class="info-list">
         <div class="info-row">
-          <span>样本平均流通A股市值（亿元）</span><span>{{ formatValue(indexFeatureData.aamv) }}</span>
+          <span>所属类型（股票、债券、商品、货币）</span>
+          <span>{{ formatValue(indexFeatureData.typeI) }}</span>
         </div>
         <div class="info-row">
-          <span>指数代码</span><span>{{ indexFeatureData.indexCode }}</span>
-        </div>
-        <div class="info-row">
-          <span>指数名称</span>
-          <span>{{ indexFeatureData.indexName }}</span>
-        </div>
-        <div class="info-row">
-          <span>样本流通A股市值中位数（亿元）</span>
-          <span>{{ formatValue(indexFeatureData.mamv) }}</span>
-        </div>
-        <div class="info-row">
-          <span>样本数量</span>
+          <span>成份证券数量</span>
           <span>{{ formatValue(indexFeatureData.stkNum) }}</span>
-        </div>
-        <div class="info-row">
-          <span>指数流通A股市值（亿元）</span><span>{{ formatValue(indexFeatureData.tamv) }}</span>
-        </div>
-        <div class="info-row">
-          <span>流通A股市值全市场覆盖率</span><span>{{ formatValue(indexFeatureData.tamvCr, "percent") }}</span>
         </div>
         <div class="info-row">
           <span>指数市值（亿元）</span>
           <span>{{ formatValue(indexFeatureData.tmv) }}</span>
         </div>
         <div class="info-row">
-          <span>总市值全市场覆盖率</span>
+          <span>指数流通A股市值（亿元）</span><span>{{ formatValue(indexFeatureData.tamv) }}</span>
+        </div>
+        <div class="info-row">
+          <span>总市值全市场覆盖率（%）</span>
           <span>{{ formatValue(indexFeatureData.tmvCr, "percent") }}</span>
         </div>
         <div class="info-row">
-          <span>所属类型（股票、债券、商品、货币）</span>
-          <span>{{ formatValue(indexFeatureData.typeI) }}</span>
+          <span>流通A股市值全市场覆盖率（%）</span><span>{{ formatValue(indexFeatureData.tamvCr, "percent") }}</span>
+        </div>
+        <div class="info-row">
+          <span>样本平均流通A股市值（亿元）</span><span>{{ formatValue(indexFeatureData.aamv) }}</span>
+        </div>
+        <!-- <div class="info-row">
+          <span>指数代码</span><span>{{ indexFeatureData.indexCode }}</span>
+        </div>
+        <div class="info-row">
+          <span>指数名称</span>
+          <span>{{ indexFeatureData.indexName }}</span>
+        </div> -->
+        <div class="info-row">
+          <span>样本流通A股市值中位数（亿元）</span>
+          <span>{{ formatValue(indexFeatureData.mamv) }}</span>
         </div>
       </div>
     </div>

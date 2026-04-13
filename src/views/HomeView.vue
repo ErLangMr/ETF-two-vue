@@ -26,42 +26,42 @@ const { isMobile } = useDevice();
 const etfToolArr = [
   {
     title: "ETF 筛选器",
-    desc: "根据资产类别、发行人、市值、费用率等筛选 ETF。",
+    desc: "按资产类型、特色标签、市值、费率、流动性等多维指标，灵活筛选，精准锁定目标ETF。",
     icon: Setting,
     img: screenerImg,
     path: "/screener",
   },
   {
     title: "ETF 分类排行",
-    desc: '将ETF根据资产类型、投资区域、发行人等进行分类，并根据资产规模、收益、费率等进行排序。',
+    desc: '将ETF根据资产类型、投资地区、发行人等多维度分类，清晰呈现每类ETF的规模、收益、费率、资金流动等排名。',
     icon: Edit,
     img: categoryRanks,
     path: "/etfs",
   },
   {
     title: "ETF 比较工具",
-    desc: "根据资产类别、发行人、市值、费用率等筛选 ETF。",
+    desc: "快速比较2-5只ETF的收益、费用、风险、资金流动等指标，更可深度剖析两只ETF的底层持仓与行业分布差异。",
     icon: Setting,
     img: comparisonTool,
     path: "/comparisonTool",
   },
   {
     title: "ETF 股票定位器",
-    desc: '将ETF根据资产类型、投资区域、发行人等进行分类，并根据资产规模、收益、费率等进行排序。',
+    desc: '查找最受ETF欢迎的股票，并快速定位持有某只股票的ETF。',
     icon: Edit,
     img: stockLocator,
     path: "/stockLocator",
   },
   {
     title: "ETF 组合模拟器",
-    desc: "快速轻松地查找由50多家不同发行人发行的ETF。",
+    desc: "构建ETF模拟组合，综合评估费用、收益与风险，并清晰展示持仓的市值、行业、地区画像。",
     icon: OfficeBuilding,
     img: portfolioSimulator,
     path: "/portfolioSimulator",
   },
   {
     title: "跨境ETF",
-    desc: "快速轻松地查找由50多家不同发行人发行的ETF。",
+    desc: "跨境ETF专区，深挖境外底层持仓与真实风险收益。",
     icon: OfficeBuilding,
     img: intlAssetAllocation,
     path: "/developing",
@@ -70,25 +70,25 @@ const etfToolArr = [
 const etfChannel = [
   {
     title: "ETF 跟踪指数",
-    desc: "想要拥有特定指数的投资组合吗?关注ETF追踪指数。",
+    desc: "看好某个指数？多维筛选目标指数，找到跟踪特定指数的ETF，让你的投资组合与指数同步。",
     icon: Location,
     path: "/trackingIndex",
   },
   {
     title: "ETF 热门产品",
-    desc: "想要拥有特定指数的投资组合吗?关注ETF追踪指数。",
+    desc: "市场在买什么？热门产品榜单帮你快速锁定高关注度ETF。",
     icon: Setting,
     path: "/developing",
   },
   {
     title: "ETF 发行人",
-    desc: "快速轻松地查找由50多家不同发行人发行的ETF。",
+    desc: "50多家ETF发行人一站汇聚，轻松找到你信赖的基金公司旗下的ETF。",
     icon: OfficeBuilding,
     path: "/issuers",
   },
   {
     title: "ETF 指数榜单",
-    desc: "想要拥有特定指数的投资组合吗?关注ETF追踪指数。",
+    desc: "指数收益谁领先？——选指数，配ETF。",
     icon: Edit,
     path: "/tool",
   },
@@ -438,7 +438,7 @@ const featuredCategories = [
       width: 100%;
     }
     #leftChart {
-      width: 100%;
+      width: calc(100% - 10px);
       height: calc(100% - 70px);
     }
   }
@@ -450,7 +450,7 @@ const featuredCategories = [
       width: 100%;
     }
     #rightChart {
-      width: 100%;
+      width: calc(100% - 10px);
       height: calc(100% - 70px);
     }
   }
@@ -469,13 +469,15 @@ h3{
   width: 100%;
   display: flex;
   justify-content: space-between;
-  padding: 24px;
+  padding: 10px;
   background: #ffffff;
 }
 .grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
+  // gap: 24px;
+  column-gap: 25px;
+  row-gap: 10px;
   width: 100%;
   // max-width: 1200px;
   // column-gap: 20px;
@@ -486,14 +488,16 @@ h3{
   gap: 16px;
   background: #fff;
   border-radius: 8px;
-  padding: 20px;
-  box-shadow: 0px 0px 10px 4px rgba(0, 0, 0, 0.08);
+  padding: 10px 20px;
+  // box-shadow: 0px 0px 10px 4px rgba(0, 0, 0, 0.08);
+  box-shadow: 0px 0px 5px 3px rgba(0, 0, 0, 0.08);
   transition: all 0.3s ease;
   cursor: pointer;
 }
 .card:hover {
   transform: translateY(-2px);
-  box-shadow: 3px 6px 3px 8px rgba(0, 0, 0, 0.05);
+  // box-shadow: 3px 6px 3px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 1px 1px 1px 3px rgba(0, 0, 0, 0.05);
 }
 .icon-bg {
   width: 60px;
@@ -534,7 +538,8 @@ h3{
   background: #3b3b6d;
 }
 .desc {
-  color: #5c5c7b;
+  // color: #5c5c7b;
+  color: black;
   font-size: var(--font-size-medium);
   line-height: 1.6;
 }
@@ -542,7 +547,7 @@ h3{
   padding: 20px;
 }
 .index-list-item {
-  margin-bottom: 30px;
+  margin-bottom: 10px;
   .index-list-item-title {
     font-size: var(--font-size-large);
     font-weight: bold;

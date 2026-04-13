@@ -182,7 +182,8 @@ const tableColumnList = ref<Record<string, TableColumn[]>>(
       { prop: "etfName", label: "ETF简称", width: 150, showTooltip: true, type: "link", url: "/details" },
       // { prop: "etfFullname", label: "ETF全称", width: 150, showTooltip: true, type: "link", url: "/details" },
       { prop: "stockNumber", label: "持有证券数量(只)", width: 120, showTooltip: false, sortable: true },
-      { prop: "weightedTotalMarketValue", label: "持仓证券平均市值(百万元)", width: 140, showTooltip: false, sortable: true },
+      { prop: "weightedTotalMarketValue", label: "持仓证券平均总市值(百万元)", width: 140, showTooltip: false, sortable: true },
+      { prop: "weightedAShareMarketValue", label: "持仓证券平均流通市值(百万元)", width: 160, showTooltip: false, sortable: true },
       { prop: "top5HoldingPercent", label: "前五大持仓占比(%)", width: 120, showTooltip: false, sortable: true },
       { prop: "top10HoldingPercent", label: "前十大持仓占比(%)", width: 120, showTooltip: false, sortable: true },
       { prop: "top20HoldingPercent", label: "前二十大持仓占比(%)", width: 130, showTooltip: false, sortable: true },
@@ -317,6 +318,8 @@ const handleSelectionChange = (val: any[]) => {
       <el-table
         ref="tableRef"
         :data="tablePropData"
+        :header-row-style="{ color: 'black'}"
+        :row-style="{ color: 'black'}"
         row-key="etfCode"
         v-loading="tableLoading"
         element-loading-text="加载中..."

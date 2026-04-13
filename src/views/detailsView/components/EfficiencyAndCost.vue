@@ -25,54 +25,54 @@
             <span>交易金额（百万元）</span><span>{{ formatValue(infoData.amount) }}</span>
           </div>
           <div class="info-row">
-            <span>折溢价率</span><span>{{ formatValue(infoData.cover) }}</span>
+            <span>日均交易量（百万份）</span>
+            <span>{{ formatValue(infoData.volume) }}%</span>
           </div>
           <div class="info-row">
-            <span>托管费率</span>
-            <span>{{ formatValue(infoData.custodianFee) }}</span>
+            <span>换手率（%）</span>
+            <span>{{ formatValue(infoData.turnover) }}%</span>
           </div>
           <div class="info-row">
-            <span>跟踪偏离度</span>
-            <span>{{ formatValue(infoData.dev) }}</span>
+            <span>折溢价率（%）</span><span>{{ formatValue(infoData.cover) }}%</span>
           </div>
           <div class="info-row">
+            <span>日均跟踪偏离度（%）</span>
+            <span>{{ formatValue(infoData.dev) }}%</span>
+          </div>
+          <div class="info-row">
+            <span>跟踪误差（%）</span>
+            <span>{{ formatValue(infoData.trackingError) }}%</span>
+          </div>
+          <!-- <div class="info-row">
             <span>查询维度（月）</span>
             <span>{{ formatValue(infoData.dimension) }}</span>
-          </div>
-          <div class="info-row">
-            <span>管理费率</span>
-            <span>{{ formatValue(infoData.managementFee) }}</span>
-          </div>
+          </div> -->
         </div>
       </div>
       <div class="block">
         <div class="section-title"></div>
         <div class="info-list">
           <div class="info-row">
-            <span>申购费率</span><span>{{ formatValue(infoData.subscriptionFee) }}</span>
+            <span>管理费率（%）</span>
+            <span>{{ formatValue(infoData.managementFee) }}%</span>
           </div>
           <div class="info-row">
-            <span>总费率</span><span>{{ formatValue(infoData.totalFee) }}</span>
+            <span>托管费率（%）</span>
+            <span>{{ formatValue(infoData.custodianFee) }}%</span>
           </div>
           <div class="info-row">
-            <span>跟踪误差</span>
-            <span>{{ formatValue(infoData.trackingError) }}</span>
+            <span>销售服务费率（%）</span>
+            <span>{{ formatValue(infoData.salesServiceFee) }}%</span>
           </div>
           <div class="info-row">
-            <span>换手率</span>
-            <span>{{ formatValue(infoData.turnover) }}</span>
+            <span>申购费率（%）</span><span>{{ formatValue(infoData.subscriptionFee) }}%</span>
           </div>
           <div class="info-row">
-            <span>交易量（百万份）</span>
-            <span>{{ formatValue(infoData.volume) }}</span>
+            <span>赎回费率（%）</span>
+            <span>{{ formatValue(infoData.redemptionFee) }}%</span>
           </div>
           <div class="info-row">
-            <span>赎回费率</span>
-            <span>{{ formatValue(infoData.redemptionFee) }}</span>
-          </div>
-          <div class="info-row">
-            <span>销售服务费率</span>
-            <span>{{ formatValue(infoData.salesServiceFee) }}</span>
+            <span>总费率（%）</span><span>{{ formatValue(infoData.totalFee) }}%</span>
           </div>
         </div>
       </div>

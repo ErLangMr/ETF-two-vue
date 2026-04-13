@@ -32,9 +32,9 @@ const props = defineProps<{
     margin-top: 10px;
   }
   .facts-title {
-    font-size: 2rem;
-    font-weight: 400;
-    margin-bottom: 18px;
+    font-size: 26px;
+    font-weight: 600;
+    margin-bottom: 10px;
   }
   .facts-row {
     display: flex;

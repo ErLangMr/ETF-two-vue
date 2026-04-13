@@ -28,10 +28,10 @@
           <span>ICB 三级标签</span>
           <span>{{ formatValue(industryData.icb3) }}</span>
         </div>
-        <div class="info-row">
+        <!-- <div class="info-row">
           <span>标签日期</span>
           <span>{{ formatValue(industryData.labelDate) }}</span>
-        </div>
+        </div> -->
         <div class="info-row">
           <span>市值标签</span>
           <span>{{ formatValue(industryData.marketCapLabel) }}</span>

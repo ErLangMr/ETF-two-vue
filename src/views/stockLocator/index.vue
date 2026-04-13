@@ -3,7 +3,7 @@
     <div class="page-header">
       <h1>股票定位器</h1>
       <p class="page-desc">
-        只需在下方搜索框中输入股票代码或名称（例如GOOG），ETF股票持仓工具就会为您找到持有该股票较多的ETF。
+        股票定位器可帮助投资者快速找到所有对某只股票具有持仓的ETF。只需在下方搜索框中输入股票代码或名称，系统就会为您列出持有该股票的相关ETF。
       </p>
     </div>
     <div class="search-box">
@@ -22,7 +22,7 @@
           v-for="item in options"
           :key="item.value"
           :label="item.label + '(' + item.value + ')'"
-          :value="item.value"
+          :value="item.label + '/' + item.value"
         />
       </el-select>
       <!-- <el-input
@@ -40,7 +40,7 @@
     </div>
     <div class="divider"></div>
     <div style="display: flex; align-items: center;justify-content: space-between">
-      <p class="titleP">最受欢迎的{{ total }}只股票及其ETF替代方案</p>
+      <p class="titleP">最受ETF欢迎的{{ total }}只股票。</p>
       <div style="display: flex; align-items: center">
           <el-date-picker
             v-model="yearValue"
@@ -91,7 +91,7 @@
         ></el-table-column>
         <el-table-column
           prop="stkHn"
-          label="ETF持有数量（万）"
+          label="ETF持有数量（万股）"
           min-width="100"
           sortable
         >
