@@ -90,12 +90,12 @@
             <el-table-column
               :prop="column.prop"
               :label="column.label"
-              v-for="column in tableColumn"
+              v-for="column in tableColumn2"
               :key="column.prop"
             >
               <template #default="{ row }">
                 <span
-                  v-if="column.prop === 'dataType' || column.prop === 'dataLabel'"
+                  v-if="column.prop === 'dataLabel'"
                   >{{ row[column.prop] }}</span
                 >
                 <span v-else :style="{ color: styleColor(row[column.prop]) }">
@@ -106,7 +106,7 @@
             </el-table-column>
           </el-table>
         </div>
-        <div style="height: 30px"></div>
+        <!-- <div style="height: 30px"></div>
         <div>
           <div class="block">
             <div class="section-title">组合风险</div>
@@ -141,7 +141,7 @@
               </div>
             </div>
           </div>
-        </div>
+        </div> -->
         <div style="height: 30px"></div>
         <!-- <AnalystOpinions /> -->
         <div style="height: 30px"></div>
@@ -299,6 +299,12 @@ const tableColumn = [
   { prop: "fiveYear", label: "近五年" },
   { prop: "ltd", label: "成立以来" },
 ];
+const tableColumn2 = [
+  { prop: "dataLabel", label: "" },
+  { prop: "return", label: "收益率" },
+  { prop: "volatility", label: "波动率" },
+]
+const tableData2 = ref([]);
 function styleColor(value: any) {
   if (value) {
     return value >= 0 ? "red" : "green";
@@ -317,7 +323,21 @@ function getPortfolioSimulatorReturnVol() {
     weights: weightsParams,
   }).then((res) => {
     if (res.code === 200) {
-      tableData.value = res.data.returnVolTable;
+      if (res.data.returnVolTable.length > 0) {
+        const returnRow = res.data.returnVolTable.find((i: any) => i.dataLabel === '收益率')
+        const volRow = res.data.returnVolTable.find((i: any) => i.dataLabel === '波动率')
+        const transposed = tableColumn
+          .filter((col) => col.prop !== 'dataLabel' && col.prop !== 'dataType')
+          .map((col) => ({
+            dataLabel: col.label,
+            return: returnRow ? returnRow[col.prop] : null,
+            volatility: volRow ? volRow[col.prop] : null,
+          }))
+        tableData.value = transposed as any
+      } else {
+        tableData.value = [];
+      }
+      // tableData.value = res.data.returnVolTable;
       portfolioRisk.value = res.data.riskIndicator;
     }
   }).finally(() => {

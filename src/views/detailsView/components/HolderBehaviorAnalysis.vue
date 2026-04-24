@@ -34,22 +34,22 @@
         >
           <el-table-column prop="activity" label="持有人行为" show-overflow-tooltip min-width="120" />
           <el-table-column prop="holderName" label="持有人名称" show-overflow-tooltip min-width="150" />
-          <el-table-column prop="holderNum" label="持有份额" show-overflow-tooltip min-width="120">
+          <el-table-column prop="holderNum" label="持有份额（万份）" show-overflow-tooltip min-width="140">
             <template #default="scope">
               {{ formatValue(scope.row.holderNum) }}
             </template>
           </el-table-column>
-          <el-table-column prop="holderNum1" label="上一期持有份额" show-overflow-tooltip min-width="150">
+          <el-table-column prop="holderNum1" label="上一期持有份额（万份）" show-overflow-tooltip min-width="180">
             <template #default="scope">
               {{ formatValue(scope.row.holderNum1) }}
             </template>
           </el-table-column>
-          <el-table-column prop="holderV" label="持有规模（元）" show-overflow-tooltip min-width="150">
+          <el-table-column prop="holderV" label="持有规模（万元）" show-overflow-tooltip min-width="150">
             <template #default="scope">
               {{ formatValue(scope.row.holderV) }}
             </template>
           </el-table-column>
-          <el-table-column prop="holderV1" label="上一期持有规模" show-overflow-tooltip min-width="150">
+          <el-table-column prop="holderV1" label="上一期持有规模（万元）" show-overflow-tooltip min-width="180">
             <template #default="scope">
               {{ formatValue(scope.row.holderV1) }}
             </template>
@@ -272,6 +272,13 @@ function initChart(chart: echarts.ECharts, xaxis: any, series: any, title: strin
         axisPointer: {
           type: "shadow",
         },
+        formatter: (params: any) => {
+          let html = `${params[0].name}`
+          params.forEach((item: any) => {
+            html += `<br/>${item.marker}${item.seriesName}: ${item.value}万元`
+          })
+          return html
+        },
       },
       // legend: {},
       grid: {
@@ -306,6 +313,7 @@ function initChart(chart: echarts.ECharts, xaxis: any, series: any, title: strin
             show: true,
             position: "right",
             valueAnimation: true,
+            formatter: (params: any) => `${params.value}万元`,
           },
         },
         {
@@ -316,6 +324,7 @@ function initChart(chart: echarts.ECharts, xaxis: any, series: any, title: strin
             show: true,
             position: "right",
             valueAnimation: true,
+            formatter: (params: any) => `${params.value}万元`,
           },
         },
       ],

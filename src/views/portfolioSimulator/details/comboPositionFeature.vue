@@ -256,7 +256,7 @@ function initHangyeChart(
       formatter: (params: any) => {
         let html = `${params[0].name}`
         params.forEach((item: any) => {
-          html += `<br/>${item.marker}${item.seriesName}: ${item.value}%`
+          html += `<br/>${item.marker}${item.seriesName}: ${item.value.toFixed(2)}%`
         })
         return html
       },
@@ -298,6 +298,7 @@ function initHangyeChart(
           show: true,
           position: "right",
           valueAnimation: true,
+          formatter: (params: any) => `${params.value.toFixed(2)}%`,
         },
       },
       {
@@ -309,6 +310,7 @@ function initHangyeChart(
           show: true,
           position: "right",
           valueAnimation: true,
+          formatter: (params: any) => `${params.value.toFixed(2)}%`,
         },
       },
     ],
@@ -330,7 +332,7 @@ function initShizhiChart(yAxis: string[], seriesData: number[]) {
       },
       formatter: (params: any) => {
         const item = params[0]
-        return `${item.name}: ${item.value}%`
+        return `${item.name}: ${item.value.toFixed(2)}%`
       },
     },
     // legend: {},
@@ -366,6 +368,7 @@ function initShizhiChart(yAxis: string[], seriesData: number[]) {
           show: true,
           position: "right",
           valueAnimation: true,
+          formatter: (params: any) => `${params.value.toFixed(2)}%`,
         },
       },
     ],

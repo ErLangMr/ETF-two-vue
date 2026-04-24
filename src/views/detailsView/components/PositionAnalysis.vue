@@ -266,6 +266,7 @@ function initCharts(
             show: true,
             position: "right",
             valueAnimation: true,
+            formatter: (params: any) => `${params.value}%`,
           },
         },
         {
@@ -276,6 +277,7 @@ function initCharts(
             show: true,
             position: "right",
             valueAnimation: true,
+            formatter: (params: any) => `${params.value}%`,
           },
         },
       ],
@@ -350,12 +352,12 @@ onUnmounted(() => {
   #hangye1,
   #hangye3 {
     width: 100%;
-    height: 600px;
+    height: 800px;
   }
   #hangye2,
   #hangye4 {
     width: 100%;
-    height: 1500px;
+    height: 2400px;
   }
   #diqu {
     width: 100%;

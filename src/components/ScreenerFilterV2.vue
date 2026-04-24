@@ -281,18 +281,18 @@ const sliderConfig = [
         paramKeys: ["top10ConcentrationStart", "top10ConcentrationEnd"],
         range: [0, 100],
       },
-      {
-        label: "前十五大持仓占比(%)",
-        type: "slider",
-        paramKeys: ["top15ConcentrationStart", "top15ConcentrationEnd"],
-        range: [0, 100],
-      },
-      {
-        label: "前五十大持仓占比(%)",
-        type: "slider",
-        paramKeys: ["top50ConcentrationStart", "top50ConcentrationEnd"],
-        range: [0, 100],
-      },
+      // {
+      //   label: "前十五大持仓占比(%)",
+      //   type: "slider",
+      //   paramKeys: ["top15ConcentrationStart", "top15ConcentrationEnd"],
+      //   range: [0, 100],
+      // },
+      // {
+      //   label: "前五十大持仓占比(%)",
+      //   type: "slider",
+      //   paramKeys: ["top50ConcentrationStart", "top50ConcentrationEnd"],
+      //   range: [0, 100],
+      // },
     ],
   },
 ];

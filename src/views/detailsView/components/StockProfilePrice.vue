@@ -53,7 +53,7 @@
             <div class="info-row">
               <span>最新交易日</span
               ><span>
-                {{ formatDate(detailsData?.latestDate) }}
+                {{ detailsData?.latestDate }}
               </span>
             </div>
             <div class="info-row">

@@ -158,7 +158,9 @@ const tableList = ref([
     title: "发行人",
     value: "fundMgrs",
     data: [],
-    originalColumns: [],
+    originalColumns: [
+      { prop: "category", label: "发行人名称", minWidth: "180" },
+    ],
   },
 ]);
 
@@ -171,31 +173,31 @@ const tabs = [
   { label: "资产规模", value: "AUM",columns: [
     { prop: "fundFlowRank", label: "资产规模排名", minWidth: "120" },
     { prop: "dataValue", label: "资产规模(百万元)", minWidth: "120", unit: "million" },
-    { prop: "topFundMgr", label: "发行人", minWidth: "180" },
+    { prop: "topFundMgr", label: "规模最大发行人", minWidth: "180" },
     { prop: "bestAum", label: "产品规模(百万元)", minWidth: "180" },
   ], },
   { label: "资金流动", value: "Fund Flow",columns: [
       { prop: "fundFlowRank", label: "资金流动排名", minWidth: "120" },
       { prop: "dataValue", label: "过去三个月的资金净流入额(百万元)", minWidth: "120", unit: "million" },
-      { prop: "topFundMgr", label: "发行人", minWidth: "180" },
+      { prop: "topFundMgr", label: "资金流入最多发行人", minWidth: "180" },
       { prop: "bestFf", label: "资金流动规模(百万元)", minWidth: "180" },
     ], },
   { label: "收益", value: "Return",columns: [
       { prop: "fundFlowRank", label: "收益排名", minWidth: "120" },
       { prop: "dataValue", label: "过去三个月的平均收益(%)", minWidth: "120" },
-      { prop: "topFundMgr", label: "发行人", minWidth: "180" },
+      { prop: "topFundMgr", label: "收益最高发行人", minWidth: "180" },
       { prop: "bestR3", label: "产品收益(%)", minWidth: "180" },
     ], },
   { label: "费用", value: "Expense",columns: [
       { prop: "fundFlowRank", label: "费用排名", minWidth: "120" },
       { prop: "dataValue", label: "平均费率(%)", minWidth: "120" },
-      { prop: "topFundMgr", label: "发行人", minWidth: "180" },
+      { prop: "topFundMgr", label: "费率最低发行人", minWidth: "180" },
       { prop: "bestFee", label: "产品费率(%)", minWidth: "180" },
     ], },
   { label: "分红", value: "Dividend",columns: [
       { prop: "fundFlowRank", label: "分红排名", minWidth: "120" },
       { prop: "dataValue", label: "平均分红率(%)", minWidth: "120" },
-      { prop: "topFundMgr", label: "发行人", minWidth: "180" },
+      { prop: "topFundMgr", label: "分红率最高发行人", minWidth: "180" },
       { prop: "bestDp", label: "分红比率(%)", minWidth: "180" },
     ], },
   { label: "发行人收入", value: "Issuer Revenue",columns: [
@@ -220,21 +222,24 @@ updateColumns()
         if(selectedTab.value === "Issuer Revenue") {
           table.currentColumns.splice(-1, 0, { prop: "fundFlowRank", label: "发行人收入排名", minWidth: "120" })
         }
+        if(selectedTab.value === "AUM") {
+          table.currentColumns.splice(-1,1)
+        }
 
       }
-      if(selectedTab.value === "AUM") {
-        table.currentColumns.unshift({ prop: "category", label: "规模最大发行人", minWidth: "120" })
-      } else if(selectedTab.value === "Fund Flow") {
-        table.currentColumns.unshift({ prop: "category", label: "资金流入最多发行人", minWidth: "120" })
-      } else if(selectedTab.value === "Return") {
-        table.currentColumns.unshift({ prop: "category", label: "收益最高发行人", minWidth: "120" })
-      } else if(selectedTab.value === "Expense") {
-        table.currentColumns.unshift({ prop: "category", label: "费率最低发行人", minWidth: "120" })
-      } else if(selectedTab.value === "Dividend") {
-        table.currentColumns.unshift({ prop: "category", label: "分红率最高发行人", minWidth: "120" })
-      } else {
-        table.currentColumns.unshift({ prop: "category", label: "发行人", minWidth: "120" })
-      }
+      // if(selectedTab.value === "AUM") {
+      //   table.currentColumns.unshift({ prop: "category", label: "规模最大发行人", minWidth: "120" })
+      // } else if(selectedTab.value === "Fund Flow") {
+      //   table.currentColumns.unshift({ prop: "category", label: "资金流入最多发行人", minWidth: "120" })
+      // } else if(selectedTab.value === "Return") {
+      //   table.currentColumns.unshift({ prop: "category", label: "收益最高发行人", minWidth: "120" })
+      // } else if(selectedTab.value === "Expense") {
+      //   table.currentColumns.unshift({ prop: "category", label: "费率最低发行人", minWidth: "120" })
+      // } else if(selectedTab.value === "Dividend") {
+      //   table.currentColumns.unshift({ prop: "category", label: "分红率最高发行人", minWidth: "120" })
+      // } else {
+      //   table.currentColumns.unshift({ prop: "category", label: "发行人", minWidth: "120" })
+      // }
     })
     const setTableData = (data: any) => {
       tableList.value.map(table => {

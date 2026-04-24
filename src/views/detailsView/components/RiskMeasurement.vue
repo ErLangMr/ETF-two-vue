@@ -12,29 +12,29 @@
     </div>
     <div style="display: flex; gap: 62px">
       <div class="block">
-        <div class="section-title">日度收益</div>
+        <div class="section-title">⽇度收益标准差</div>
         <div class="info-list">
           <div class="info-row">
             <span>近 1 月日度收益</span><span>{{ formatValue(riskIndicatorInfo.beta?.beta1) }}</span>
           </div>
           <div class="info-row">
-            <span>近 3 月日度收益</span>
+            <span>近 3 月日度收益%</span>
             <span>{{ formatValue(riskIndicatorInfo.beta?.beta3) }}</span>
           </div>
           <div class="info-row">
-            <span>近 6 月日度收益</span>
+            <span>近 6 月日度收益%</span>
             <span>{{ formatValue(riskIndicatorInfo.beta?.beta6) }}</span>
           </div>
           <div class="info-row">
-            <span>近 1 年日度收益</span
+            <span>近 1 年日度收益%</span
             ><span>{{ formatValue(riskIndicatorInfo.beta?.beta2) }}</span>
           </div>
           <div class="info-row">
-            <span>近 3 年日度收益</span>
+            <span>近 3 年日度收益%</span>
             <span>{{ formatValue(riskIndicatorInfo.beta?.beta36) }}</span>
           </div>
           <div class="info-row">
-            <span>近 5 年日度收益</span>
+            <span>近 5 年日度收益%</span>
             <span>{{ formatValue(riskIndicatorInfo.beta?.beta60) }}</span>
           </div>
         </div>
@@ -72,27 +72,27 @@
         <div class="section-title">年化波动率</div>
         <div class="info-list">
           <div class="info-row">
-            <span>近 1 月年化波动率</span><span>{{ formatValue(riskIndicatorInfo.sharpeRatio?.yvol1) }}</span>
+            <span>近 1 月年化波动率%</span><span>{{ formatValue(riskIndicatorInfo.volatility?.yvol1) }}</span>
           </div>
           <div class="info-row">
-            <span>近 3 月年化波动率</span>
-            <span>{{ formatValue(riskIndicatorInfo.sharpeRatio?.yvol3) }}</span>
+            <span>近 3 月年化波动率%</span>
+            <span>{{ formatValue(riskIndicatorInfo.volatility?.yvol3) }}</span>
           </div>
           <div class="info-row">
-            <span>近 6 月年化波动率</span>
-            <span>{{ formatValue(riskIndicatorInfo.sharpeRatio?.yvol6) }}</span>
+            <span>近 6 月年化波动率%</span>
+            <span>{{ formatValue(riskIndicatorInfo.volatility?.yvol6) }}</span>
           </div>
           <div class="info-row">
-            <span>近 1 年年化波动率</span
-            ><span>{{ formatValue(riskIndicatorInfo.sharpeRatio?.yvol12) }}</span>
+            <span>近 1 年年化波动率%</span
+            ><span>{{ formatValue(riskIndicatorInfo.volatility?.yvol12) }}</span>
           </div>
           <div class="info-row">
-            <span>近 3 年年化波动率</span>
-            <span>{{ formatValue(riskIndicatorInfo.sharpeRatio?.yvol36) }}</span>
+            <span>近 3 年年化波动率%</span>
+            <span>{{ formatValue(riskIndicatorInfo.volatility?.yvol36) }}</span>
           </div>
           <div class="info-row">
-            <span>近 5 年年化波动率</span>
-            <span>{{ formatValue(riskIndicatorInfo.sharpeRatio?.yvol60) }}</span>
+            <span>近 5 年年化波动率%</span>
+            <span>{{ formatValue(riskIndicatorInfo.volatility?.yvol60) }}</span>
           </div>
         </div>
       </div>

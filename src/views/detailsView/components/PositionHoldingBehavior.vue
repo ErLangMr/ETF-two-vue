@@ -353,6 +353,13 @@ function initCharts(chart: echarts.ECharts, xaxis: any, series: any, title: stri
         axisPointer: {
           type: "shadow",
         },
+        formatter: (params: any) => {
+          let html = `${params[0].name}`
+          params.forEach((item: any) => {
+            html += `<br/>${item.marker}${item.seriesName}: ${item.value}%`
+          })
+          return html
+        },
       },
       // legend: {},
       grid: {
@@ -388,6 +395,7 @@ function initCharts(chart: echarts.ECharts, xaxis: any, series: any, title: stri
             show: true,
             position: "right",
             valueAnimation: true,
+            formatter: (params: any) => `${params.value}%`,
           },
         },
         {
@@ -398,6 +406,7 @@ function initCharts(chart: echarts.ECharts, xaxis: any, series: any, title: stri
             show: true,
             position: "right",
             valueAnimation: true,
+            formatter: (params: any) => `${params.value}%`,
           },
         },
       ],
@@ -449,11 +458,14 @@ onUnmounted(() => {
     display: none;
   }
   #behavior-chart1,
-  #behavior-chart2,
+  #behavior-chart2 {
+    width: 50%;
+    height: 500px;
+  }
   #behavior-chart3,
   #behavior-chart4 {
     width: 50%;
-    height: 400px;
+    height: 700px;
   }
 }
 </style>

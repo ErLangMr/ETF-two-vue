@@ -15,7 +15,7 @@
             class="legend-color"
             :style="{ background: colors[idx] }"
           ></span>
-          <span class="legend-value">{{ item.value }}</span>
+          <span class="legend-value">{{ item.value }}%</span>
         </div>
       </div>
     </div>
